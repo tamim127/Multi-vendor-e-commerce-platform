@@ -18,6 +18,7 @@ import {
   SiteFooter,
 } from '@/components/layout';
 import { ThemeProvider } from '@/lib/theme';
+import { I18nProvider } from '@/lib/i18n';
 
 // Mock Next.js navigation hook
 vi.mock('next/navigation', () => ({
@@ -175,7 +176,9 @@ describe('Phase 1E: Responsive Application Shell & Navigation Engine', () => {
     it('renders DesktopHeader with branding and utility links', () => {
       render(
         <ThemeProvider>
-          <DesktopHeader />
+          <I18nProvider>
+            <DesktopHeader />
+          </I18nProvider>
         </ThemeProvider>
       );
       expect(screen.getByText(/global multi-vendor trade platform/i)).toBeDefined();
@@ -185,7 +188,9 @@ describe('Phase 1E: Responsive Application Shell & Navigation Engine', () => {
     it('renders MobileHeader with drawer trigger and brand', () => {
       render(
         <ThemeProvider>
-          <MobileHeader />
+          <I18nProvider>
+            <MobileHeader />
+          </I18nProvider>
         </ThemeProvider>
       );
       expect(screen.getByRole('button', { name: /open mobile navigation menu/i })).toBeDefined();
@@ -227,9 +232,11 @@ describe('Phase 1E: Responsive Application Shell & Navigation Engine', () => {
     it('renders full shell structure around children', () => {
       render(
         <ThemeProvider>
-          <AppShell announcementMessage="Global launch notice">
-            <div data-testid="page-child">Test Page Content</div>
-          </AppShell>
+          <I18nProvider>
+            <AppShell announcementMessage="Global launch notice">
+              <div data-testid="page-child">Test Page Content</div>
+            </AppShell>
+          </I18nProvider>
         </ThemeProvider>
       );
 

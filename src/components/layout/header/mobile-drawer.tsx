@@ -22,6 +22,8 @@ import { Menu, User, Store, HelpCircle, Sun, Moon, Laptop } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { defaultMegaMenuCategories, primaryNavigationLinks } from '@/config/navigation';
 import { useTheme } from '@/lib/theme/theme-context';
+import { useI18n } from '@/lib/i18n';
+import { LanguageSelector } from '@/components/layout/header/language-selector';
 
 export interface MobileDrawerProps {
   open?: boolean;
@@ -39,6 +41,7 @@ export function MobileDrawer({
   className,
 }: MobileDrawerProps): React.JSX.Element {
   const { theme, setTheme } = useTheme();
+  const { isRtl } = useI18n();
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -56,7 +59,10 @@ export function MobileDrawer({
         </button>
       </DrawerTrigger>
 
-      <DrawerContent side="left" className="w-[85vw] max-w-sm p-0 flex flex-col justify-between">
+      <DrawerContent
+        side={isRtl ? 'right' : 'left'}
+        className="w-[85vw] max-w-sm p-0 flex flex-col justify-between"
+      >
         {/* Drawer Header with User Access */}
         <div>
           <DrawerHeader className="p-5 border-b border-border-subtle bg-surface-muted/50 text-left">
@@ -165,6 +171,11 @@ export function MobileDrawer({
 
         {/* Drawer Footer with Theme Controller */}
         <DrawerFooter className="p-4 border-t border-border-subtle bg-surface-muted/40">
+          <div className="flex items-center justify-between w-full pb-2 mb-2 border-b border-border-subtle/50">
+            <span className="text-xs font-medium text-fg-muted">Language:</span>
+            <LanguageSelector />
+          </div>
+
           <div className="flex items-center justify-between w-full">
             <span className="text-xs font-medium text-fg-muted">Appearance:</span>
             <div className="flex items-center gap-1 bg-surface rounded-md p-1 border border-border-subtle">

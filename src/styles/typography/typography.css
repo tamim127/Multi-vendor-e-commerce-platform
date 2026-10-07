@@ -167,3 +167,26 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ----------------------------------------------------------------------------
+ * 4. Internationalization & Bidirectional Text Foundation
+ * ---------------------------------------------------------------------------- */
+[dir='rtl'] {
+  text-align: start;
+}
+
+/* Directional isolation utilities */
+[dir='rtl'] .dir-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+[dir='ltr'] .dir-rtl {
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+/* Automatic icon mirroring in RTL mode */
+[dir='rtl'] .rtl-mirror {
+  transform: scaleX(-1);
+}

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Globe, Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container/container';
 import { SearchBar } from '@/components/layout/header/search-bar';
@@ -14,6 +14,7 @@ import {
   SellerAction,
 } from '@/components/layout/header/header-actions';
 import { MegaMenu } from '@/components/layout/header/mega-menu';
+import { LanguageSelector } from '@/components/layout/header/language-selector';
 import { topUtilityLinks, primaryNavigationLinks } from '@/config/navigation';
 import { useTheme } from '@/lib/theme/theme-context';
 
@@ -66,11 +67,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Language / Currency Selector Placeholder */}
-            <div className="flex items-center gap-1.5 text-fg-muted hover:text-fg-primary cursor-pointer select-none">
-              <Globe className="size-3.5" />
-              <span>EN / USD ($)</span>
-            </div>
+            <LanguageSelector />
 
             <div className="h-3 w-px bg-border-subtle" />
 

@@ -1,0 +1,295 @@
+/**
+ * ==============================================================================
+ * LAYER 2: SEMANTIC TOKENS
+ * ==============================================================================
+ * Meaning-based aliases referencing Layer 1 Primitive tokens.
+ * Prepares the architectural contract for Light & Dark mode mapping.
+ */
+
+:root {
+  /* --------------------------------------------------------------------------
+   * 2.1 Surfaces & Canvas (Light Theme Baseline)
+   * -------------------------------------------------------------------------- */
+  --color-bg-canvas: var(--primitive-neutral-50);
+  --color-bg-surface: var(--primitive-neutral-0);
+  --color-bg-surface-muted: var(--primitive-neutral-100);
+  --color-bg-surface-elevated: var(--primitive-neutral-0);
+  --color-bg-overlay: oklch(0.16 0.022 260 / 0.45);
+
+  /* --------------------------------------------------------------------------
+   * 2.2 Foregrounds & Typography
+   * -------------------------------------------------------------------------- */
+  --color-fg-primary: var(--primitive-neutral-900);
+  --color-fg-secondary: var(--primitive-neutral-600);
+  --color-fg-tertiary: var(--primitive-neutral-500);
+  --color-fg-muted: var(--primitive-neutral-500);
+  --color-fg-inverse: var(--primitive-neutral-0);
+
+  /* --------------------------------------------------------------------------
+   * 2.3 Borders & Dividers
+   * -------------------------------------------------------------------------- */
+  --color-border-subtle: var(--primitive-neutral-200); /* Subtle card/item separator */
+  --color-border-default: var(--primitive-neutral-300); /* Standard input & card border */
+  --color-border-strong: var(--primitive-neutral-400); /* Emphasized divider */
+  --color-border-focus: var(--primitive-indigo-600); /* High-contrast focus indicator */
+  --color-border-selected: var(--primitive-neutral-900); /* Active tile border */
+
+  /* --------------------------------------------------------------------------
+   * 2.4 Brand & Action Roles
+   * -------------------------------------------------------------------------- */
+  --color-primary: var(--primitive-indigo-600);
+  --color-primary-hover: var(--primitive-indigo-700);
+  --color-primary-foreground: var(--primitive-neutral-0);
+
+  --color-secondary: var(--primitive-neutral-100);
+  --color-secondary-hover: var(--primitive-neutral-200);
+  --color-secondary-foreground: var(--primitive-neutral-900);
+
+  --color-accent: var(--primitive-amber-500);
+  --color-accent-hover: var(--primitive-amber-600);
+  --color-accent-foreground: var(--primitive-neutral-900);
+
+  --color-muted: var(--primitive-neutral-150);
+  --color-muted-foreground: var(--primitive-neutral-600);
+
+  /* --------------------------------------------------------------------------
+   * 2.5 Semantic Feedback
+   * -------------------------------------------------------------------------- */
+  --color-success: var(--primitive-emerald-500);
+  --color-success-foreground: var(--primitive-neutral-0);
+  --color-success-muted: var(--primitive-emerald-50);
+  --color-success-border: var(--primitive-emerald-200);
+
+  --color-warning: var(--primitive-amber-500);
+  --color-warning-foreground: var(--primitive-neutral-900);
+  --color-warning-muted: var(--primitive-amber-50);
+  --color-warning-border: var(--primitive-amber-200);
+
+  --color-destructive: var(--primitive-crimson-500);
+  --color-destructive-hover: var(--primitive-crimson-600);
+  --color-destructive-foreground: var(--primitive-neutral-0);
+  --color-destructive-muted: var(--primitive-crimson-50);
+  --color-destructive-border: var(--primitive-crimson-200);
+
+  --color-info: var(--primitive-sky-500);
+  --color-info-foreground: var(--primitive-neutral-0);
+  --color-info-muted: var(--primitive-sky-50);
+  --color-info-border: var(--primitive-sky-200);
+
+  /* --------------------------------------------------------------------------
+   * 2.6 Commerce Domain Semantics
+   * -------------------------------------------------------------------------- */
+  --color-commerce-price: var(--primitive-neutral-900);
+  --color-commerce-price-sale: var(--primitive-crimson-500);
+  --color-commerce-price-strike: var(--primitive-neutral-500);
+  --color-commerce-discount-bg: var(--primitive-crimson-50);
+  --color-commerce-discount-fg: var(--primitive-crimson-600);
+  --color-commerce-discount-border: var(--primitive-crimson-200);
+
+  --color-commerce-rating-star: var(--primitive-amber-500);
+  --color-commerce-rating-bg: var(--primitive-amber-50);
+  --color-commerce-rating-fg: var(--primitive-amber-800);
+
+  --color-commerce-verified-bg: var(--primitive-emerald-50);
+  --color-commerce-verified-fg: var(--primitive-emerald-700);
+  --color-commerce-verified-border: var(--primitive-emerald-200);
+
+  --color-commerce-sponsored-bg: var(--primitive-neutral-100);
+  --color-commerce-sponsored-fg: var(--primitive-neutral-600);
+
+  /* Inventory Status */
+  --color-inventory-instock: var(--primitive-emerald-600);
+  --color-inventory-instock-bg: var(--primitive-emerald-50);
+  --color-inventory-lowstock: var(--primitive-amber-600);
+  --color-inventory-lowstock-bg: var(--primitive-amber-50);
+  --color-inventory-outofstock: var(--primitive-neutral-500);
+  --color-inventory-outofstock-bg: var(--primitive-neutral-100);
+  --color-inventory-backorder: var(--primitive-sky-600);
+  --color-inventory-backorder-bg: var(--primitive-sky-50);
+
+  /* Logistics / Order Status */
+  --color-order-processing: var(--primitive-sky-600);
+  --color-order-processing-bg: var(--primitive-sky-50);
+  --color-order-dispatched: var(--primitive-indigo-600);
+  --color-order-dispatched-bg: var(--primitive-indigo-50);
+  --color-order-delivered: var(--primitive-emerald-600);
+  --color-order-delivered-bg: var(--primitive-emerald-50);
+  --color-order-cancelled: var(--primitive-crimson-600);
+  --color-order-cancelled-bg: var(--primitive-crimson-50);
+
+  /* Flash Sales & Campaign Urgency */
+  --color-campaign-flash: var(--primitive-crimson-500);
+  --color-campaign-voucher-bg: var(--primitive-amber-50);
+  --color-campaign-voucher-border: var(--primitive-amber-300);
+  --color-campaign-voucher-fg: var(--primitive-amber-900);
+
+  /* --------------------------------------------------------------------------
+   * 2.7 Focus, Selection & Interaction States
+   * -------------------------------------------------------------------------- */
+  --color-focus-ring: var(--primitive-indigo-600);
+  --color-focus-ring-offset: var(--primitive-neutral-0);
+  --color-selection-bg: var(--primitive-indigo-100);
+  --color-selection-fg: var(--primitive-indigo-900);
+
+  /* --------------------------------------------------------------------------
+   * 2.8 Semantic Spacing Aliases
+   * -------------------------------------------------------------------------- */
+  --spacing-page-padding-x: var(--primitive-space-4);
+  --spacing-section-gap: var(--primitive-space-12);
+  --spacing-card-gap: var(--primitive-space-4);
+  --spacing-stack-gap: var(--primitive-space-4);
+  --spacing-inline-gap: var(--primitive-space-2);
+  --spacing-control-gap: var(--primitive-space-2);
+
+  /* --------------------------------------------------------------------------
+   * 2.9 Semantic Radius Aliases
+   * -------------------------------------------------------------------------- */
+  --radius-control: var(--primitive-radius-md); /* 8px inputs/buttons */
+  --radius-card: var(--primitive-radius-lg); /* 12px product/surface card */
+  --radius-surface: var(--primitive-radius-lg); /* 12px elevated containers */
+  --radius-badge: var(--primitive-radius-sm); /* 4px pills/tags */
+  --radius-modal: var(--primitive-radius-xl); /* 16px dialog surfaces */
+  --radius-drawer: var(--primitive-radius-xl); /* 16px bottom-sheet top radius */
+
+  /* --------------------------------------------------------------------------
+   * 2.10 Semantic Sizing & Interactive Target Targets
+   * -------------------------------------------------------------------------- */
+  --size-touch-target-min: 2.75rem; /* 44px (WCAG 2.2 AA minimum) */
+  --size-touch-target-comfort: 3rem; /* 48px standard touch thumb zone */
+  --size-control-height-sm: 2rem; /* 32px compact controls */
+  --size-control-height-md: 2.5rem; /* 40px standard controls */
+  --size-control-height-lg: 3rem; /* 48px hero controls */
+
+  --size-icon-xs: 0.75rem; /* 12px */
+  --size-icon-sm: 1rem; /* 16px */
+  --size-icon-md: 1.25rem; /* 20px */
+  --size-icon-lg: 1.5rem; /* 24px */
+  --size-icon-xl: 2rem; /* 32px */
+
+  --size-avatar-xs: 1.5rem; /* 24px */
+  --size-avatar-sm: 2rem; /* 32px */
+  --size-avatar-md: 2.5rem; /* 40px */
+  --size-avatar-lg: 3rem; /* 48px */
+  --size-avatar-xl: 4rem; /* 64px */
+
+  --size-sidebar-collapsed: 4.5rem; /* 72px icon rail */
+  --size-sidebar-expanded: 17.5rem; /* 280px merchant/admin navigation */
+  --size-drawer-sm: 22.5rem; /* 360px cart slide-over */
+  --size-drawer-md: 30rem; /* 480px filter drawer */
+  --size-drawer-lg: 40rem; /* 640px quick-view drawer */
+
+  /* --------------------------------------------------------------------------
+   * 2.11 Semantic Elevation & Shadow Roles
+   * -------------------------------------------------------------------------- */
+  --elevation-dropdown: var(--primitive-shadow-md);
+  --elevation-popover: var(--primitive-shadow-lg);
+  --elevation-drawer: var(--primitive-shadow-xl);
+  --elevation-modal: var(--primitive-shadow-2xl);
+  --elevation-sticky: var(--primitive-shadow-xs);
+  --elevation-card-hover: var(--primitive-shadow-md);
+
+  /* --------------------------------------------------------------------------
+   * 2.12 Semantic Motion Roles
+   * -------------------------------------------------------------------------- */
+  --motion-hover-duration: var(--primitive-duration-fast);
+  --motion-hover-ease: var(--primitive-ease-standard);
+
+  --motion-press-duration: var(--primitive-duration-fast);
+  --motion-press-ease: var(--primitive-ease-standard);
+
+  --motion-drawer-duration: var(--primitive-duration-slow);
+  --motion-drawer-ease: var(--primitive-ease-emphasized);
+
+  --motion-modal-duration: var(--primitive-duration-normal);
+  --motion-modal-ease: var(--primitive-ease-emphasized);
+}
+
+/* ==============================================================================
+ * DARK THEME SEMANTIC OVERRIDES
+ * ==============================================================================
+ * Preserves the exact same semantic token names while mapping to dark primitives.
+ */
+.dark {
+  --color-bg-canvas: var(--primitive-neutral-950);
+  --color-bg-surface: var(--primitive-neutral-900);
+  --color-bg-surface-muted: var(--primitive-neutral-800);
+  --color-bg-surface-elevated: var(--primitive-neutral-800);
+  --color-bg-overlay: oklch(0 0 0 / 0.7);
+
+  --color-fg-primary: var(--primitive-neutral-50);
+  --color-fg-secondary: var(--primitive-neutral-300);
+  --color-fg-tertiary: var(--primitive-neutral-400);
+  --color-fg-muted: var(--primitive-neutral-400);
+  --color-fg-inverse: var(--primitive-neutral-900);
+
+  --color-border-subtle: var(--primitive-neutral-800);
+  --color-border-default: var(--primitive-neutral-700);
+  --color-border-strong: var(--primitive-neutral-600);
+  --color-border-focus: var(--primitive-indigo-400);
+  --color-border-selected: var(--primitive-neutral-100);
+
+  --color-primary: var(--primitive-indigo-500);
+  --color-primary-hover: var(--primitive-indigo-400);
+  --color-primary-foreground: var(--primitive-neutral-0);
+
+  --color-secondary: var(--primitive-neutral-800);
+  --color-secondary-hover: var(--primitive-neutral-700);
+  --color-secondary-foreground: var(--primitive-neutral-50);
+
+  --color-accent: var(--primitive-amber-400);
+  --color-accent-hover: var(--primitive-amber-300);
+  --color-accent-foreground: var(--primitive-neutral-950);
+
+  --color-muted: var(--primitive-neutral-800);
+  --color-muted-foreground: var(--primitive-neutral-400);
+
+  --color-success: var(--primitive-emerald-400);
+  --color-success-muted: oklch(0.25 0.08 155);
+  --color-success-border: var(--primitive-emerald-800);
+
+  --color-warning: var(--primitive-amber-400);
+  --color-warning-muted: oklch(0.26 0.08 85);
+  --color-warning-border: var(--primitive-amber-800);
+
+  --color-destructive: var(--primitive-crimson-400);
+  --color-destructive-hover: var(--primitive-crimson-300);
+  --color-destructive-muted: oklch(0.24 0.1 25);
+  --color-destructive-border: var(--primitive-crimson-800);
+
+  --color-info: var(--primitive-sky-400);
+  --color-info-muted: oklch(0.24 0.08 235);
+  --color-info-border: var(--primitive-sky-800);
+
+  /* Commerce Overrides for Dark Mode */
+  --color-commerce-price: var(--primitive-neutral-50);
+  --color-commerce-price-sale: var(--primitive-crimson-400);
+  --color-commerce-price-strike: var(--primitive-neutral-500);
+  --color-commerce-discount-bg: oklch(0.24 0.1 25);
+  --color-commerce-discount-fg: var(--primitive-crimson-300);
+  --color-commerce-discount-border: var(--primitive-crimson-800);
+
+  --color-commerce-rating-star: var(--primitive-amber-400);
+  --color-commerce-rating-bg: oklch(0.26 0.08 85);
+  --color-commerce-rating-fg: var(--primitive-amber-200);
+
+  --color-commerce-verified-bg: oklch(0.25 0.08 155);
+  --color-commerce-verified-fg: var(--primitive-emerald-300);
+  --color-commerce-verified-border: var(--primitive-emerald-800);
+
+  --color-commerce-sponsored-bg: var(--primitive-neutral-800);
+  --color-commerce-sponsored-fg: var(--primitive-neutral-400);
+
+  --color-inventory-instock: var(--primitive-emerald-400);
+  --color-inventory-instock-bg: oklch(0.25 0.08 155);
+  --color-inventory-lowstock: var(--primitive-amber-400);
+  --color-inventory-lowstock-bg: oklch(0.26 0.08 85);
+  --color-inventory-outofstock: var(--primitive-neutral-400);
+  --color-inventory-outofstock-bg: var(--primitive-neutral-800);
+  --color-inventory-backorder: var(--primitive-sky-400);
+  --color-inventory-backorder-bg: oklch(0.24 0.08 235);
+
+  --color-focus-ring: var(--primitive-indigo-400);
+  --color-focus-ring-offset: var(--primitive-neutral-900);
+  --color-selection-bg: var(--primitive-indigo-900);
+  --color-selection-fg: var(--primitive-indigo-100);
+}

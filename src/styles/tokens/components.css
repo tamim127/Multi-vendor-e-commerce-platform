@@ -1,0 +1,161 @@
+/**
+ * ==============================================================================
+ * LAYER 3: COMPONENT TOKENS
+ * ==============================================================================
+ * Component-specific namespaces referencing Layer 2 Semantic tokens.
+ * Prepares consistent styling contracts for future UI primitives.
+ */
+
+:root {
+  /* --------------------------------------------------------------------------
+   * 3.1 Button Tokens
+   * -------------------------------------------------------------------------- */
+  --comp-btn-height-sm: var(--size-control-height-sm);
+  --comp-btn-height-md: var(--size-control-height-md);
+  --comp-btn-height-lg: var(--size-control-height-lg);
+  --comp-btn-radius: var(--radius-control);
+  --comp-btn-font-weight: var(--primitive-font-weight-medium);
+  --comp-btn-transition: all var(--primitive-duration-fast) var(--primitive-ease-standard);
+
+  --comp-btn-primary-bg: var(--color-primary);
+  --comp-btn-primary-fg: var(--color-primary-foreground);
+  --comp-btn-primary-hover-bg: var(--color-primary-hover);
+
+  --comp-btn-secondary-bg: var(--color-secondary);
+  --comp-btn-secondary-fg: var(--color-secondary-foreground);
+  --comp-btn-secondary-hover-bg: var(--color-secondary-hover);
+
+  --comp-btn-outline-border: var(--color-border-default);
+  --comp-btn-outline-fg: var(--color-fg-primary);
+  --comp-btn-outline-hover-bg: var(--color-bg-surface-muted);
+
+  --comp-btn-destructive-bg: var(--color-destructive);
+  --comp-btn-destructive-fg: var(--color-destructive-foreground);
+  --comp-btn-destructive-hover: var(--color-destructive-hover);
+
+  /* --------------------------------------------------------------------------
+   * 3.2 Form Input & Field Tokens
+   * -------------------------------------------------------------------------- */
+  --comp-input-height-sm: var(--size-control-height-sm);
+  --comp-input-height-md: var(--size-control-height-md);
+  --comp-input-height-lg: var(--size-control-height-lg);
+  --comp-input-bg: var(--color-bg-surface);
+  --comp-input-fg: var(--color-fg-primary);
+  --comp-input-placeholder: var(--color-fg-muted);
+  --comp-input-border: var(--color-border-default);
+  --comp-input-border-focus: var(--color-border-focus);
+  --comp-input-radius: var(--radius-control);
+  --comp-input-padding-x: var(--primitive-space-3);
+  --comp-input-font-size: var(--primitive-font-size-sm);
+
+  /* --------------------------------------------------------------------------
+   * 3.3 Selection Controls (Checkbox, Radio, Switch)
+   * -------------------------------------------------------------------------- */
+  --comp-checkbox-size: 1.125rem; /* 18px */
+  --comp-checkbox-radius: var(--primitive-radius-xs);
+  --comp-checkbox-border: var(--color-border-strong);
+  --comp-checkbox-checked-bg: var(--color-primary);
+  --comp-checkbox-checked-fg: var(--color-primary-foreground);
+
+  --comp-radio-size: 1.125rem; /* 18px */
+  --comp-radio-checked-border: var(--color-primary);
+  --comp-radio-dot-size: 0.5rem; /* 8px */
+
+  --comp-switch-width: 2.75rem; /* 44px */
+  --comp-switch-height: 1.5rem; /* 24px */
+  --comp-switch-thumb-size: 1.25rem; /* 20px */
+  --comp-switch-bg-off: var(--color-border-strong);
+  --comp-switch-bg-on: var(--color-primary);
+
+  /* --------------------------------------------------------------------------
+   * 3.4 Card & Container Surfaces
+   * -------------------------------------------------------------------------- */
+  --comp-card-bg: var(--color-bg-surface);
+  --comp-card-border: var(--color-border-subtle);
+  --comp-card-radius: var(--radius-card);
+  --comp-card-shadow: var(--primitive-shadow-xs);
+  --comp-card-hover-shadow: var(--elevation-card-hover);
+  --comp-card-padding: var(--primitive-space-4);
+
+  /* --------------------------------------------------------------------------
+   * 3.5 Commerce: Product Card System
+   * -------------------------------------------------------------------------- */
+  --comp-product-card-bg: var(--color-bg-surface);
+  --comp-product-card-border: var(--color-border-subtle);
+  --comp-product-card-radius: var(--radius-card);
+  --comp-product-card-media-ratio: 4 / 5;
+  --comp-product-card-hover-lift: translateY(-2px);
+  --comp-product-card-badge-top: var(--primitive-space-2);
+  --comp-product-card-badge-start: var(--primitive-space-2);
+
+  /* --------------------------------------------------------------------------
+   * 3.6 Commerce: Price Display System
+   * -------------------------------------------------------------------------- */
+  --comp-price-fg: var(--color-commerce-price);
+  --comp-price-sale-fg: var(--color-commerce-price-sale);
+  --comp-price-strike-fg: var(--color-commerce-price-strike);
+  --comp-price-font-weight: var(--primitive-font-weight-bold);
+  --comp-price-sm: var(--primitive-font-size-sm);
+  --comp-price-md: var(--primitive-font-size-md);
+  --comp-price-lg: var(--primitive-font-size-xl);
+  --comp-price-hero: var(--primitive-font-size-3xl);
+
+  /* --------------------------------------------------------------------------
+   * 3.7 Commerce: Rating & Trust Badges
+   * -------------------------------------------------------------------------- */
+  --comp-rating-star-color: var(--color-commerce-rating-star);
+  --comp-rating-star-sm: var(--size-icon-xs);
+  --comp-rating-star-md: var(--size-icon-sm);
+  --comp-rating-star-lg: var(--size-icon-md);
+
+  --comp-badge-radius: var(--radius-badge);
+  --comp-badge-padding-x: var(--primitive-space-2);
+  --comp-badge-padding-y: var(--primitive-space-0-5);
+  --comp-badge-font-size: var(--primitive-font-size-2xs);
+  --comp-badge-font-weight: var(--primitive-font-weight-semibold);
+
+  /* --------------------------------------------------------------------------
+   * 3.8 Commerce: Quantity Control
+   * -------------------------------------------------------------------------- */
+  --comp-quantity-height: var(--size-control-height-sm);
+  --comp-quantity-btn-width: 2rem; /* 32px */
+  --comp-quantity-radius: var(--radius-control);
+  --comp-quantity-border: var(--color-border-default);
+
+  /* --------------------------------------------------------------------------
+   * 3.9 Overlays: Dialogs, Drawers & Menus
+   * -------------------------------------------------------------------------- */
+  --comp-dialog-bg: var(--color-bg-surface-elevated);
+  --comp-dialog-border: var(--color-border-subtle);
+  --comp-dialog-radius: var(--radius-modal);
+  --comp-dialog-shadow: var(--elevation-modal);
+  --comp-dialog-padding: var(--primitive-space-6);
+
+  --comp-drawer-bg: var(--color-bg-surface-elevated);
+  --comp-drawer-border: var(--color-border-subtle);
+  --comp-drawer-radius: var(--radius-drawer);
+  --comp-drawer-shadow: var(--elevation-drawer);
+
+  --comp-tooltip-bg: var(--primitive-neutral-900);
+  --comp-tooltip-fg: var(--primitive-neutral-0);
+  --comp-tooltip-radius: var(--radius-badge);
+  --comp-tooltip-padding-x: var(--primitive-space-2-5);
+  --comp-tooltip-padding-y: var(--primitive-space-1);
+  --comp-tooltip-font-size: var(--primitive-font-size-xs);
+
+  /* --------------------------------------------------------------------------
+   * 3.10 Navigation & Data Tables
+   * -------------------------------------------------------------------------- */
+  --comp-nav-height-desktop: 4.5rem; /* 72px */
+  --comp-nav-height-mobile: 3.5rem; /* 56px */
+  --comp-nav-bottom-mobile: 4rem; /* 64px */
+  --comp-nav-bg: var(--color-bg-surface);
+  --comp-nav-border: var(--color-border-subtle);
+
+  --comp-table-header-bg: var(--color-bg-surface-muted);
+  --comp-table-header-fg: var(--color-fg-secondary);
+  --comp-table-border: var(--color-border-subtle);
+  --comp-table-row-hover: var(--color-bg-surface-muted);
+  --comp-table-padding-y: var(--primitive-space-3);
+  --comp-table-padding-x: var(--primitive-space-4);
+}

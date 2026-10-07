@@ -1,0 +1,253 @@
+/**
+ * ==============================================================================
+ * LAYER 1: PRIMITIVE TOKENS
+ * ==============================================================================
+ * Raw, meaning-agnostic design values.
+ * All colors are specified in the perceptually uniform OKLCH color space.
+ * Math scales adhere to strict geometric and modular progressions.
+ */
+
+:root {
+  /* --------------------------------------------------------------------------
+   * 1.1 OKLCH Color Primitives: Neutral Slate / Ink Scale
+   * -------------------------------------------------------------------------- */
+  --primitive-neutral-0: oklch(1 0 0); /* Pure White */
+  --primitive-neutral-50: oklch(0.985 0.003 260); /* Canvas / Off-White */
+  --primitive-neutral-100: oklch(0.965 0.005 260); /* Soft Gray */
+  --primitive-neutral-150: oklch(0.94 0.006 260); /* Subdued Surface */
+  --primitive-neutral-200: oklch(0.915 0.008 260); /* Subtle Border */
+  --primitive-neutral-300: oklch(0.85 0.01 260); /* Standard Border */
+  --primitive-neutral-400: oklch(0.72 0.014 260); /* Strong Border */
+  --primitive-neutral-500: oklch(0.58 0.018 260); /* Muted Text */
+  --primitive-neutral-600: oklch(0.46 0.02 260); /* Secondary Text */
+  --primitive-neutral-700: oklch(0.35 0.022 260); /* Subheading Text */
+  --primitive-neutral-800: oklch(0.24 0.022 260); /* Heading Text */
+  --primitive-neutral-900: oklch(0.16 0.022 260); /* Deep Ink */
+  --primitive-neutral-950: oklch(0.11 0.02 260); /* Near Black */
+  --primitive-neutral-1000: oklch(0 0 0); /* Absolute Black */
+
+  /* --------------------------------------------------------------------------
+   * 1.2 OKLCH Color Primitives: Brand Indigo (Primary Commerce Action)
+   * -------------------------------------------------------------------------- */
+  --primitive-indigo-50: oklch(0.97 0.02 265);
+  --primitive-indigo-100: oklch(0.93 0.04 265);
+  --primitive-indigo-200: oklch(0.85 0.08 265);
+  --primitive-indigo-300: oklch(0.75 0.12 265);
+  --primitive-indigo-400: oklch(0.64 0.16 265);
+  --primitive-indigo-500: oklch(0.54 0.19 265);
+  --primitive-indigo-600: oklch(0.44 0.19 265); /* Core Brand Primary */
+  --primitive-indigo-700: oklch(0.36 0.18 265); /* Active / Darker Hover */
+  --primitive-indigo-800: oklch(0.28 0.15 265);
+  --primitive-indigo-900: oklch(0.2 0.11 265);
+  --primitive-indigo-950: oklch(0.14 0.07 265);
+
+  /* --------------------------------------------------------------------------
+   * 1.3 OKLCH Color Primitives: Warm Ochre / Amber (Luxury Accent & Ratings)
+   * -------------------------------------------------------------------------- */
+  --primitive-amber-50: oklch(0.98 0.025 85);
+  --primitive-amber-100: oklch(0.94 0.055 85);
+  --primitive-amber-200: oklch(0.88 0.1 85);
+  --primitive-amber-300: oklch(0.8 0.15 85);
+  --primitive-amber-400: oklch(0.72 0.18 80);
+  --primitive-amber-500: oklch(0.66 0.19 75); /* Core Luxury Accent / Gold Stars */
+  --primitive-amber-600: oklch(0.58 0.17 70);
+  --primitive-amber-700: oklch(0.48 0.15 65);
+  --primitive-amber-800: oklch(0.38 0.12 60);
+  --primitive-amber-900: oklch(0.28 0.08 55);
+
+  /* --------------------------------------------------------------------------
+   * 1.4 OKLCH Color Primitives: Emerald (Success / In-Stock / Verified)
+   * -------------------------------------------------------------------------- */
+  --primitive-emerald-50: oklch(0.97 0.025 155);
+  --primitive-emerald-100: oklch(0.93 0.06 155);
+  --primitive-emerald-200: oklch(0.86 0.1 155);
+  --primitive-emerald-300: oklch(0.78 0.14 155);
+  --primitive-emerald-400: oklch(0.69 0.17 155);
+  --primitive-emerald-500: oklch(0.61 0.18 155); /* Core Success */
+  --primitive-emerald-600: oklch(0.52 0.16 155);
+  --primitive-emerald-700: oklch(0.42 0.13 155);
+  --primitive-emerald-800: oklch(0.32 0.09 155);
+  --primitive-emerald-900: oklch(0.22 0.06 155);
+
+  /* --------------------------------------------------------------------------
+   * 1.5 OKLCH Color Primitives: Crimson / Ruby (Destructive / Sale / Urgent)
+   * -------------------------------------------------------------------------- */
+  --primitive-crimson-50: oklch(0.97 0.03 25);
+  --primitive-crimson-100: oklch(0.92 0.07 25);
+  --primitive-crimson-200: oklch(0.84 0.12 25);
+  --primitive-crimson-300: oklch(0.74 0.18 25);
+  --primitive-crimson-400: oklch(0.65 0.22 25);
+  --primitive-crimson-500: oklch(0.57 0.23 25); /* Core Sale Price / Destructive */
+  --primitive-crimson-600: oklch(0.49 0.21 25);
+  --primitive-crimson-700: oklch(0.4 0.17 25);
+  --primitive-crimson-800: oklch(0.31 0.12 25);
+  --primitive-crimson-900: oklch(0.22 0.07 25);
+
+  /* --------------------------------------------------------------------------
+   * 1.6 OKLCH Color Primitives: Sky (Information / Tracking Milestones)
+   * -------------------------------------------------------------------------- */
+  --primitive-sky-50: oklch(0.97 0.02 235);
+  --primitive-sky-100: oklch(0.92 0.05 235);
+  --primitive-sky-200: oklch(0.84 0.09 235);
+  --primitive-sky-300: oklch(0.74 0.13 235);
+  --primitive-sky-400: oklch(0.65 0.16 235);
+  --primitive-sky-500: oklch(0.57 0.17 235); /* Core Info */
+  --primitive-sky-600: oklch(0.48 0.15 235);
+  --primitive-sky-700: oklch(0.39 0.12 235);
+  --primitive-sky-800: oklch(0.3 0.08 235);
+  --primitive-sky-900: oklch(0.2 0.05 235);
+
+  /* --------------------------------------------------------------------------
+   * 1.7 Mathematical Spacing Progression (4px Baseline Grid)
+   * -------------------------------------------------------------------------- */
+  --primitive-space-0: 0rem; /* 0px */
+  --primitive-space-0-5: 0.125rem; /* 2px */
+  --primitive-space-1: 0.25rem; /* 4px */
+  --primitive-space-1-5: 0.375rem; /* 6px */
+  --primitive-space-2: 0.5rem; /* 8px */
+  --primitive-space-2-5: 0.625rem; /* 10px */
+  --primitive-space-3: 0.75rem; /* 12px */
+  --primitive-space-3-5: 0.875rem; /* 14px */
+  --primitive-space-4: 1rem; /* 16px */
+  --primitive-space-5: 1.25rem; /* 20px */
+  --primitive-space-6: 1.5rem; /* 24px */
+  --primitive-space-7: 1.75rem; /* 28px */
+  --primitive-space-8: 2rem; /* 32px */
+  --primitive-space-9: 2.25rem; /* 36px */
+  --primitive-space-10: 2.5rem; /* 40px */
+  --primitive-space-12: 3rem; /* 48px */
+  --primitive-space-14: 3.5rem; /* 56px */
+  --primitive-space-16: 4rem; /* 64px */
+  --primitive-space-20: 5rem; /* 80px */
+  --primitive-space-24: 6rem; /* 96px */
+  --primitive-space-28: 7rem; /* 112px */
+  --primitive-space-32: 8rem; /* 128px */
+  --primitive-space-40: 10rem; /* 160px */
+  --primitive-space-48: 12rem; /* 192px */
+
+  /* --------------------------------------------------------------------------
+   * 1.8 Typography Primitives: Scale (Fluid clamp values)
+   * -------------------------------------------------------------------------- */
+  --primitive-font-size-2xs: clamp(0.6875rem, 0.65rem + 0.15vw, 0.75rem); /* 11px -> 12px */
+  --primitive-font-size-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.8125rem); /* 12px -> 13px */
+  --primitive-font-size-sm: clamp(0.8125rem, 0.78rem + 0.25vw, 0.875rem); /* 13px -> 14px */
+  --primitive-font-size-md: clamp(0.9375rem, 0.9rem + 0.25vw, 1rem); /* 15px -> 16px */
+  --primitive-font-size-lg: clamp(1.0625rem, 1rem + 0.35vw, 1.125rem); /* 17px -> 18px */
+  --primitive-font-size-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.375rem); /* 20px -> 22px */
+  --primitive-font-size-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 1.75rem); /* 24px -> 28px */
+  --primitive-font-size-3xl: clamp(1.875rem, 1.65rem + 1.1vw, 2.25rem); /* 30px -> 36px */
+  --primitive-font-size-4xl: clamp(2.25rem, 1.95rem + 1.5vw, 2.875rem); /* 36px -> 46px */
+  --primitive-font-size-5xl: clamp(2.75rem, 2.3rem + 2vw, 3.625rem); /* 44px -> 58px */
+  --primitive-font-size-6xl: clamp(3.375rem, 2.75rem + 2.75vw, 4.5rem); /* 54px -> 72px */
+  --primitive-font-size-display-sm: clamp(2.5rem, 2.1rem + 1.8vw, 3.25rem); /* Editorial sub-hero */
+  --primitive-font-size-display-md: clamp(3.25rem, 2.65rem + 2.6vw, 4.25rem); /* Editorial hero */
+  --primitive-font-size-display-lg: clamp(4rem, 3.2rem + 3.5vw, 5.5rem); /* Editorial marquee */
+
+  /* Line Heights */
+  --primitive-line-height-none: 1;
+  --primitive-line-height-tight: 1.15;
+  --primitive-line-height-snug: 1.25;
+  --primitive-line-height-normal: 1.45;
+  --primitive-line-height-relaxed: 1.6;
+  --primitive-line-height-loose: 1.8;
+
+  /* Font Weights */
+  --primitive-font-weight-regular: 400;
+  --primitive-font-weight-medium: 500;
+  --primitive-font-weight-semibold: 600;
+  --primitive-font-weight-bold: 700;
+  --primitive-font-weight-extrabold: 800;
+
+  /* Letter Spacing */
+  --primitive-letter-spacing-tighter: -0.04em;
+  --primitive-letter-spacing-tight: -0.02em;
+  --primitive-letter-spacing-normal: 0em;
+  --primitive-letter-spacing-wide: 0.025em;
+  --primitive-letter-spacing-wider: 0.06em;
+
+  /* --------------------------------------------------------------------------
+   * 1.9 Border Radius Primitives
+   * -------------------------------------------------------------------------- */
+  --primitive-radius-none: 0px;
+  --primitive-radius-xs: 2px;
+  --primitive-radius-sm: 4px;
+  --primitive-radius-md: 8px;
+  --primitive-radius-lg: 12px;
+  --primitive-radius-xl: 16px;
+  --primitive-radius-2xl: 24px;
+  --primitive-radius-3xl: 32px;
+  --primitive-radius-full: 9999px;
+
+  /* --------------------------------------------------------------------------
+   * 1.10 Border Width & Style Primitives
+   * -------------------------------------------------------------------------- */
+  --primitive-border-width-0: 0px;
+  --primitive-border-width-1: 1px; /* Hairline architecture */
+  --primitive-border-width-2: 2px; /* Focus ring / active selection */
+  --primitive-border-width-3: 3px;
+  --primitive-border-width-4: 4px; /* Heavy accent bar */
+
+  /* --------------------------------------------------------------------------
+   * 1.11 Multi-Layer Ambient Shadow Primitives
+   * -------------------------------------------------------------------------- */
+  --primitive-shadow-none: none;
+  --primitive-shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --primitive-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --primitive-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --primitive-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+  --primitive-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.09), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  --primitive-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.18);
+  --primitive-shadow-overlay: 0 32px 64px -16px rgb(0 0 0 / 0.24);
+
+  /* --------------------------------------------------------------------------
+   * 1.12 Motion Timing & Easing Curves (Hardware Acceleration Targets)
+   * -------------------------------------------------------------------------- */
+  --primitive-duration-instant: 0ms;
+  --primitive-duration-fast: 100ms;
+  --primitive-duration-normal: 200ms;
+  --primitive-duration-slow: 350ms;
+  --primitive-duration-slower: 500ms;
+
+  --primitive-ease-linear: linear;
+  --primitive-ease-standard: cubic-bezier(0.2, 0, 0, 1); /* Crisp editorial stop */
+  --primitive-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1); /* Natural spring deceleration */
+  --primitive-ease-enter: cubic-bezier(0, 0, 0.2, 1); /* Fast entrance */
+  --primitive-ease-exit: cubic-bezier(0.4, 0, 1, 1); /* Accelerated exit */
+
+  /* --------------------------------------------------------------------------
+   * 1.13 Responsive Viewport Breakpoints
+   * -------------------------------------------------------------------------- */
+  --primitive-breakpoint-xs: 320px;
+  --primitive-breakpoint-sm: 375px;
+  --primitive-breakpoint-md: 768px;
+  --primitive-breakpoint-lg: 1024px;
+  --primitive-breakpoint-xl: 1280px;
+  --primitive-breakpoint-2xl: 1440px;
+  --primitive-breakpoint-3xl: 1920px;
+  --primitive-breakpoint-4xl: 2560px;
+
+  /* --------------------------------------------------------------------------
+   * 1.14 Z-Index Layer Stack
+   * -------------------------------------------------------------------------- */
+  --primitive-z-base: 0;
+  --primitive-z-sticky: 10;
+  --primitive-z-header: 20;
+  --primitive-z-dropdown: 30;
+  --primitive-z-popover: 40;
+  --primitive-z-drawer: 50;
+  --primitive-z-modal: 60;
+  --primitive-z-toast: 70;
+  --primitive-z-tooltip: 80;
+  --primitive-z-command-palette: 90;
+  --primitive-z-max: 100;
+
+  /* --------------------------------------------------------------------------
+   * 1.15 Layout Container & Grid Primitives
+   * -------------------------------------------------------------------------- */
+  --primitive-container-reading: 680px; /* Optimal typographic measure (~65-75ch) */
+  --primitive-container-prose: 800px;
+  --primitive-container-commerce: 1280px; /* Standard customer catalog container */
+  --primitive-container-wide: 1440px; /* Editorial & wide storefront container */
+  --primitive-container-dashboard: 1680px; /* High-density seller & admin console */
+  --primitive-container-max: 1920px;
+}

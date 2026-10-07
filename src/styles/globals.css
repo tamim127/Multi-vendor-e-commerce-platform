@@ -1,4 +1,106 @@
 @import 'tailwindcss';
+@import './tokens/primitives.css';
+@import './tokens/semantic.css';
+@import './tokens/components.css';
+
+@theme {
+  /* Colors */
+  --color-canvas: var(--color-bg-canvas);
+  --color-surface: var(--color-bg-surface);
+  --color-surface-muted: var(--color-bg-surface-muted);
+  --color-surface-elevated: var(--color-bg-surface-elevated);
+
+  --color-fg-primary: var(--color-fg-primary);
+  --color-fg-secondary: var(--color-fg-secondary);
+  --color-fg-tertiary: var(--color-fg-tertiary);
+  --color-fg-muted: var(--color-fg-muted);
+  --color-fg-inverse: var(--color-fg-inverse);
+
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-default: var(--color-border-default);
+  --color-border-strong: var(--color-border-strong);
+  --color-border-focus: var(--color-border-focus);
+
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-foreground: var(--color-primary-foreground);
+
+  --color-secondary: var(--color-secondary);
+  --color-secondary-hover: var(--color-secondary-hover);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-foreground: var(--color-accent-foreground);
+
+  --color-success: var(--color-success);
+  --color-success-foreground: var(--color-success-foreground);
+  --color-success-muted: var(--color-success-muted);
+
+  --color-warning: var(--color-warning);
+  --color-warning-foreground: var(--color-warning-foreground);
+  --color-warning-muted: var(--color-warning-muted);
+
+  --color-destructive: var(--color-destructive);
+  --color-destructive-hover: var(--color-destructive-hover);
+  --color-destructive-foreground: var(--color-destructive-foreground);
+  --color-destructive-muted: var(--color-destructive-muted);
+
+  --color-info: var(--color-info);
+  --color-info-foreground: var(--color-info-foreground);
+  --color-info-muted: var(--color-info-muted);
+
+  /* Commerce Colors */
+  --color-price: var(--color-commerce-price);
+  --color-price-sale: var(--color-commerce-price-sale);
+  --color-price-strike: var(--color-commerce-price-strike);
+  --color-rating-star: var(--color-commerce-rating-star);
+
+  /* Font Sizes */
+  --text-2xs: var(--primitive-font-size-2xs);
+  --text-xs: var(--primitive-font-size-xs);
+  --text-sm: var(--primitive-font-size-sm);
+  --text-md: var(--primitive-font-size-md);
+  --text-lg: var(--primitive-font-size-lg);
+  --text-xl: var(--primitive-font-size-xl);
+  --text-2xl: var(--primitive-font-size-2xl);
+  --text-3xl: var(--primitive-font-size-3xl);
+  --text-4xl: var(--primitive-font-size-4xl);
+  --text-5xl: var(--primitive-font-size-5xl);
+  --text-6xl: var(--primitive-font-size-6xl);
+  --text-display-sm: var(--primitive-font-size-display-sm);
+  --text-display-md: var(--primitive-font-size-display-md);
+  --text-display-lg: var(--primitive-font-size-display-lg);
+
+  /* Border Radii */
+  --radius-xs: var(--primitive-radius-xs);
+  --radius-sm: var(--primitive-radius-sm);
+  --radius-md: var(--primitive-radius-md);
+  --radius-lg: var(--primitive-radius-lg);
+  --radius-xl: var(--primitive-radius-xl);
+  --radius-2xl: var(--primitive-radius-2xl);
+  --radius-3xl: var(--primitive-radius-3xl);
+  --radius-full: var(--primitive-radius-full);
+
+  /* Shadows */
+  --shadow-xs: var(--primitive-shadow-xs);
+  --shadow-sm: var(--primitive-shadow-sm);
+  --shadow-md: var(--primitive-shadow-md);
+  --shadow-lg: var(--primitive-shadow-lg);
+  --shadow-xl: var(--primitive-shadow-xl);
+  --shadow-2xl: var(--primitive-shadow-2xl);
+  --shadow-overlay: var(--primitive-shadow-overlay);
+
+  /* Breakpoints */
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 375px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+}
 
 /* Baseline box model reset */
 *,

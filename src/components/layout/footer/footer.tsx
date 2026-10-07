@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container/container';
 import { Input } from '@/components/ui/input/input';
 import { Button } from '@/components/ui/button/button';
+import { useI18n } from '@/lib/i18n';
 import { defaultFooterSections } from '@/config/navigation';
 import type { FooterSection } from '@/types/navigation';
 
@@ -24,6 +25,7 @@ export function SiteFooter({
   className,
   ...props
 }: SiteFooterProps): React.JSX.Element {
+  const { t } = useI18n();
   const [newsletterEmail, setNewsletterEmail] = React.useState<string>('');
   const [isSubscribed, setIsSubscribed] = React.useState<boolean>(false);
 
@@ -53,10 +55,10 @@ export function SiteFooter({
               </div>
               <div>
                 <h5 className="text-xs font-bold uppercase tracking-wider text-fg-primary">
-                  Worldwide Logistics
+                  {t('footer.logistics')}
                 </h5>
                 <p className="text-xs text-fg-muted mt-0.5 leading-relaxed">
-                  Fast, tracked fulfillment across 180+ global markets.
+                  {t('footer.logisticsDesc')}
                 </p>
               </div>
             </div>
@@ -67,10 +69,10 @@ export function SiteFooter({
               </div>
               <div>
                 <h5 className="text-xs font-bold uppercase tracking-wider text-fg-primary">
-                  Escrow Protection
+                  {t('footer.escrow')}
                 </h5>
                 <p className="text-xs text-fg-muted mt-0.5 leading-relaxed">
-                  Bank-grade security and full buyer deposit guarantees.
+                  {t('footer.escrowDesc')}
                 </p>
               </div>
             </div>
@@ -81,10 +83,10 @@ export function SiteFooter({
               </div>
               <div>
                 <h5 className="text-xs font-bold uppercase tracking-wider text-fg-primary">
-                  Seamless Returns
+                  {t('footer.returns')}
                 </h5>
                 <p className="text-xs text-fg-muted mt-0.5 leading-relaxed">
-                  Hassle-free 30-day merchant returns and quick refunds.
+                  {t('footer.returnsDesc')}
                 </p>
               </div>
             </div>
@@ -95,10 +97,10 @@ export function SiteFooter({
               </div>
               <div>
                 <h5 className="text-xs font-bold uppercase tracking-wider text-fg-primary">
-                  Dedicated Concierge
+                  {t('footer.support')}
                 </h5>
                 <p className="text-xs text-fg-muted mt-0.5 leading-relaxed">
-                  24/7 client care and merchant arbitration support.
+                  {t('footer.supportDesc')}
                 </p>
               </div>
             </div>
@@ -133,7 +135,7 @@ export function SiteFooter({
               {/* Newsletter Signup Shell */}
               <div className="pt-2 max-w-sm">
                 <span className="text-xs font-semibold text-fg-primary block mb-2">
-                  Trade Insights &amp; Exclusive Drops
+                  {t('footer.newsletterTitle')}
                 </span>
 
                 {isSubscribed ? (
@@ -144,7 +146,7 @@ export function SiteFooter({
                   <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
                     <Input
                       type="email"
-                      placeholder="Enter corporate email..."
+                      placeholder={t('footer.newsletterPlaceholder')}
                       value={newsletterEmail}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                       required
@@ -152,7 +154,7 @@ export function SiteFooter({
                       className="h-9 text-xs"
                     />
                     <Button type="submit" size="sm" variant="primary" className="h-9 shrink-0">
-                      <span>Join</span>
+                      <span>{t('footer.newsletterJoin')}</span>
                       <ArrowRight className="size-3.5" aria-hidden="true" />
                     </Button>
                   </form>
@@ -196,24 +198,26 @@ export function SiteFooter({
           className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-fg-muted text-center sm:text-left"
         >
           <div>
-            <p>© {new Date().getFullYear()} Marketplace Technologies Corp. All rights reserved.</p>
+            <p>
+              © {new Date().getFullYear()} Marketplace Technologies Corp. {t('footer.copyright')}
+            </p>
             <p className="text-[11px] text-fg-muted/70 mt-0.5">
               Multi-Vendor Core Platform • Production Architecture Baseline
             </p>
           </div>
 
           <div className="flex items-center gap-6 text-2xs">
-            <a href="/security" className="hover:text-primary transition-colors">
-              SOC2 Type II Certified
-            </a>
+            <Link href="/security" className="hover:text-primary transition-colors">
+              Security Architecture
+            </Link>
             <div className="size-1 rounded-full bg-border-subtle" />
-            <a href="/privacy" className="hover:text-primary transition-colors">
-              GDPR &amp; CCPA Compliant
-            </a>
+            <Link href="/privacy" className="hover:text-primary transition-colors">
+              Privacy Framework
+            </Link>
             <div className="size-1 rounded-full bg-border-subtle" />
-            <a href="/compliance" className="hover:text-primary transition-colors">
-              PCI-DSS Level 1
-            </a>
+            <Link href="/compliance" className="hover:text-primary transition-colors">
+              Payment Standards Baseline
+            </Link>
           </div>
         </Container>
       </div>

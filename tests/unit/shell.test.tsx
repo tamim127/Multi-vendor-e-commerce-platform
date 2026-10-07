@@ -211,15 +211,23 @@ describe('Phase 1E: Responsive Application Shell & Navigation Engine', () => {
 
   describe('SiteFooter Component', () => {
     it('renders trust badges and multi-column footer sections', () => {
-      render(<SiteFooter />);
+      render(
+        <I18nProvider>
+          <SiteFooter />
+        </I18nProvider>
+      );
       expect(screen.getByRole('contentinfo')).toBeDefined();
-      expect(screen.getByText('Worldwide Logistics')).toBeDefined();
+      expect(screen.getByText('Cross-Border Delivery')).toBeDefined();
       expect(screen.getByText('Customer Experience')).toBeDefined();
       expect(screen.getByText('Marketplace Ecosystem')).toBeDefined();
     });
 
     it('handles newsletter form interaction', () => {
-      render(<SiteFooter />);
+      render(
+        <I18nProvider>
+          <SiteFooter />
+        </I18nProvider>
+      );
       const input = screen.getByRole('textbox', { name: /corporate email address/i });
       fireEvent.change(input, { target: { value: 'buyer@enterprise.com' } });
       const joinBtn = screen.getByRole('button', { name: /join/i });

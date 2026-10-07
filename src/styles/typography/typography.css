@@ -1,0 +1,169 @@
+/**
+ * ==============================================================================
+ * TYPOGRAPHY ROLE MAPPINGS & REDUCED MOTION FOUNDATION
+ * ==============================================================================
+ * Connects font family variables with Phase 1B tokens and establishes the
+ * accessible motion suppression baseline.
+ */
+
+/* ----------------------------------------------------------------------------
+ * 1. Font Family Stacks (Consuming Next.js font variables + system fallbacks)
+ * ---------------------------------------------------------------------------- */
+:root {
+  --font-family-sans: var(--font-sans, system-ui, -apple-system, sans-serif);
+  --font-family-serif: var(--font-serif, 'Times New Roman', Georgia, serif);
+  --font-family-mono: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
+}
+
+/* ----------------------------------------------------------------------------
+ * 2. Semantic Typography Utilities
+ * ---------------------------------------------------------------------------- */
+.font-sans {
+  font-family: var(--font-family-sans);
+}
+
+.font-serif {
+  font-family: var(--font-family-serif);
+}
+
+.font-mono {
+  font-family: var(--font-family-mono);
+}
+
+/* Editorial Display Roles */
+.text-display-lg {
+  font-family: var(--font-family-serif);
+  font-size: var(--primitive-font-size-display-lg);
+  line-height: var(--primitive-line-height-tight);
+  letter-spacing: var(--primitive-letter-spacing-tighter);
+  font-weight: var(--primitive-font-weight-bold);
+}
+
+.text-display-md {
+  font-family: var(--font-family-serif);
+  font-size: var(--primitive-font-size-display-md);
+  line-height: var(--primitive-line-height-tight);
+  letter-spacing: var(--primitive-letter-spacing-tight);
+  font-weight: var(--primitive-font-weight-bold);
+}
+
+.text-display-sm {
+  font-family: var(--font-family-serif);
+  font-size: var(--primitive-font-size-display-sm);
+  line-height: var(--primitive-line-height-snug);
+  letter-spacing: var(--primitive-letter-spacing-tight);
+  font-weight: var(--primitive-font-weight-semibold);
+}
+
+/* Heading Roles */
+.text-heading-2xl {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-2xl);
+  line-height: var(--primitive-line-height-snug);
+  letter-spacing: var(--primitive-letter-spacing-tight);
+  font-weight: var(--primitive-font-weight-bold);
+}
+
+.text-heading-xl {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-xl);
+  line-height: var(--primitive-line-height-snug);
+  font-weight: var(--primitive-font-weight-semibold);
+}
+
+.text-heading-lg {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-lg);
+  line-height: var(--primitive-line-height-normal);
+  font-weight: var(--primitive-font-weight-semibold);
+}
+
+/* Body & Reading Roles */
+.text-body {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-md);
+  line-height: var(--primitive-line-height-normal);
+  font-weight: var(--primitive-font-weight-regular);
+}
+
+.text-body-sm {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-sm);
+  line-height: var(--primitive-line-height-normal);
+  font-weight: var(--primitive-font-weight-regular);
+}
+
+.text-caption {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-xs);
+  line-height: var(--primitive-line-height-snug);
+  font-weight: var(--primitive-font-weight-regular);
+  color: var(--color-fg-muted);
+}
+
+.text-overline {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-2xs);
+  line-height: var(--primitive-line-height-none);
+  letter-spacing: var(--primitive-letter-spacing-wider);
+  text-transform: uppercase;
+  font-weight: var(--primitive-font-weight-bold);
+}
+
+/* Commerce Price Roles */
+.text-price {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-lg);
+  line-height: var(--primitive-line-height-none);
+  font-weight: var(--primitive-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-commerce-price);
+}
+
+.text-price-sale {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-lg);
+  line-height: var(--primitive-line-height-none);
+  font-weight: var(--primitive-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-commerce-price-sale);
+}
+
+.text-price-strike {
+  font-family: var(--font-family-sans);
+  font-size: var(--primitive-font-size-sm);
+  line-height: var(--primitive-line-height-none);
+  text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-commerce-price-strike);
+}
+
+/* Monospace Financial & SKU Code */
+.text-mono-code {
+  font-family: var(--font-family-mono);
+  font-size: var(--primitive-font-size-sm);
+  line-height: var(--primitive-line-height-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------------------------
+ * 3. Reduced Motion Preference Baseline (WCAG 2.2 AA Compliance)
+ * ---------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --primitive-duration-instant: 0ms;
+    --primitive-duration-fast: 0.01ms;
+    --primitive-duration-normal: 0.01ms;
+    --primitive-duration-slow: 0.01ms;
+    --primitive-duration-slower: 0.01ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

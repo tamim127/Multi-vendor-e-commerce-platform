@@ -1,6 +1,8 @@
 'use client';
 
 import * as React from 'react';
+import { ProductCard, type ProductCardVariant } from '@/components/product-card';
+import { MOCK_PRODUCTS } from '@/domains/catalog/fixtures';
 import { useTheme } from '@/lib/theme/theme-context';
 import {
   Button,
@@ -73,6 +75,18 @@ export default function ShowcasePage(): React.JSX.Element {
   const [qty, setQty] = React.useState<number>(2);
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
   const [drawerOpen, setDrawerOpen] = React.useState<boolean>(false);
+  const [activeVariant, setActiveVariant] = React.useState<ProductCardVariant>('standard');
+  const [wishlistMap, setWishlistMap] = React.useState<Record<string, boolean>>({});
+  const [actionLog, setActionLog] = React.useState<string | null>(null);
+
+  const handleToggleWishlist = (prod: (typeof MOCK_PRODUCTS)[0]): void => {
+    setWishlistMap((prev) => ({ ...prev, [prod.id]: !prev[prod.id] }));
+    setActionLog(`Wishlist toggled for: ${prod.slug}`);
+  };
+
+  const handleQuickAction = (prod: (typeof MOCK_PRODUCTS)[0]): void => {
+    setActionLog(`Quick Action triggered for: ${prod.slug}`);
+  };
 
   return (
     <TooltipProvider>
@@ -490,6 +504,154 @@ export default function ShowcasePage(): React.JSX.Element {
                 <Skeleton className="h-32 w-full rounded-md" />
               </CardContent>
             </Card>
+          </div>
+        </section>
+
+        {/* Section 8: Product Card System (Phase 2C Reusable Presentation Layer) */}
+        <section className="space-y-6 pt-6 border-t border-border-subtle">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant="brand">Phase 2C Architecture</Badge>
+              <Badge variant="success" dot>
+                Reusable Component System
+              </Badge>
+            </div>
+            <h2 className="text-xl font-bold tracking-tight text-fg-primary">
+              8. Canonical Product Card System
+            </h2>
+            <p className="text-sm text-fg-muted mt-1 max-w-2xl">
+              Unified presentation layer supporting 10 distinct variants, decoupled media and
+              pricing, responsive layouts, WCAG 2.2 AA accessibility, and interactive affordances.
+            </p>
+          </div>
+
+          {/* Action Log Feedback Banner */}
+          {actionLog && (
+            <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20 text-xs text-primary font-mono">
+              <span>Feedback: {actionLog}</span>
+              <button
+                type="button"
+                onClick={() => setActionLog(null)}
+                className="underline hover:text-primary-hover"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+
+          {/* Variant Selector Tabs */}
+          <div className="space-y-3">
+            <span className="text-xs font-semibold uppercase tracking-wider text-fg-muted block">
+              Select Variant Showcase:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  'standard',
+                  'compact',
+                  'large',
+                  'editorial',
+                  'horizontal',
+                  'search',
+                  'recommendation',
+                  'flash-sale',
+                  'sponsored',
+                  'recently-viewed',
+                ] as ProductCardVariant[]
+              ).map((variantKey) => (
+                <Button
+                  key={variantKey}
+                  type="button"
+                  variant={activeVariant === variantKey ? 'primary' : 'tertiary'}
+                  size="sm"
+                  onClick={() => setActiveVariant(variantKey)}
+                  className="capitalize font-medium"
+                >
+                  {variantKey.replace('-', ' ')}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Variant Live Preview Grid */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-fg-muted">
+              Live Preview: {activeVariant.toUpperCase()} Variant
+            </h3>
+            <div
+              className={
+                activeVariant === 'horizontal'
+                  ? 'flex flex-col gap-4 max-w-4xl'
+                  : activeVariant === 'compact' || activeVariant === 'recently-viewed'
+                    ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4'
+                    : activeVariant === 'large' || activeVariant === 'editorial'
+                      ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+                      : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+              }
+            >
+              {MOCK_PRODUCTS.slice(0, activeVariant === 'horizontal' ? 3 : 4).map((prod) => (
+                <ProductCard
+                  key={prod.id}
+                  product={prod}
+                  variant={activeVariant}
+                  isWishlisted={wishlistMap[prod.id]}
+                  flashSaleProgressPercent={activeVariant === 'flash-sale' ? 72 : undefined}
+                  editorialBadgeText={activeVariant === 'editorial' ? "Editor's Choice" : undefined}
+                  onWishlistToggle={handleToggleWishlist}
+                  onQuickAction={handleQuickAction}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Presentation States Showcase */}
+          <div className="space-y-4 pt-6 border-t border-border-subtle">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-fg-muted">
+              Card States Demonstration
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* 1. Normal Default */}
+              <div className="space-y-2">
+                <span className="text-2xs font-semibold text-fg-muted uppercase tracking-wider block">
+                  1. Default / Active State
+                </span>
+                <ProductCard
+                  product={MOCK_PRODUCTS[0]!}
+                  variant="standard"
+                  isWishlisted={wishlistMap[MOCK_PRODUCTS[0]!.id]}
+                  onWishlistToggle={handleToggleWishlist}
+                />
+              </div>
+
+              {/* 2. Loading Skeleton */}
+              <div className="space-y-2">
+                <span className="text-2xs font-semibold text-fg-muted uppercase tracking-wider block">
+                  2. Loading State (Skeleton)
+                </span>
+                <ProductCard product={MOCK_PRODUCTS[0]!} variant="standard" isLoading />
+              </div>
+
+              {/* 3. Unavailable / Out-of-Stock */}
+              <div className="space-y-2">
+                <span className="text-2xs font-semibold text-fg-muted uppercase tracking-wider block">
+                  3. Unavailable State
+                </span>
+                <ProductCard product={MOCK_PRODUCTS[1]!} variant="standard" isUnavailable />
+              </div>
+
+              {/* 4. Sponsored State */}
+              <div className="space-y-2">
+                <span className="text-2xs font-semibold text-fg-muted uppercase tracking-wider block">
+                  4. Sponsored State
+                </span>
+                <ProductCard
+                  product={MOCK_PRODUCTS[2]!}
+                  variant="sponsored"
+                  isWishlisted={wishlistMap[MOCK_PRODUCTS[2]!.id]}
+                  onWishlistToggle={handleToggleWishlist}
+                />
+              </div>
+            </div>
           </div>
         </section>
       </div>

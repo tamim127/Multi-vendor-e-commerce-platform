@@ -87,6 +87,20 @@ export interface TranslationsContract {
   'plp.retry': string;
   'plp.pagePrevious': string;
   'plp.pageNext': string;
+
+  // Product Card System
+  'productCard.fromPrice': string;
+  'productCard.offersCount': string;
+  'productCard.addToWishlist': string;
+  'productCard.removeFromWishlist': string;
+  'productCard.quickView': string;
+  'productCard.inStock': string;
+  'productCard.outOfStock': string;
+  'productCard.sponsored': string;
+  'productCard.flashSale': string;
+  'productCard.claimed': string;
+  'productCard.viewDetails': string;
+  'productCard.unavailable': string;
 }
 
 export type TranslationKey = keyof TranslationsContract;

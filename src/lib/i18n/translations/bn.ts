@@ -84,4 +84,18 @@ export const bnTranslations: TranslationsContract = {
   'plp.retry': 'আবার চেষ্টা করুন',
   'plp.pagePrevious': 'পূর্ববর্তী',
   'plp.pageNext': 'পরবর্তী',
+
+  // Product Card System
+  'productCard.fromPrice': '{price} থেকে',
+  'productCard.offersCount': '{count}টি অফার',
+  'productCard.addToWishlist': 'উইশলিস্টে যোগ করুন',
+  'productCard.removeFromWishlist': 'উইশলিস্ট থেকে সরান',
+  'productCard.quickView': 'কুইক ভিউ',
+  'productCard.inStock': 'স্টকে আছে',
+  'productCard.outOfStock': 'স্টক শেষ',
+  'productCard.sponsored': 'স্পন্সরড',
+  'productCard.flashSale': 'ফ্ল্যাশ সেল',
+  'productCard.claimed': '{percent}% বিক্রি হয়েছে',
+  'productCard.viewDetails': 'বিস্তারিত দেখুন',
+  'productCard.unavailable': 'বর্তমানে অনুপলব্ধ',
 };

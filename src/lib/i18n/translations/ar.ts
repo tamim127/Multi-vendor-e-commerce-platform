@@ -84,4 +84,18 @@ export const arTranslations: TranslationsContract = {
   'plp.retry': 'إعادة المحاولة',
   'plp.pagePrevious': 'السابق',
   'plp.pageNext': 'التالي',
+
+  // Product Card System
+  'productCard.fromPrice': 'من {price}',
+  'productCard.offersCount': '{count} عروض',
+  'productCard.addToWishlist': 'إضافة إلى قائمة الرغبات',
+  'productCard.removeFromWishlist': 'إزالة من قائمة الرغبات',
+  'productCard.quickView': 'معاينة سريعة',
+  'productCard.inStock': 'متوفر',
+  'productCard.outOfStock': 'نفد المخزون',
+  'productCard.sponsored': 'إعلان مروّج',
+  'productCard.flashSale': 'عروض خاطفة',
+  'productCard.claimed': 'تم حجز {percent}%',
+  'productCard.viewDetails': 'عرض التفاصيل',
+  'productCard.unavailable': 'غير متوفر حالياً',
 };

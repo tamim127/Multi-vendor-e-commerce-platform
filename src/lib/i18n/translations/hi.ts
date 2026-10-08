@@ -84,4 +84,18 @@ export const hiTranslations: TranslationsContract = {
   'plp.retry': 'पुनः प्रयास करें',
   'plp.pagePrevious': 'पिछला',
   'plp.pageNext': 'अगला',
+
+  // Product Card System
+  'productCard.fromPrice': '{price} से',
+  'productCard.offersCount': '{count} ऑफ़र',
+  'productCard.addToWishlist': 'विशलिस्ट में जोड़ें',
+  'productCard.removeFromWishlist': 'विशलिस्ट से हटाएं',
+  'productCard.quickView': 'त्वरित दृश्य',
+  'productCard.inStock': 'स्टॉक में उपलब्ध',
+  'productCard.outOfStock': 'स्टॉक समाप्त',
+  'productCard.sponsored': 'प्रायोजित',
+  'productCard.flashSale': 'फ्लैश सेल',
+  'productCard.claimed': '{percent}% दावा किया गया',
+  'productCard.viewDetails': 'विवरण देखें',
+  'productCard.unavailable': 'वर्तमान में अनुपलब्ध',
 };

@@ -84,4 +84,18 @@ export const enTranslations: TranslationsContract = {
   'plp.retry': 'Try Again',
   'plp.pagePrevious': 'Previous',
   'plp.pageNext': 'Next',
+
+  // Product Card System
+  'productCard.fromPrice': 'From {price}',
+  'productCard.offersCount': '{count} offers',
+  'productCard.addToWishlist': 'Add to wishlist',
+  'productCard.removeFromWishlist': 'Remove from wishlist',
+  'productCard.quickView': 'Quick view',
+  'productCard.inStock': 'In Stock',
+  'productCard.outOfStock': 'Out of Stock',
+  'productCard.sponsored': 'Sponsored',
+  'productCard.flashSale': 'Flash Sale',
+  'productCard.claimed': '{percent}% Claimed',
+  'productCard.viewDetails': 'View details',
+  'productCard.unavailable': 'Currently Unavailable',
 };

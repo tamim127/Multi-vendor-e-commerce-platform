@@ -3,6 +3,7 @@ import '../styles/globals.css';
 import { fontVariablesClass } from '../styles/typography';
 import { ThemeProvider, themeInitScript } from '../lib/theme';
 import { I18nProvider, i18nInitScript } from '../lib/i18n';
+import { QueryProvider } from '../lib/query';
 
 export const metadata: Metadata = {
   title: 'Enterprise Multi-Vendor Marketplace',
@@ -22,7 +23,9 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
-          <I18nProvider>{children}</I18nProvider>
+          <I18nProvider>
+            <QueryProvider>{children}</QueryProvider>
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>

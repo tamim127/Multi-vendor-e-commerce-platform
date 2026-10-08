@@ -50,6 +50,43 @@ export interface TranslationsContract {
   'footer.newsletterPlaceholder': string;
   'footer.newsletterJoin': string;
   'footer.copyright': string;
+
+  // PLP & Product Discovery
+  'plp.products': string;
+  'plp.title': string;
+  'plp.subtitle': string;
+  'plp.resultsCount': string;
+  'plp.showingResults': string;
+  'plp.sortBy': string;
+  'plp.sortNewest': string;
+  'plp.sortPriceAsc': string;
+  'plp.sortPriceDesc': string;
+  'plp.sortRatingDesc': string;
+  'plp.sortRelevance': string;
+  'plp.filters': string;
+  'plp.clearAll': string;
+  'plp.applyFilters': string;
+  'plp.category': string;
+  'plp.brand': string;
+  'plp.price': string;
+  'plp.rating': string;
+  'plp.availability': string;
+  'plp.inStockOnly': string;
+  'plp.minPrice': string;
+  'plp.maxPrice': string;
+  'plp.starsAndAbove': string;
+  'plp.fromPrice': string;
+  'plp.inStock': string;
+  'plp.outOfStock': string;
+  'plp.backorder': string;
+  'plp.noResultsTitle': string;
+  'plp.noResultsDesc': string;
+  'plp.resetFilters': string;
+  'plp.errorTitle': string;
+  'plp.errorDesc': string;
+  'plp.retry': string;
+  'plp.pagePrevious': string;
+  'plp.pageNext': string;
 }
 
 export type TranslationKey = keyof TranslationsContract;

@@ -6,6 +6,7 @@ import { I18nProvider, i18nInitScript } from '../lib/i18n';
 import { QueryProvider } from '../lib/query';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000'),
   title: 'Enterprise Multi-Vendor Marketplace',
   description: 'World-Class Global Multi-Vendor E-Commerce Marketplace Platform',
 };

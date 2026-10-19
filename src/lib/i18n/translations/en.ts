@@ -159,4 +159,12 @@ export const enTranslations: TranslationsContract = {
     'The product you are looking for does not exist or has been removed from the catalog.',
   'pdp.backToHome': 'Back to Home',
   'pdp.fulfilledBy': 'Fulfilled by',
+  'pdp.backorder': 'Available on Backorder',
+  'pdp.backorderRestock': 'Expected restock: {date}',
+  'pdp.backorderProhibited': 'Backorders not accepted',
+  'pdp.backorderDemoLimit':
+    'Demonstration limit: maximum 10 units for demo backorder intent. Does not guarantee inventory reservation or merchant capacity.',
+  'pdp.shippingCost': '+ {cost} shipping',
+  'pdp.shippingCalculatedAtCheckout': 'Shipping calculated at checkout',
+  'pdp.priceUnavailable': 'Price unavailable',
 };

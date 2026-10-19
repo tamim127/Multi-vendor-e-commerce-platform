@@ -155,4 +155,92 @@ describe('Phase 2D: PDP Component Suite', () => {
     renderWithI18n(<PdpNotFound />);
     expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('Product Not Found');
   });
+
+  describe('Phase 2E Component Resilience', () => {
+    it('suppresses compare-at strike and discount badge on currency mismatch', () => {
+      const mixedCurrencyOffer = {
+        ...selectedOffer,
+        price: { amountMinor: 200000, currency: 'USD' as const },
+        compareAtPrice: { amountMinor: 250000, currency: 'EUR' as const }, // Mismatched currency!
+      };
+
+      const { container } = renderWithI18n(
+        <PdpPrice selectedOffer={mixedCurrencyOffer} offerSummary={product.offerSummary} />
+      );
+
+      // Must show current USD price
+      expect(screen.getByText('$2,000.00')).toBeDefined();
+      // Must NOT render strike-through compare-at or discount badge
+      expect(container.querySelector('.line-through')).toBeNull();
+      expect(screen.queryByText(/-\d+%/)).toBeNull();
+    });
+
+    it('renders price unavailable fallback on invalid price data', () => {
+      const invalidPriceOffer = {
+        ...selectedOffer,
+        price: { amountMinor: -500, currency: 'USD' as const },
+      };
+
+      renderWithI18n(
+        <PdpPrice selectedOffer={invalidPriceOffer} offerSummary={product.offerSummary} />
+      );
+
+      expect(screen.getByText(/price unavailable/i)).toBeDefined();
+    });
+
+    it('renders PdpAvailability with permitted backorder and restock date', () => {
+      const backorderOffer = {
+        ...selectedOffer,
+        inventory: {
+          state: 'backorder' as const,
+          quantityAvailable: 0,
+          allowsBackorder: true,
+          restockDate: '2026-11-15',
+        },
+      };
+
+      renderWithI18n(<PdpAvailability selectedOffer={backorderOffer} />);
+      expect(screen.getByText(/available on backorder/i)).toBeDefined();
+      expect(screen.getByText(/2026-11-15/)).toBeDefined();
+    });
+
+    it('renders PdpAvailability with prohibited backorder message', () => {
+      const prohibitedBackorderOffer = {
+        ...selectedOffer,
+        inventory: {
+          state: 'backorder' as const,
+          quantityAvailable: 0,
+          allowsBackorder: false,
+        },
+      };
+
+      renderWithI18n(<PdpAvailability selectedOffer={prohibitedBackorderOffer} />);
+      expect(screen.getByText(/backorders not accepted/i)).toBeDefined();
+    });
+
+    it('renders PdpPurchasePanel in unpurchasable state with disabled quantity control and buttons', () => {
+      renderWithI18n(
+        <PdpPurchasePanel
+          product={product}
+          selectedOffer={selectedOffer}
+          quantity={0}
+          maxQuantity={0}
+          isQuantityBoundedByDemo={false}
+          canPurchase={false}
+          onSetQuantity={vi.fn()}
+        />
+      );
+
+      // Quantity control input should have value 0 and be disabled
+      const qtyInput = screen.getByRole('textbox', { name: /quantity/i }) as HTMLInputElement;
+      expect(qtyInput.value).toBe('0');
+      expect(qtyInput.disabled).toBe(true);
+
+      // Action buttons disabled
+      const addBtn = screen.getByRole('button', { name: /add to cart/i }) as HTMLButtonElement;
+      expect(addBtn.disabled).toBe(true);
+      const buyBtn = screen.getByRole('button', { name: /buy now/i }) as HTMLButtonElement;
+      expect(buyBtn.disabled).toBe(true);
+    });
+  });
 });

@@ -159,6 +159,13 @@ export interface TranslationsContract {
   'pdp.notFoundDesc': string;
   'pdp.backToHome': string;
   'pdp.fulfilledBy': string;
+  'pdp.backorder': string;
+  'pdp.backorderRestock': string;
+  'pdp.backorderProhibited': string;
+  'pdp.backorderDemoLimit': string;
+  'pdp.shippingCost': string;
+  'pdp.shippingCalculatedAtCheckout': string;
+  'pdp.priceUnavailable': string;
 }
 
 export type TranslationKey = keyof TranslationsContract;

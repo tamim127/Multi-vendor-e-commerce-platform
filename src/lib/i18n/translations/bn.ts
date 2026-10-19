@@ -158,4 +158,12 @@ export const bnTranslations: TranslationsContract = {
   'pdp.notFoundDesc': 'আপনি যে পণ্যটি খুঁজছেন তা বিদ্যমান নেই বা ক্যাটালগ থেকে সরানো হয়েছে।',
   'pdp.backToHome': 'হোমে ফিরুন',
   'pdp.fulfilledBy': 'ফুলফিলমেন্ট প্রদানকারী',
+  'pdp.backorder': 'ব্যাকঅর্ডারে উপলব্ধ',
+  'pdp.backorderRestock': 'পুনরায় মজুদের সম্ভাব্য তারিখ: {date}',
+  'pdp.backorderProhibited': 'ব্যাকঅর্ডার গ্রহণ করা হয় না',
+  'pdp.backorderDemoLimit':
+    'ডেমোনস্ট্রেশন সীমা: ডেমো ব্যাকঅর্ডার ইন্টেন্টের জন্য সর্বোচ্চ ১০টি ইউনিট। এটি ইনভেন্টরি রিজার্ভেশন বা মার্চেন্ট সক্ষমতা নিশ্চিত করে না।',
+  'pdp.shippingCost': '+ {cost} শিপিং',
+  'pdp.shippingCalculatedAtCheckout': 'চেকআউটে শিপিং চার্জ গণনা করা হবে',
+  'pdp.priceUnavailable': 'মূল্য উপলব্ধ নয়',
 };

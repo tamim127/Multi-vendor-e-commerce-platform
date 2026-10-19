@@ -97,23 +97,25 @@ export function PdpPurchasePanel({
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="font-semibold text-fg-primary">{t('pdp.quantity')}</span>
-            {selectedOffer?.inventory.quantityAvailable && (
-              <span className="text-fg-subtle">
-                Max: {selectedOffer.inventory.quantityAvailable}
-              </span>
-            )}
+            {canPurchase &&
+              typeof selectedOffer?.inventory.quantityAvailable === 'number' &&
+              selectedOffer.inventory.quantityAvailable > 0 && (
+                <span className="text-fg-subtle">
+                  Max: {selectedOffer.inventory.quantityAvailable}
+                </span>
+              )}
           </div>
 
           <div className="flex items-center gap-3">
             <QuantityControl
-              value={quantity}
+              value={canPurchase ? quantity : 0}
               onChange={onSetQuantity}
-              min={1}
-              max={maxQuantity}
+              min={canPurchase ? 1 : 0}
+              max={canPurchase ? maxQuantity : 0}
               disabled={!canPurchase}
             />
 
-            {totalPrice && (
+            {canPurchase && totalPrice && quantity > 0 && (
               <span className="text-xs font-semibold text-fg-muted tabular-nums">
                 Total: {formatMoneyMinor(totalPrice, { locale: formatLocale })}
               </span>
@@ -121,7 +123,11 @@ export function PdpPurchasePanel({
           </div>
 
           {isQuantityBoundedByDemo && (
-            <span className="text-2xs text-fg-subtle">{t('pdp.quantityDemoBound')}</span>
+            <span className="text-2xs text-fg-subtle">
+              {selectedOffer?.inventory.state === 'backorder'
+                ? t('pdp.backorderDemoLimit')
+                : t('pdp.quantityDemoBound')}
+            </span>
           )}
         </div>
 

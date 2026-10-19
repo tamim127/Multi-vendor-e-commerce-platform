@@ -8,6 +8,7 @@ export * from './types';
 export * from './repository';
 export * from './fixtures/demo-feedback.fixture';
 export * from './utils/variant-lookup';
+export * from './utils/shipping';
 export * from './hooks/use-pdp-selection';
 
 // Components

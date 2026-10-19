@@ -158,4 +158,12 @@ export const arTranslations: TranslationsContract = {
   'pdp.notFoundDesc': 'المنتج الذي تبحث عنه غير موجود أو تمت إزالته من الكتالوج.',
   'pdp.backToHome': 'العودة للرئيسية',
   'pdp.fulfilledBy': 'التنفيذ بواسطة',
+  'pdp.backorder': 'متاح للطلب المسبق المتأخر (Backorder)',
+  'pdp.backorderRestock': 'تاريخ التوفر المتوقع: {date}',
+  'pdp.backorderProhibited': 'الطلبات المتأخرة غير مقبولة',
+  'pdp.backorderDemoLimit':
+    'حد توضيحي تجريبي: الحد الأقصى 10 وحدات لقصد الشراء التجريبي. لا يضمن حجز المخزون أو سعة التاجر.',
+  'pdp.shippingCost': '+ {cost} الشحن',
+  'pdp.shippingCalculatedAtCheckout': 'يتم حساب الشحن عند إتمام الطلب',
+  'pdp.priceUnavailable': 'السعر غير متوفر',
 };

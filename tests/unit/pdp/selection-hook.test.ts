@@ -254,4 +254,163 @@ describe('Phase 2D: PDP Selection Hook State Machine', () => {
     });
     expect(result.current.quantity).toBe(1);
   });
+
+  describe('Phase 2E: Strict Inventory Validation & Fail-Closed Behavior', () => {
+    it('disables demo intent eligibility when quantityAvailable is 0', () => {
+      const zeroStockOffer: SellerOffer = {
+        ...baseOffers[0]!,
+        inventory: {
+          state: 'in_stock',
+          quantityAvailable: 0,
+        },
+      };
+
+      const { result } = renderHook(() =>
+        usePdpSelection({
+          product: baseProduct,
+          offers: [zeroStockOffer],
+        })
+      );
+
+      expect(result.current.canPurchase).toBe(false);
+      expect(result.current.quantity).toBe(0);
+      expect(result.current.maxQuantity).toBe(0);
+    });
+
+    it('fails closed for negative inventory', () => {
+      const negativeStockOffer: SellerOffer = {
+        ...baseOffers[0]!,
+        inventory: {
+          state: 'in_stock',
+          quantityAvailable: -1,
+        },
+      };
+
+      const { result } = renderHook(() =>
+        usePdpSelection({
+          product: baseProduct,
+          offers: [negativeStockOffer],
+        })
+      );
+
+      expect(result.current.canPurchase).toBe(false);
+      expect(result.current.quantity).toBe(0);
+      expect(result.current.maxQuantity).toBe(0);
+      expect(result.current.isQuantityBoundedByDemo).toBe(false);
+    });
+
+    it('fails closed for fractional inventory', () => {
+      const fractionalStockOffer: SellerOffer = {
+        ...baseOffers[0]!,
+        inventory: {
+          state: 'in_stock',
+          quantityAvailable: 3.5,
+        },
+      };
+
+      const { result } = renderHook(() =>
+        usePdpSelection({
+          product: baseProduct,
+          offers: [fractionalStockOffer],
+        })
+      );
+
+      expect(result.current.canPurchase).toBe(false);
+      expect(result.current.quantity).toBe(0);
+      expect(result.current.maxQuantity).toBe(0);
+    });
+
+    it('fails closed for NaN, Infinity, and -Infinity inventory', () => {
+      const invalidValues = [NaN, Infinity, -Infinity];
+
+      for (const val of invalidValues) {
+        const invalidOffer: SellerOffer = {
+          ...baseOffers[0]!,
+          inventory: {
+            state: 'in_stock',
+            quantityAvailable: val,
+          },
+        };
+
+        const { result } = renderHook(() =>
+          usePdpSelection({
+            product: baseProduct,
+            offers: [invalidOffer],
+          })
+        );
+
+        expect(result.current.canPurchase).toBe(false);
+        expect(result.current.quantity).toBe(0);
+        expect(result.current.maxQuantity).toBe(0);
+      }
+    });
+
+    it('enables demo intent eligibility for unknown inventory with demo bound of 10', () => {
+      const unknownStockOffer: SellerOffer = {
+        ...baseOffers[0]!,
+        inventory: {
+          state: 'in_stock',
+          quantityAvailable: undefined,
+        },
+      };
+
+      const { result } = renderHook(() =>
+        usePdpSelection({
+          product: baseProduct,
+          offers: [unknownStockOffer],
+        })
+      );
+
+      expect(result.current.canPurchase).toBe(true);
+      expect(result.current.quantity).toBe(1);
+      expect(result.current.maxQuantity).toBe(10);
+      expect(result.current.isQuantityBoundedByDemo).toBe(true);
+    });
+
+    it('enables demo intent eligibility for permitted backorder with demo bound of 10', () => {
+      const permittedBackorderOffer: SellerOffer = {
+        ...baseOffers[0]!,
+        inventory: {
+          state: 'backorder',
+          quantityAvailable: 0,
+          allowsBackorder: true,
+          restockDate: '2026-11-01',
+        },
+      };
+
+      const { result } = renderHook(() =>
+        usePdpSelection({
+          product: baseProduct,
+          offers: [permittedBackorderOffer],
+        })
+      );
+
+      expect(result.current.canPurchase).toBe(true);
+      expect(result.current.quantity).toBe(1);
+      expect(result.current.maxQuantity).toBe(10);
+      expect(result.current.isQuantityBoundedByDemo).toBe(true);
+    });
+
+    it('disables demo intent eligibility for prohibited backorder', () => {
+      const prohibitedBackorderOffer: SellerOffer = {
+        ...baseOffers[0]!,
+        inventory: {
+          state: 'backorder',
+          quantityAvailable: 0,
+          allowsBackorder: false,
+        },
+      };
+
+      const { result } = renderHook(() =>
+        usePdpSelection({
+          product: baseProduct,
+          offers: [prohibitedBackorderOffer],
+        })
+      );
+
+      expect(result.current.canPurchase).toBe(false);
+      expect(result.current.quantity).toBe(0);
+      expect(result.current.maxQuantity).toBe(0);
+    });
+  });
 });

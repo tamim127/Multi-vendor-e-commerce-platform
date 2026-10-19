@@ -15,6 +15,7 @@ import { formatMoneyMinor } from '@/domains/catalog/utils/money';
 import type { SellerOffer } from '@/domains/catalog/types/seller-offer';
 import { useI18n } from '@/lib/i18n';
 import { Badge } from '@/components/ui/badge/badge';
+import { formatShippingEstimate } from '../utils/shipping';
 
 export interface PdpSellerOffersProps {
   eligibleOffers: SellerOffer[];
@@ -50,6 +51,12 @@ export function PdpSellerOffers({
         {eligibleOffers.map((offer) => {
           const isSelected = selectedOffer?.offerId === offer.offerId;
           const formattedPrice = formatMoneyMinor(offer.price, { locale: formatLocale });
+
+          const shippingDisplay = formatShippingEstimate(offer.shippingEstimate, {
+            locale: formatLocale,
+            freeDeliveryText: t('pdp.freeDelivery'),
+            calculatedAtCheckoutText: t('pdp.shippingCalculatedAtCheckout'),
+          });
 
           return (
             <div
@@ -102,12 +109,16 @@ export function PdpSellerOffers({
                     {offer.condition.replace(/_/g, ' ')}
                   </span>
 
-                  {offer.shippingEstimate?.isFreeShipping && (
-                    <>
-                      <span className="text-fg-subtle">•</span>
-                      <span className="text-success font-medium">{t('pdp.freeDelivery')}</span>
-                    </>
-                  )}
+                  <span className="text-fg-subtle">•</span>
+                  <span
+                    className={
+                      shippingDisplay.isFree
+                        ? 'text-success font-medium'
+                        : 'text-fg-secondary font-medium'
+                    }
+                  >
+                    {shippingDisplay.label}
+                  </span>
                 </div>
               </div>
 

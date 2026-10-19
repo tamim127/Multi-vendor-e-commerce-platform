@@ -93,6 +93,18 @@ test.describe('Phase 2D: Product Detail Page (PDP)', () => {
     await expect(mobilePrice.getByText('$2,499.00')).toBeVisible();
   });
 
+  test('displays truthful free and paid shipping estimates across competing seller offers', async ({
+    page,
+  }) => {
+    await page.goto(pdpUrl);
+
+    // Initial winner offer has free delivery
+    await expect(page.getByText(/Free Delivery/i).first()).toBeVisible();
+
+    // Competing offer table displays paid shipping estimate
+    await expect(page.getByText(/\+ \$15\.00/i).first()).toBeVisible();
+  });
+
   test('handles 404 gracefully when navigating to nonexistent product slug', async ({ page }) => {
     const response = await page.goto('/products/this-product-does-not-exist');
     expect([200, 404]).toContain(response?.status());

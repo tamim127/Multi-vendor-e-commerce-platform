@@ -146,42 +146,82 @@ export function usePdpSelection({
     return buyBoxWinner ?? eligibleOffers[0]!;
   }, [selectionState, eligibleOffers, selectedOfferId]);
 
-  // Inventory bounds & demonstration quantity limits
-  const { maxQuantity, isQuantityBoundedByDemo } = React.useMemo(() => {
-    if (!selectedOffer) {
-      return { maxQuantity: 1, isQuantityBoundedByDemo: false };
+  /**
+   * Evaluates whether a quantity value is a finite, non-negative integer.
+   * Undefined is considered valid (denoting unquantified/undisclosed stock).
+   * Negative numbers, fractional values, NaN, and infinities fail validation.
+   */
+  const inventory = selectedOffer?.inventory;
+  const isInventoryValid = React.useMemo(() => {
+    if (!inventory) return false;
+    const qty = inventory.quantityAvailable;
+    if (qty === undefined) return true;
+    return typeof qty === 'number' && Number.isFinite(qty) && Number.isInteger(qty) && qty >= 0;
+  }, [inventory]);
+
+  const isBackorderPermitted =
+    isInventoryValid && inventory?.state === 'backorder' && inventory?.allowsBackorder === true;
+
+  const isInStockPurchasable =
+    isInventoryValid &&
+    (inventory?.state === 'in_stock' || inventory?.state === 'low_stock') &&
+    (inventory?.quantityAvailable === undefined || inventory.quantityAvailable > 0);
+
+  /**
+   * CANPURCHASE (DEMO INTENT ELIGIBILITY):
+   * Represents client-side demonstration intent eligibility (enabling the prototype
+   * Add to Cart / Buy Now modal trigger). It strictly does NOT represent backend-verified
+   * stock, merchant capacity, inventory reservation, or authorization to charge a customer.
+   */
+  const canPurchase =
+    selectionState === 'valid_with_offers' &&
+    selectedOffer !== null &&
+    (isInStockPurchasable || isBackorderPermitted);
+
+  // Deterministic inventory bounds & demonstration quantity limits
+  const { minQuantity, maxQuantity, isQuantityBoundedByDemo } = React.useMemo(() => {
+    if (!canPurchase || !selectedOffer || !inventory || !isInventoryValid) {
+      return { minQuantity: 0, maxQuantity: 0, isQuantityBoundedByDemo: false };
     }
 
-    if (typeof selectedOffer.inventory.quantityAvailable === 'number') {
+    if (inventory.state === 'backorder') {
       return {
-        maxQuantity: Math.max(1, selectedOffer.inventory.quantityAvailable),
+        minQuantity: 1,
+        maxQuantity: 10,
+        isQuantityBoundedByDemo: true,
+      };
+    }
+
+    if (typeof inventory.quantityAvailable === 'number') {
+      return {
+        minQuantity: 1,
+        maxQuantity: inventory.quantityAvailable,
         isQuantityBoundedByDemo: false,
       };
     }
 
-    // Demonstration client fallback bound
+    // Unknown inventory client demonstration bound
     return {
+      minQuantity: 1,
       maxQuantity: 10,
       isQuantityBoundedByDemo: true,
     };
-  }, [selectedOffer]);
+  }, [canPurchase, selectedOffer, inventory, isInventoryValid]);
 
-  // Ensure current quantity is clamped
+  // Ensure current quantity is clamped deterministically
   React.useEffect(() => {
-    if (quantity > maxQuantity) {
-      setQuantity(maxQuantity);
-    } else if (quantity < 1) {
-      setQuantity(1);
+    if (!canPurchase) {
+      if (quantity !== 0) {
+        setQuantity(0);
+      }
+    } else {
+      if (quantity < minQuantity) {
+        setQuantity(minQuantity);
+      } else if (quantity > maxQuantity) {
+        setQuantity(maxQuantity);
+      }
     }
-  }, [maxQuantity, quantity]);
-
-  // Can purchase logic
-  const canPurchase =
-    selectionState === 'valid_with_offers' &&
-    selectedOffer !== null &&
-    selectedOffer.inventory.state === 'in_stock' &&
-    (selectedOffer.inventory.quantityAvailable === undefined ||
-      selectedOffer.inventory.quantityAvailable > 0);
+  }, [canPurchase, minQuantity, maxQuantity, quantity]);
 
   // Handlers
   const setOption = React.useCallback((key: string, value: string): void => {
@@ -199,10 +239,14 @@ export function usePdpSelection({
 
   const handleSetQuantity = React.useCallback(
     (qty: number): void => {
-      const clamped = Math.max(1, Math.min(maxQuantity, qty));
+      if (!canPurchase || maxQuantity === 0) {
+        setQuantity(0);
+        return;
+      }
+      const clamped = Math.max(minQuantity, Math.min(maxQuantity, qty));
       setQuantity(clamped);
     },
-    [maxQuantity]
+    [canPurchase, minQuantity, maxQuantity]
   );
 
   return {

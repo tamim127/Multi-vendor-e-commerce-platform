@@ -159,4 +159,12 @@ export const hiTranslations: TranslationsContract = {
     'आप जिस उत्पाद की तलाश कर रहे हैं वह मौजूद नहीं है या कैटलॉग से हटा दिया गया है।',
   'pdp.backToHome': 'होम पर वापस जाएं',
   'pdp.fulfilledBy': 'द्वारा पूरा किया गया',
+  'pdp.backorder': 'बैकऑर्डर पर उपलब्ध',
+  'pdp.backorderRestock': 'पुनः स्टॉक की अपेक्षित तिथि: {date}',
+  'pdp.backorderProhibited': 'बैकऑर्डर स्वीकार नहीं किए जाते',
+  'pdp.backorderDemoLimit':
+    'डेमो सीमा: डेमो बैकऑर्डर इंटेंट के लिए अधिकतम 10 इकाइयाँ। यह इन्वेंट्री आरक्षण या विक्रेता क्षमता की गारंटी नहीं देता है।',
+  'pdp.shippingCost': '+ {cost} शिपिंग',
+  'pdp.shippingCalculatedAtCheckout': 'चेकआउट पर शिपिंग की गणना की जाएगी',
+  'pdp.priceUnavailable': 'मूल्य अनुपलब्ध है',
 };

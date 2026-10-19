@@ -109,6 +109,14 @@ describe('Phase 2D: PDP Localization, Translations & RTL Suite', () => {
       'pdp.notFoundTitle',
       'pdp.notFoundDesc',
       'pdp.backToHome',
+      'pdp.fulfilledBy',
+      'pdp.backorder',
+      'pdp.backorderRestock',
+      'pdp.backorderProhibited',
+      'pdp.backorderDemoLimit',
+      'pdp.shippingCost',
+      'pdp.shippingCalculatedAtCheckout',
+      'pdp.priceUnavailable',
     ] as const;
 
     const locales = ['en', 'bn', 'ar', 'hi'] as const;
@@ -120,5 +128,34 @@ describe('Phase 2D: PDP Localization, Translations & RTL Suite', () => {
         expect(translation).not.toBe(key);
       }
     }
+  });
+
+  it('renders Arabic PDP with backorder and truthful shipping fallbacks in RTL direction', () => {
+    const backorderOffer = {
+      ...offers[0]!,
+      inventory: {
+        state: 'backorder' as const,
+        quantityAvailable: 0,
+        allowsBackorder: true,
+        restockDate: '2026-11-20',
+      },
+      shippingEstimate: {
+        minDays: 2,
+        maxDays: 4,
+        isFreeShipping: false,
+        // Missing shippingCost triggers localized shippingCalculatedAtCheckout
+      },
+    };
+
+    render(
+      <I18nProvider defaultLocale="ar">
+        <ProductDetailInteractiveView initialData={{ ...initialData, offers: [backorderOffer] }} />
+      </I18nProvider>
+    );
+
+    // Verify Arabic backorder text
+    expect(screen.getByText(/متاح للطلب المسبق المتأخر/)).toBeDefined();
+    // Verify Arabic shipping calculated at checkout text is rendered
+    expect(screen.getAllByText('يتم حساب الشحن عند إتمام الطلب').length).toBeGreaterThan(0);
   });
 });

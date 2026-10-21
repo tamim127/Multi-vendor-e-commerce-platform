@@ -83,4 +83,53 @@ describe('useCatalogUrlState Hook', () => {
 
     expect(mockPush).toHaveBeenCalledWith('/products', { scroll: false });
   });
+
+  it('preserves search query q on resetFilters when q is present', () => {
+    currentSearchString = 'q=macbook&brands=apple&minPrice=50000';
+
+    const { result } = renderHook(() => useCatalogUrlState());
+
+    act(() => {
+      result.current.resetFilters();
+    });
+
+    expect(mockPush).toHaveBeenCalledWith('/products?q=macbook', { scroll: false });
+  });
+
+  it('updates search query and resets page on setQuery', () => {
+    currentSearchString = 'category=laptops&page=2';
+
+    const { result } = renderHook(() => useCatalogUrlState());
+
+    act(() => {
+      result.current.setQuery('thinkpad');
+    });
+
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    const pushedUrl = mockPush.mock.calls[0]![0] as string;
+    expect(pushedUrl).toContain('q=thinkpad');
+    expect(pushedUrl).not.toContain('page=');
+  });
+
+  it('computes effectiveSort correctly according to query presence and explicit selection', () => {
+    // 1. Neither q nor sort -> 'newest'
+    currentSearchString = 'category=laptops';
+    const { result: res1 } = renderHook(() => useCatalogUrlState());
+    expect(res1.current.effectiveSort).toBe('newest');
+
+    // 2. q present, sort omitted -> 'relevance'
+    currentSearchString = 'q=laptop&category=laptops';
+    const { result: res2 } = renderHook(() => useCatalogUrlState());
+    expect(res2.current.effectiveSort).toBe('relevance');
+
+    // 3. q present, sort explicitly 'newest' -> 'newest'
+    currentSearchString = 'q=laptop&sort=newest';
+    const { result: res3 } = renderHook(() => useCatalogUrlState());
+    expect(res3.current.effectiveSort).toBe('newest');
+
+    // 4. q present, sort explicitly 'price_asc' -> 'price_asc'
+    currentSearchString = 'q=laptop&sort=price_asc';
+    const { result: res4 } = renderHook(() => useCatalogUrlState());
+    expect(res4.current.effectiveSort).toBe('price_asc');
+  });
 });

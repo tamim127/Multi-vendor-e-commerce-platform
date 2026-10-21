@@ -59,6 +59,12 @@ export const arTranslations: TranslationsContract = {
   'plp.sortPriceDesc': 'السعر: من الأعلى للأقل',
   'plp.sortRatingDesc': 'أعلى تقييمات العملاء',
   'plp.sortRelevance': 'المميز',
+  'plp.sortBestselling': 'الأكثر مبيعاً',
+  'plp.sortDiscountDesc': 'أعلى خصم',
+  'plp.searchResultsFor': 'نتائج البحث عن "{query}"',
+  'plp.searchQueryLabel': 'بحث: "{query}"',
+  'plp.noSearchResultsDesc':
+    'لم يتم العثور على منتجات تطابق "{query}". يرجى التحقق من الكلمات المدخلة أو تجربة بحث آخر.',
   'plp.filters': 'التصفيات',
   'plp.clearAll': 'مسح الكل',
   'plp.applyFilters': 'تطبيق التصفيات',

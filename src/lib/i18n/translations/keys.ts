@@ -63,6 +63,11 @@ export interface TranslationsContract {
   'plp.sortPriceDesc': string;
   'plp.sortRatingDesc': string;
   'plp.sortRelevance': string;
+  'plp.sortBestselling': string;
+  'plp.sortDiscountDesc': string;
+  'plp.searchResultsFor': string;
+  'plp.searchQueryLabel': string;
+  'plp.noSearchResultsDesc': string;
   'plp.filters': string;
   'plp.clearAll': string;
   'plp.applyFilters': string;

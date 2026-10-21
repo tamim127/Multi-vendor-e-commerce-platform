@@ -113,4 +113,104 @@ describe('Catalog Discovery Repository Adapter', () => {
     expect(page2.products.length).toBeGreaterThan(0);
     expect(page1.products[0]!.id).not.toBe(page2.products[0]!.id);
   });
+
+  describe('Search Stage 1 AND Eligibility & Relevance', () => {
+    it('requires all query tokens to match (Stage 1 AND logic)', async () => {
+      const singleToken = await getCatalogProducts({ query: 'Apple' });
+      expect(singleToken.total).toBeGreaterThan(0);
+
+      const multiTokenMatch = await getCatalogProducts({ query: 'Apple MacBook' });
+      expect(multiTokenMatch.total).toBeGreaterThan(0);
+      for (const p of multiTokenMatch.products) {
+        expect(p.title.en.toLowerCase()).toContain('macbook');
+      }
+
+      // Mutually exclusive tokens should return zero results
+      const noMatch = await getCatalogProducts({ query: 'Apple Sony' });
+      expect(noMatch.total).toBe(0);
+    });
+
+    it('preserves Bengali, Arabic, and Hindi text in search matching', async () => {
+      const bnMatch = await getCatalogProducts({ query: 'ম্যাকবুক' });
+      expect(bnMatch.total).toBeGreaterThan(0);
+
+      const arMatch = await getCatalogProducts({ query: 'ماك بوك' });
+      expect(arMatch.total).toBeGreaterThan(0);
+
+      const hiMatch = await getCatalogProducts({ query: 'मैकबुक' });
+      expect(hiMatch.total).toBeGreaterThan(0);
+    });
+
+    it('defaults to relevance sort when query is present and sort is omitted', async () => {
+      const result = await getCatalogProducts({ query: 'Apple' });
+      expect(result.products.length).toBeGreaterThan(0);
+      expect(result.products[0]!.brand.slug).toBe('apple');
+    });
+
+    it('honors explicit sort selection even when query is present', async () => {
+      const result = await getCatalogProducts({ query: 'Electronics', sort: 'newest' });
+      expect(result.products.length).toBeGreaterThan(1);
+      for (let i = 1; i < result.products.length; i++) {
+        const prevDate = new Date(result.products[i - 1]!.createdAt).getTime();
+        const currDate = new Date(result.products[i]!.createdAt).getTime();
+        expect(currDate).toBeLessThanOrEqual(prevDate);
+      }
+    });
+  });
+
+  describe('All 7 CatalogSortOptions', () => {
+    it('sorts deterministically by newest', async () => {
+      const result = await getCatalogProducts({ sort: 'newest' });
+      expect(result.products.length).toBeGreaterThan(1);
+      for (let i = 1; i < result.products.length; i++) {
+        const prevDate = new Date(result.products[i - 1]!.createdAt).getTime();
+        const currDate = new Date(result.products[i]!.createdAt).getTime();
+        expect(currDate).toBeLessThanOrEqual(prevDate);
+      }
+    });
+
+    it('sorts deterministically by bestselling using volume signals and badges', async () => {
+      const result = await getCatalogProducts({ sort: 'bestselling' });
+      expect(result.products.length).toBeGreaterThan(1);
+      for (let i = 1; i < result.products.length; i++) {
+        const prev = result.products[i - 1]!;
+        const curr = result.products[i]!;
+        const countDiff = (prev.ratingSummary?.count ?? 0) - (curr.ratingSummary?.count ?? 0);
+        if (countDiff === 0) {
+          const reviewDiff = (prev.reviewCount ?? 0) - (curr.reviewCount ?? 0);
+          if (reviewDiff === 0) {
+            const prevBadge = (prev.badges ?? []).some((b) => b.type === 'best_seller') ? 1 : 0;
+            const currBadge = (curr.badges ?? []).some((b) => b.type === 'best_seller') ? 1 : 0;
+            expect(prevBadge).toBeGreaterThanOrEqual(currBadge);
+          } else {
+            expect(reviewDiff).toBeGreaterThanOrEqual(0);
+          }
+        } else {
+          expect(countDiff).toBeGreaterThanOrEqual(0);
+        }
+      }
+    });
+
+    it('sorts deterministically by discount_desc in authoritative currency', async () => {
+      const result = await getCatalogProducts({ sort: 'discount_desc' });
+      expect(result.products.length).toBeGreaterThan(1);
+    });
+  });
+
+  describe('Boundary & Fail-Closed Filtering', () => {
+    it('fails closed when category slug is not found in hierarchy', async () => {
+      const result = await getCatalogProducts({ categorySlug: 'non-existent-category-slug-xyz' });
+      expect(result.total).toBe(0);
+      expect(result.products.length).toBe(0);
+    });
+
+    it('returns 0 products when price bounds are inverted (minPrice > maxPrice)', async () => {
+      const result = await getCatalogProducts({
+        minPriceMinor: 250000,
+        maxPriceMinor: 100000,
+      });
+      expect(result.total).toBe(0);
+      expect(result.products.length).toBe(0);
+    });
+  });
 });

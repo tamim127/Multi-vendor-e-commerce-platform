@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { SUPPORTED_CURRENCY_CODES } from '../utils/money';
 import type { PaginationMeta } from '../types/api';
 import type { CatalogLocale, LocalizedText } from '../types/localization';
 import type { CurrencyCode, Money } from '../types/pricing';
@@ -21,7 +22,7 @@ export const LocalizedTextSchema: z.ZodType<LocalizedText> = z
   })
   .catchall(z.string().optional());
 
-export const CurrencyCodeSchema: z.ZodType<CurrencyCode> = z.string().min(3).max(5);
+export const CurrencyCodeSchema: z.ZodType<CurrencyCode> = z.enum(SUPPORTED_CURRENCY_CODES);
 
 /**
  * Canonical Money Schema.

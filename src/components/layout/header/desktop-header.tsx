@@ -16,6 +16,7 @@ import {
 import { MegaMenu } from '@/components/layout/header/mega-menu';
 import { LanguageSelector } from '@/components/layout/header/language-selector';
 import { topUtilityLinks, primaryNavigationLinks } from '@/config/navigation';
+import { useSafeRouter, useSafeSearchParams } from '@/lib/navigation/safe-navigation';
 import { useTheme } from '@/lib/theme/theme-context';
 
 export interface DesktopHeaderProps {
@@ -27,8 +28,21 @@ export interface DesktopHeaderProps {
  * Features 3-tier structure: Top Utility Row, Brand & Search Row, and Mega-Menu Category Row.
  */
 export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Element {
+  const router = useSafeRouter();
   const pathname = usePathname();
+  const searchParams = useSafeSearchParams();
+  const currentQuery = searchParams?.get('q') ?? '';
   const { theme, resolvedTheme, setTheme } = useTheme();
+
+  const handleSearchSubmit = (submittedQuery: string): void => {
+    const q = submittedQuery.trim();
+    const target = q ? `/products?q=${encodeURIComponent(q)}` : '/products';
+    if (router) {
+      router.push(target);
+    } else if (typeof window !== 'undefined') {
+      window.location.assign(target);
+    }
+  };
 
   const toggleTheme = (): void => {
     if (theme === 'system') {
@@ -118,7 +132,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
 
           {/* Prominent Marketplace Search */}
           <div className="flex-1 flex justify-center max-w-3xl">
-            <SearchBar />
+            <SearchBar initialQuery={currentQuery} onSearchSubmit={handleSearchSubmit} />
           </div>
 
           {/* Action Hub */}

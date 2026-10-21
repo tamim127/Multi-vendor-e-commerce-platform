@@ -32,13 +32,19 @@ export function PlpHeader({ params }: PlpHeaderProps): React.JSX.Element {
     ? getCategoryBreadcrumbs(selectedCategory.id, MOCK_CATEGORIES)
     : [];
 
-  const pageTitle = selectedCategory
-    ? (selectedCategory.name[locale] ?? selectedCategory.name.en)
-    : t('plp.title');
+  const hasQuery = Boolean(params.query && params.query.trim().length > 0);
+
+  const pageTitle = hasQuery
+    ? `${t('plp.searchResultsFor')}: \u201C${params.query}\u201D`
+    : selectedCategory
+      ? (selectedCategory.name[locale] ?? selectedCategory.name.en)
+      : t('plp.title');
 
   const pageSubtitle = selectedCategory?.description
     ? (selectedCategory.description[locale] ?? selectedCategory.description.en)
-    : t('plp.subtitle');
+    : selectedCategory
+      ? ''
+      : t('plp.subtitle');
 
   return (
     <header className="mb-6 space-y-2">

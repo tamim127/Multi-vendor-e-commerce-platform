@@ -16,11 +16,19 @@ import {
   serializeCatalogQueryParams,
 } from '@/domains/catalog/utils/url-params';
 
+export function resolveEffectiveSort(params: CatalogQueryParams): CatalogSortOption {
+  if (params.sort) return params.sort;
+  if (params.query && params.query.trim().length > 0) return 'relevance';
+  return 'newest';
+}
+
 export interface UseCatalogUrlStateReturn {
   params: CatalogQueryParams;
+  effectiveSort: CatalogSortOption;
   setParams: (updates: Partial<CatalogQueryParams>, options?: { resetPage?: boolean }) => void;
   setParam: <K extends keyof CatalogQueryParams>(key: K, value: CatalogQueryParams[K]) => void;
-  resetFilters: () => void;
+  setQuery: (query: string) => void;
+  resetFilters: (options?: { preserveQuery?: boolean }) => void;
   setPage: (page: number) => void;
   setSort: (sort: CatalogSortOption) => void;
 }
@@ -35,6 +43,8 @@ export function useCatalogUrlState(): UseCatalogUrlStateReturn {
   const params: CatalogQueryParams = useMemo(() => {
     return parseCatalogQueryParams(queryString);
   }, [queryString]);
+
+  const effectiveSort = useMemo(() => resolveEffectiveSort(params), [params]);
 
   const updateUrl = useCallback(
     (newParams: CatalogQueryParams) => {
@@ -77,10 +87,32 @@ export function useCatalogUrlState(): UseCatalogUrlStateReturn {
     [params, updateUrl]
   );
 
-  const resetFilters = useCallback(() => {
-    // Retain only query or sort if desired, or reset everything to base page
-    updateUrl({});
-  }, [updateUrl]);
+  const setQuery = useCallback(
+    (queryText: string) => {
+      const trimmed = queryText.trim();
+      const next: CatalogQueryParams = { ...params };
+      if (trimmed.length > 0) {
+        next.query = trimmed;
+      } else {
+        delete next.query;
+      }
+      delete next.page;
+      updateUrl(next);
+    },
+    [params, updateUrl]
+  );
+
+  const resetFilters = useCallback(
+    (options?: { preserveQuery?: boolean }) => {
+      const shouldPreserveQuery = options?.preserveQuery ?? true;
+      const next: CatalogQueryParams = {};
+      if (shouldPreserveQuery && params.query) {
+        next.query = params.query;
+      }
+      updateUrl(next);
+    },
+    [params.query, updateUrl]
+  );
 
   const setPage = useCallback(
     (page: number) => {
@@ -106,8 +138,10 @@ export function useCatalogUrlState(): UseCatalogUrlStateReturn {
 
   return {
     params,
+    effectiveSort,
     setParams,
     setParam,
+    setQuery,
     resetFilters,
     setPage,
     setSort,

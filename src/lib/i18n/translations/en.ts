@@ -59,6 +59,12 @@ export const enTranslations: TranslationsContract = {
   'plp.sortPriceDesc': 'Price: High to Low',
   'plp.sortRatingDesc': 'Highest Customer Rating',
   'plp.sortRelevance': 'Featured',
+  'plp.sortBestselling': 'Best Sellers',
+  'plp.sortDiscountDesc': 'Highest Discount',
+  'plp.searchResultsFor': 'Search results for "{query}"',
+  'plp.searchQueryLabel': 'Search: "{query}"',
+  'plp.noSearchResultsDesc':
+    'No products match your search for "{query}". Try checking your spelling or use different keywords.',
   'plp.filters': 'Filters',
   'plp.clearAll': 'Clear all',
   'plp.applyFilters': 'Apply Filters',

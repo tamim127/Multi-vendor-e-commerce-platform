@@ -23,6 +23,7 @@ export interface PlpActiveFiltersProps {
   onRemovePrice: () => void;
   onRemoveRating: () => void;
   onRemoveInStock: () => void;
+  onRemoveQuery?: () => void;
   onClearAll: () => void;
 }
 
@@ -33,6 +34,7 @@ export function PlpActiveFilters({
   onRemovePrice,
   onRemoveRating,
   onRemoveInStock,
+  onRemoveQuery,
   onClearAll,
 }: PlpActiveFiltersProps): React.JSX.Element | null {
   const { locale, t } = useI18n();
@@ -40,6 +42,7 @@ export function PlpActiveFilters({
   const brandMap = React.useMemo(() => new Map(MOCK_BRANDS.map((b) => [b.slug, b])), []);
 
   // Compute active filters
+  const hasQuery = Boolean(params.query && params.query.trim().length > 0);
   const hasCategory = Boolean(params.categorySlug || params.categoryId);
   const activeBrands = params.brandSlugs ?? [];
   const hasPrice =
@@ -48,6 +51,7 @@ export function PlpActiveFilters({
   const hasInStock = Boolean(params.inventoryStates?.includes('in_stock'));
 
   const totalActive =
+    (hasQuery ? 1 : 0) +
     (hasCategory ? 1 : 0) +
     activeBrands.length +
     (hasPrice ? 1 : 0) +
@@ -84,6 +88,29 @@ export function PlpActiveFilters({
       <span className="text-xs font-semibold uppercase tracking-wider text-fg-muted mr-1">
         {t('plp.filters')}:
       </span>
+
+      {/* Search Query Chip */}
+      {hasQuery && (
+        <Badge
+          variant="neutral"
+          size="sm"
+          className="gap-1.5 py-1 px-2.5 text-xs bg-surface border-border-subtle"
+        >
+          <span>
+            {t('plp.searchQueryLabel')}: &ldquo;{params.query}&rdquo;
+          </span>
+          {onRemoveQuery && (
+            <button
+              type="button"
+              onClick={onRemoveQuery}
+              className="hover:text-destructive focus:outline-none cursor-pointer"
+              aria-label={`Remove search query: ${params.query}`}
+            >
+              <X className="size-3" />
+            </button>
+          )}
+        </Badge>
+      )}
 
       {/* Category Chip */}
       {hasCategory && (

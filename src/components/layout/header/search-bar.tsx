@@ -33,6 +33,10 @@ export function SearchBar({
   const [isFocused, setIsFocused] = React.useState<boolean>(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
+  React.useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const val = e.target.value;
     setQuery(val);

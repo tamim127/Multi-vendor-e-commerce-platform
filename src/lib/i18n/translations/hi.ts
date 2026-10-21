@@ -59,6 +59,12 @@ export const hiTranslations: TranslationsContract = {
   'plp.sortPriceDesc': 'कीमत: अधिक से कम',
   'plp.sortRatingDesc': 'उच्चतम ग्राहक रेटिंग',
   'plp.sortRelevance': 'विशेष रुप से प्रदर्शित',
+  'plp.sortBestselling': 'सर्वाधिक बिकने वाले',
+  'plp.sortDiscountDesc': 'सर्वाधिक छूट',
+  'plp.searchResultsFor': '"{query}" के लिए खोज परिणाम',
+  'plp.searchQueryLabel': 'खोज: "{query}"',
+  'plp.noSearchResultsDesc':
+    '"{query}" से मेल खाने वाला कोई उत्पाद नहीं मिला। कृपया अपनी वर्तनी जांचें या अन्य कीवर्ड का उपयोग करें।',
   'plp.filters': 'फ़िल्टर',
   'plp.clearAll': 'सभी हटाएं',
   'plp.applyFilters': 'फ़िल्टर लागू करें',

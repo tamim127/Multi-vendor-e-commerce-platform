@@ -6,7 +6,12 @@
  * URL state. Validated using CatalogQueryParamsSchema.
  */
 
-import { CatalogQueryParamsSchema } from '../schemas/query.schema';
+import { z } from 'zod';
+import { ProductBadgeTypeSchema } from '../schemas/badge.schema';
+import { CatalogLocaleSchema, CurrencyCodeSchema } from '../schemas/common.schema';
+import { InventoryStateSchema } from '../schemas/inventory.schema';
+import { CatalogSortOptionSchema } from '../schemas/query.schema';
+import { SellerOfferConditionSchema } from '../schemas/seller-offer.schema';
 import type { CatalogQueryParams } from '../types/query';
 
 /**
@@ -73,7 +78,8 @@ export function serializeCatalogQueryParams(params: CatalogQueryParams): URLSear
 
 /**
  * Parses and validates URLSearchParams or raw query string into CatalogQueryParams.
- * Invalid parameters are safely rejected or discarded through Zod validation.
+ * Employs tolerant field-level validation: invalid parameters are individually discarded
+ * while preserving valid sibling parameters.
  */
 export function parseCatalogQueryParams(input: URLSearchParams | string): CatalogQueryParams {
   const searchParams =
@@ -81,100 +87,164 @@ export function parseCatalogQueryParams(input: URLSearchParams | string): Catalo
       ? new URLSearchParams(input.startsWith('?') ? input.slice(1) : input)
       : input;
 
-  const raw: Record<string, unknown> = {};
+  const valid: CatalogQueryParams = {};
 
   const q = searchParams.get('q');
-  if (q) raw['query'] = q;
+  if (q !== null && q.trim().length > 0) {
+    const res = z.string().safeParse(q.trim());
+    if (res.success) valid.query = res.data;
+  }
 
   const category = searchParams.get('category');
-  if (category) raw['categorySlug'] = category;
+  if (category) {
+    const res = z.string().min(1).safeParse(category.trim());
+    if (res.success) valid.categorySlug = res.data;
+  }
 
   const path = searchParams.get('path');
-  if (path) raw['categoryPath'] = path;
+  if (path) {
+    const res = z.string().min(1).safeParse(path.trim());
+    if (res.success) valid.categoryPath = res.data;
+  }
 
   const categoryId = searchParams.get('categoryId');
-  if (categoryId) raw['categoryId'] = categoryId;
+  if (categoryId) {
+    const res = z.string().min(1).safeParse(categoryId.trim());
+    if (res.success) valid.categoryId = res.data;
+  }
 
   const brands = searchParams.get('brands');
-  if (brands)
-    raw['brandSlugs'] = brands
+  if (brands) {
+    const parsedBrands = brands
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
+    if (parsedBrands.length > 0) {
+      valid.brandSlugs = parsedBrands;
+    }
+  }
 
   const sellers = searchParams.get('sellers');
-  if (sellers)
-    raw['sellerIds'] = sellers
+  if (sellers) {
+    const parsedSellers = sellers
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
+    if (parsedSellers.length > 0) {
+      valid.sellerIds = parsedSellers;
+    }
+  }
 
   const minPrice = searchParams.get('minPrice');
-  if (minPrice && !Number.isNaN(Number(minPrice))) raw['minPriceMinor'] = parseInt(minPrice, 10);
+  if (minPrice !== null && minPrice !== '') {
+    const num = Number(minPrice);
+    const res = z.number().int().nonnegative().safeParse(num);
+    if (res.success) valid.minPriceMinor = res.data;
+  }
 
   const maxPrice = searchParams.get('maxPrice');
-  if (maxPrice && !Number.isNaN(Number(maxPrice))) raw['maxPriceMinor'] = parseInt(maxPrice, 10);
+  if (maxPrice !== null && maxPrice !== '') {
+    const num = Number(maxPrice);
+    const res = z.number().int().nonnegative().safeParse(num);
+    if (res.success) valid.maxPriceMinor = res.data;
+  }
 
   const currency = searchParams.get('currency');
-  if (currency) raw['currency'] = currency;
+  if (currency) {
+    const res = CurrencyCodeSchema.safeParse(currency.trim());
+    if (res.success) valid.currency = res.data;
+  }
 
   const minRating = searchParams.get('minRating');
-  if (minRating && !Number.isNaN(Number(minRating))) raw['minRating'] = parseFloat(minRating);
+  if (minRating !== null && minRating !== '') {
+    const num = Number(minRating);
+    const res = z.number().min(0).max(5).safeParse(num);
+    if (res.success) valid.minRating = res.data;
+  }
 
   const stock = searchParams.get('stock');
-  if (stock)
-    raw['inventoryStates'] = stock
+  if (stock) {
+    const parsedStock = stock
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
+    const res = z.array(InventoryStateSchema).safeParse(parsedStock);
+    if (res.success && res.data.length > 0) valid.inventoryStates = res.data;
+  }
 
   const badges = searchParams.get('badges');
-  if (badges)
-    raw['badgeTypes'] = badges
+  if (badges) {
+    const parsedBadges = badges
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
+    const res = z.array(ProductBadgeTypeSchema).safeParse(parsedBadges);
+    if (res.success && res.data.length > 0) valid.badgeTypes = res.data;
+  }
 
   const conditions = searchParams.get('conditions');
-  if (conditions)
-    raw['conditions'] = conditions
+  if (conditions) {
+    const parsedConditions = conditions
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
+    const res = z.array(SellerOfferConditionSchema).safeParse(parsedConditions);
+    if (res.success && res.data.length > 0) valid.conditions = res.data;
+  }
 
   const freeShipping = searchParams.get('freeShipping');
-  if (freeShipping === 'true' || freeShipping === '1') raw['isFreeShipping'] = true;
+  if (freeShipping === 'true' || freeShipping === '1') {
+    valid.isFreeShipping = true;
+  }
 
   // Extract dynamic attributes (prefixed with attr_)
   const attributeFilters: Record<string, string[]> = {};
   searchParams.forEach((value, key) => {
     if (key.startsWith('attr_')) {
       const attrKey = key.slice(5);
-      attributeFilters[attrKey] = value
+      const items = value
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean);
+      if (items.length > 0) {
+        attributeFilters[attrKey] = items;
+      }
     }
   });
   if (Object.keys(attributeFilters).length > 0) {
-    raw['attributeFilters'] = attributeFilters;
+    valid.attributeFilters = attributeFilters;
   }
 
   const sort = searchParams.get('sort');
-  if (sort) raw['sort'] = sort;
+  if (sort) {
+    const res = CatalogSortOptionSchema.safeParse(sort.trim());
+    if (res.success) valid.sort = res.data;
+  }
 
   const page = searchParams.get('page');
-  if (page && !Number.isNaN(Number(page))) raw['page'] = parseInt(page, 10);
+  if (page !== null && page !== '') {
+    const num = Number(page);
+    const res = z.number().int().positive().safeParse(num);
+    if (res.success) valid.page = res.data;
+  }
 
   const limit = searchParams.get('limit');
-  if (limit && !Number.isNaN(Number(limit))) raw['limit'] = parseInt(limit, 10);
+  if (limit !== null && limit !== '') {
+    const num = Number(limit);
+    const res = z.number().int().positive().safeParse(num);
+    if (res.success) valid.limit = res.data;
+  }
 
   const cursor = searchParams.get('cursor');
-  if (cursor) raw['cursor'] = cursor;
+  if (cursor) {
+    valid.cursor = cursor;
+  }
 
   const locale = searchParams.get('locale');
-  if (locale) raw['locale'] = locale;
+  if (locale) {
+    const res = CatalogLocaleSchema.safeParse(locale.trim());
+    if (res.success) valid.locale = res.data;
+  }
 
-  const parseResult = CatalogQueryParamsSchema.safeParse(raw);
-  return parseResult.success ? parseResult.data : {};
+  return valid;
 }

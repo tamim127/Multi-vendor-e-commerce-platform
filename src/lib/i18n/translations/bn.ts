@@ -59,6 +59,12 @@ export const bnTranslations: TranslationsContract = {
   'plp.sortPriceDesc': 'মূল্য: বেশি থেকে কম',
   'plp.sortRatingDesc': 'সর্বোচ্চ গ্রাহক রেটিং',
   'plp.sortRelevance': 'ফিচার্ড',
+  'plp.sortBestselling': 'সেরা বিক্রিত',
+  'plp.sortDiscountDesc': 'সর্বোচ্চ ছাড়',
+  'plp.searchResultsFor': '"{query}" এর জন্য অনুসন্ধান ফলাফল',
+  'plp.searchQueryLabel': 'অনুসন্ধান: "{query}"',
+  'plp.noSearchResultsDesc':
+    '"{query}" এর জন্য কোন পণ্য পাওয়া যায়নি। আপনার বানান পরীক্ষা করুন বা ভিন্ন কীওয়ার্ড চেষ্টা করুন।',
   'plp.filters': 'ফিল্টার',
   'plp.clearAll': 'সব মুছুন',
   'plp.applyFilters': 'ফিল্টার প্রয়োগ করুন',

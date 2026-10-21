@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { MobileDrawer } from '@/components/layout/header/mobile-drawer';
 import { CartAction } from '@/components/layout/header/header-actions';
 import { SearchBar } from '@/components/layout/header/search-bar';
+import { useSafeRouter, useSafeSearchParams } from '@/lib/navigation/safe-navigation';
 
 export interface MobileHeaderProps {
   className?: string;
@@ -18,7 +19,21 @@ export interface MobileHeaderProps {
  * expandable search bar, and cart badge.
  */
 export function MobileHeader({ className }: MobileHeaderProps): React.JSX.Element {
+  const router = useSafeRouter();
+  const searchParams = useSafeSearchParams();
+  const currentQuery = searchParams?.get('q') ?? '';
   const [isSearchExpanded, setIsSearchExpanded] = React.useState<boolean>(false);
+
+  const handleSearchSubmit = (submittedQuery: string): void => {
+    setIsSearchExpanded(false);
+    const q = submittedQuery.trim();
+    const target = q ? `/products?q=${encodeURIComponent(q)}` : '/products';
+    if (router) {
+      router.push(target);
+    } else if (typeof window !== 'undefined') {
+      window.location.assign(target);
+    }
+  };
 
   return (
     <div
@@ -66,7 +81,12 @@ export function MobileHeader({ className }: MobileHeaderProps): React.JSX.Elemen
       {/* Expandable Mobile Search Row */}
       {isSearchExpanded && (
         <div className="px-3 pb-3 pt-1 border-t border-border-subtle/50 animate-in fade-in-0 duration-150">
-          <SearchBar compact autoFocus />
+          <SearchBar
+            compact
+            autoFocus
+            initialQuery={currentQuery}
+            onSearchSubmit={handleSearchSubmit}
+          />
         </div>
       )}
     </div>

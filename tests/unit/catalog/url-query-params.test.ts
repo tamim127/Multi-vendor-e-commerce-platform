@@ -62,4 +62,34 @@ describe('Catalog URL Query Parameters Contract', () => {
     expect(corrupted.minPriceMinor).toBeUndefined();
     expect(corrupted.sort).toBeUndefined();
   });
+
+  it('demonstrates tolerant field-level parsing: drops invalid fields while preserving valid siblings', () => {
+    const mixed = parseCatalogQueryParams(
+      '?category=laptops&brands=apple&minPrice=-5000&maxPrice=150000&sort=non_existent_sort&currency=INVALID_CURR'
+    );
+
+    // Valid fields preserved
+    expect(mixed.categorySlug).toBe('laptops');
+    expect(mixed.brandSlugs).toEqual(['apple']);
+    expect(mixed.maxPriceMinor).toBe(150000);
+
+    // Invalid fields dropped
+    expect(mixed.minPriceMinor).toBeUndefined();
+    expect(mixed.sort).toBeUndefined();
+    expect(mixed.currency).toBeUndefined();
+  });
+
+  it('preserves inverted bounds for repository-level zero-result evaluation', () => {
+    const inverted = parseCatalogQueryParams('?minPrice=200000&maxPrice=100000');
+    expect(inverted.minPriceMinor).toBe(200000);
+    expect(inverted.maxPriceMinor).toBe(100000);
+  });
+
+  it('validates supported currencies against canonical currency schema', () => {
+    const validCurr = parseCatalogQueryParams('?currency=EUR');
+    expect(validCurr.currency).toBe('EUR');
+
+    const invalidCurr = parseCatalogQueryParams('?currency=XYZ');
+    expect(invalidCurr.currency).toBeUndefined();
+  });
 });

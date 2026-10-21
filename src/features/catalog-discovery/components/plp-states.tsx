@@ -52,12 +52,13 @@ export function PlpSkeleton(): React.JSX.Element {
 
 export interface PlpEmptyStateProps {
   onResetFilters: () => void;
+  query?: string;
 }
 
 /**
  * Zero-result state with informative messaging and reset action.
  */
-export function PlpEmptyState({ onResetFilters }: PlpEmptyStateProps): React.JSX.Element {
+export function PlpEmptyState({ onResetFilters, query }: PlpEmptyStateProps): React.JSX.Element {
   const { t } = useI18n();
 
   return (
@@ -66,7 +67,9 @@ export function PlpEmptyState({ onResetFilters }: PlpEmptyStateProps): React.JSX
         <SearchX className="size-7" />
       </div>
       <h3 className="text-lg font-bold text-fg-primary mb-2">{t('plp.noResultsTitle')}</h3>
-      <p className="text-sm text-fg-muted max-w-md mb-6">{t('plp.noResultsDesc')}</p>
+      <p className="text-sm text-fg-muted max-w-md mb-6">
+        {query ? t('plp.noSearchResultsDesc') : t('plp.noResultsDesc')}
+      </p>
       <Button
         type="button"
         variant="primary"

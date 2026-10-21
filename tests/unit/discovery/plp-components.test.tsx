@@ -190,4 +190,53 @@ describe('PLP UI Presentation Components', () => {
       expect(onClose).toHaveBeenCalled();
     });
   });
+
+  describe('Search UI Polish & Enhancements', () => {
+    it('renders all 7 sort options in PlpToolbar', () => {
+      renderWithI18n(
+        <PlpToolbar
+          totalCount={10}
+          currentSort="relevance"
+          onSortChange={vi.fn()}
+          onOpenMobileFilters={vi.fn()}
+          activeFiltersCount={0}
+        />
+      );
+
+      const select = screen.getByLabelText(/Sort By/i) as HTMLSelectElement;
+      const optionValues = Array.from(select.options).map((opt) => opt.value);
+
+      expect(optionValues).toEqual([
+        'relevance',
+        'newest',
+        'bestselling',
+        'price_asc',
+        'price_desc',
+        'discount_desc',
+        'rating_desc',
+      ]);
+    });
+
+    it('renders search query chip in PlpActiveFilters and triggers onRemoveQuery', () => {
+      const onRemoveQuery = vi.fn();
+      renderWithI18n(
+        <PlpActiveFilters
+          params={{ query: 'thinkpad' }}
+          onRemoveCategory={vi.fn()}
+          onRemoveBrand={vi.fn()}
+          onRemovePrice={vi.fn()}
+          onRemoveRating={vi.fn()}
+          onRemoveInStock={vi.fn()}
+          onRemoveQuery={onRemoveQuery}
+          onClearAll={vi.fn()}
+        />
+      );
+
+      expect(screen.getByText(/thinkpad/i)).toBeDefined();
+
+      const removeQueryBtn = screen.getByLabelText(/Remove search query: thinkpad/i);
+      fireEvent.click(removeQueryBtn);
+      expect(onRemoveQuery).toHaveBeenCalledTimes(1);
+    });
+  });
 });

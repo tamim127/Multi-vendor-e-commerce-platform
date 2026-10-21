@@ -9,6 +9,8 @@
 
 import type { CurrencyCode, CurrencyMetadata, Discount, Money } from '../types/pricing';
 
+export const SUPPORTED_CURRENCY_CODES = ['USD', 'BDT', 'INR', 'SAR', 'AED', 'EUR', 'GBP'] as const;
+
 export const CURRENCY_METADATA_REGISTRY: Record<string, CurrencyMetadata> = {
   USD: {
     code: 'USD',
@@ -60,6 +62,25 @@ export const CURRENCY_METADATA_REGISTRY: Record<string, CurrencyMetadata> = {
     spaceBetweenSymbol: false,
   },
 };
+
+/**
+ * Validates whether an unknown value conforms strictly to the canonical Money contract.
+ * Checks for finite, non-negative, safe integers and supported currency registry keys.
+ */
+export function isValidMoney(val: unknown): val is Money {
+  if (!val || typeof val !== 'object') return false;
+  const { amountMinor, currency } = val as Partial<Money>;
+
+  return (
+    typeof amountMinor === 'number' &&
+    Number.isFinite(amountMinor) &&
+    !Number.isNaN(amountMinor) &&
+    Number.isSafeInteger(amountMinor) &&
+    amountMinor >= 0 &&
+    typeof currency === 'string' &&
+    Object.prototype.hasOwnProperty.call(CURRENCY_METADATA_REGISTRY, currency)
+  );
+}
 
 /**
  * Creates a Money object enforcing integer minor units.

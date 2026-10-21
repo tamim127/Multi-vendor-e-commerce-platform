@@ -71,11 +71,13 @@ export function PlpToolbar({
             className="h-10 sm:h-9 min-h-[44px] sm:min-h-0 rounded-md border border-border-subtle bg-surface px-3 py-1 text-sm text-fg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors cursor-pointer"
             aria-label={t('plp.sortBy')}
           >
+            <option value="relevance">{t('plp.sortRelevance')}</option>
             <option value="newest">{t('plp.sortNewest')}</option>
+            <option value="bestselling">{t('plp.sortBestselling')}</option>
             <option value="price_asc">{t('plp.sortPriceAsc')}</option>
             <option value="price_desc">{t('plp.sortPriceDesc')}</option>
+            <option value="discount_desc">{t('plp.sortDiscountDesc')}</option>
             <option value="rating_desc">{t('plp.sortRatingDesc')}</option>
-            <option value="relevance">{t('plp.sortRelevance')}</option>
           </select>
         </div>
       </div>

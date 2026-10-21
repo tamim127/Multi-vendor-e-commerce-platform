@@ -28,13 +28,15 @@ const fallbackFacets: CatalogDiscoveryFacets = {
 };
 
 export function ProductDiscoveryPage(): React.JSX.Element {
-  const { params, setParam, setParams, resetFilters, setSort, setPage } = useCatalogUrlState();
+  const { params, effectiveSort, setParam, setParams, resetFilters, setSort, setPage } =
+    useCatalogUrlState();
   const { data, isLoading, isError, error, refetch } = useProductDiscovery(params);
 
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = React.useState<boolean>(false);
 
   // Active filter count for mobile badge
   const activeFiltersCount =
+    (params.query ? 1 : 0) +
     (params.categorySlug ? 1 : 0) +
     (params.brandSlugs?.length ?? 0) +
     (typeof params.minPriceMinor === 'number' || typeof params.maxPriceMinor === 'number' ? 1 : 0) +
@@ -44,6 +46,10 @@ export function ProductDiscoveryPage(): React.JSX.Element {
   const facets = data?.facets ?? fallbackFacets;
 
   // Active filter chip removal handlers
+  const handleRemoveQuery = (): void => {
+    setParam('query', undefined);
+  };
+
   const handleRemoveCategory = (): void => {
     setParam('categorySlug', undefined);
   };
@@ -73,6 +79,7 @@ export function ProductDiscoveryPage(): React.JSX.Element {
       {/* Active Filter Chips */}
       <PlpActiveFilters
         params={params}
+        onRemoveQuery={handleRemoveQuery}
         onRemoveCategory={handleRemoveCategory}
         onRemoveBrand={handleRemoveBrand}
         onRemovePrice={handleRemovePrice}
@@ -98,7 +105,7 @@ export function ProductDiscoveryPage(): React.JSX.Element {
           {/* Toolbar: Total count, Sorting, Mobile Filter Trigger */}
           <PlpToolbar
             totalCount={data?.total ?? 0}
-            currentSort={params.sort}
+            currentSort={effectiveSort}
             onSortChange={setSort}
             onOpenMobileFilters={() => setIsMobileDrawerOpen(true)}
             activeFiltersCount={activeFiltersCount}
@@ -110,7 +117,7 @@ export function ProductDiscoveryPage(): React.JSX.Element {
           ) : isError ? (
             <PlpErrorState onRetry={() => refetch()} errorMessage={error?.message} />
           ) : !data || data.products.length === 0 ? (
-            <PlpEmptyState onResetFilters={resetFilters} />
+            <PlpEmptyState onResetFilters={resetFilters} query={params.query} />
           ) : (
             <>
               <PlpProductGrid products={data.products} />

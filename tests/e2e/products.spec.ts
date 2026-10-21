@@ -139,7 +139,7 @@ test.describe('Catalog Discovery / Products PLP Page', () => {
     await searchToggle.click();
 
     // Fill mobile search input and submit
-    const mobileSearchInput = page.locator('input[type="search"]').first();
+    const mobileSearchInput = page.locator('input[type="search"]:visible').first();
     await expect(mobileSearchInput).toBeVisible();
     await mobileSearchInput.fill('sony');
     await mobileSearchInput.press('Enter');

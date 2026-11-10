@@ -56,6 +56,20 @@ describe('Catalog Discovery Repository Adapter', () => {
     }
   });
 
+  it('filters by explicit currency and excludes mismatched products', async () => {
+    // All mock products are USD; filtering by SAR should yield 0 results
+    const sarResult = await getCatalogProducts({ currency: 'SAR' });
+    expect(sarResult.total).toBe(0);
+    expect(sarResult.products.length).toBe(0);
+
+    // Explicit USD should match all mock products
+    const usdResult = await getCatalogProducts({ currency: 'USD' });
+    expect(usdResult.total).toBe(MOCK_PRODUCTS.length);
+    for (const product of usdResult.products) {
+      expect(product.offerSummary.lowestPrice.currency).toBe('USD');
+    }
+  });
+
   it('filters by minimum rating', async () => {
     const result = await getCatalogProducts({ minRating: 4.8 });
 

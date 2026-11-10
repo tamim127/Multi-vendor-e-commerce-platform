@@ -269,6 +269,14 @@ export async function getCatalogProducts(
     // Inverted bounds yield 0 products
     filtered = [];
   } else {
+    // If currency is explicitly specified, filter strictly to products priced in that currency
+    if (query.currency) {
+      filtered = filtered.filter(
+        (p) =>
+          isValidMoney(p.offerSummary?.lowestPrice) &&
+          p.offerSummary.lowestPrice.currency === authCurrency
+      );
+    }
     if (hasMin) {
       filtered = filtered.filter(
         (p) =>

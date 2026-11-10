@@ -24,6 +24,7 @@ import { PdpTabs } from './pdp-tabs';
 import { PdpRelatedProducts } from './pdp-related-products';
 import { useI18n } from '@/lib/i18n';
 import { useCart } from '@/features/cart';
+import { useRecentlyViewed, RecentlyViewedSection } from '@/features/recently-viewed';
 
 export interface ProductDetailInteractiveViewProps {
   initialData: ProductDetailData;
@@ -60,6 +61,11 @@ export function ProductDetailInteractiveView({
 
   const [activeTab, setActiveTab] = React.useState<string>('overview');
   const { addItem } = useCart();
+  const { recordView } = useRecentlyViewed();
+
+  React.useEffect(() => {
+    recordView(product);
+  }, [product, recordView]);
 
   const handlePurchaseIntent = (payload: PdpPurchaseIntentPayload): void => {
     if (selectedOffer) {
@@ -174,7 +180,13 @@ export function ProductDetailInteractiveView({
       {/* 4. Related Products Carousel / Grid */}
       <PdpRelatedProducts relatedProducts={relatedProducts} />
 
-      {/* 5. Mobile Sticky Bottom Bar */}
+      {/* 5. Recently Viewed Products */}
+      <RecentlyViewedSection
+        currentProductId={product.id}
+        className="mt-12 pt-8 border-t border-border-subtle"
+      />
+
+      {/* 6. Mobile Sticky Bottom Bar */}
       <PdpMobileStickyBar
         selectedOffer={selectedOffer}
         offerSummary={product.offerSummary}

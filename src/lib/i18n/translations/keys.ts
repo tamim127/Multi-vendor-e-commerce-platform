@@ -229,6 +229,113 @@ export interface TranslationsContract {
   'checkout.splitOrderNotice': string;
   'checkout.vendorPackages': string;
   'checkout.validationError': string;
+
+  // Phase 4: Authentication
+  'auth.signIn': string;
+  'auth.signUp': string;
+  'auth.logout': string;
+  'auth.email': string;
+  'auth.password': string;
+  'auth.confirmPassword': string;
+  'auth.firstName': string;
+  'auth.lastName': string;
+  'auth.phone': string;
+  'auth.rememberMe': string;
+  'auth.dontHaveAccount': string;
+  'auth.alreadyHaveAccount': string;
+  'auth.agreeTerms': string;
+  'auth.demoAccount': string;
+  'auth.fillDemoCredentials': string;
+  'auth.loginTitle': string;
+  'auth.registerTitle': string;
+  'auth.loginSubtitle': string;
+  'auth.registerSubtitle': string;
+
+  // Phase 4: Customer Account & Dashboard
+  'account.title': string;
+  'account.welcome': string;
+  'account.dashboard': string;
+  'account.profile': string;
+  'account.orders': string;
+  'account.addresses': string;
+  'account.wishlist': string;
+  'account.settings': string;
+  'account.recentlyViewed': string;
+  'account.clearHistory': string;
+  'account.verified': string;
+  'account.unverified': string;
+  'account.memberSince': string;
+  'account.totalOrders': string;
+  'account.savedAddresses': string;
+  'account.wishlistItems': string;
+  'account.quickActions': string;
+  'account.viewAllOrders': string;
+  'account.editProfile': string;
+  'account.profileUpdated': string;
+  'account.saveChanges': string;
+  'account.saving': string;
+
+  // Phase 4: Order History
+  'orders.title': string;
+  'orders.noOrders': string;
+  'orders.noOrdersDesc': string;
+  'orders.viewDetails': string;
+  'orders.backToOrders': string;
+  'orders.orderNumber': string;
+  'orders.placedOn': string;
+  'orders.status': string;
+  'orders.statusPending': string;
+  'orders.statusProcessing': string;
+  'orders.statusShipped': string;
+  'orders.statusDelivered': string;
+  'orders.statusCancelled': string;
+  'orders.trackingNumber': string;
+  'orders.carrier': string;
+  'orders.estimatedDelivery': string;
+  'orders.trackingHistory': string;
+  'orders.packageFrom': string;
+  'orders.demoOrderNotice': string;
+
+  // Phase 4: Addresses
+  'addresses.title': string;
+  'addresses.addNew': string;
+  'addresses.edit': string;
+  'addresses.delete': string;
+  'addresses.defaultShipping': string;
+  'addresses.defaultBilling': string;
+  'addresses.setDefaultShipping': string;
+  'addresses.setDefaultBilling': string;
+  'addresses.noAddresses': string;
+  'addresses.noAddressesDesc': string;
+  'addresses.labelHome': string;
+  'addresses.labelWork': string;
+  'addresses.labelOther': string;
+  'addresses.addressSaved': string;
+  'addresses.confirmDelete': string;
+
+  // Phase 4: Wishlist
+  'wishlist.title': string;
+  'wishlist.empty': string;
+  'wishlist.emptyDesc': string;
+  'wishlist.exploreProducts': string;
+  'wishlist.itemRemoved': string;
+  'wishlist.itemAdded': string;
+
+  // Phase 4: Settings
+  'settings.title': string;
+  'settings.preferences': string;
+  'settings.language': string;
+  'settings.currency': string;
+  'settings.notifications': string;
+  'settings.emailUpdates': string;
+  'settings.smsUpdates': string;
+  'settings.newsletter': string;
+  'settings.security': string;
+  'settings.changePassword': string;
+  'settings.twoFactor': string;
+  'settings.dangerZone': string;
+  'settings.deactivateAccount': string;
+  'settings.saved': string;
 }
 
 export type TranslationKey = keyof TranslationsContract;

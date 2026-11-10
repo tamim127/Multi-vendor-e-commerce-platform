@@ -6,18 +6,25 @@ export interface HeaderActionProps extends React.AnchorHTMLAttributes<HTMLAnchor
   compact?: boolean;
 }
 
+export interface AccountActionProps extends HeaderActionProps {
+  userName?: string;
+  subtitle?: string;
+}
+
 /**
  * Account Navigation Entry.
  */
 export function AccountAction({
+  userName,
+  subtitle = 'Account & Lists',
   compact = false,
   className,
   ...props
-}: HeaderActionProps): React.JSX.Element {
+}: AccountActionProps): React.JSX.Element {
   return (
     <a
       href="/account"
-      aria-label="Your Account and Orders"
+      aria-label={userName ? `Account for ${userName}` : 'Your Account and Orders'}
       className={cn(
         'group flex items-center gap-2.5 rounded-md p-1.5 text-fg-primary hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         className
@@ -29,9 +36,11 @@ export function AccountAction({
       </div>
       {!compact && (
         <div className="hidden xl:flex flex-col text-left leading-tight select-none">
-          <span className="text-2xs text-fg-muted font-normal">Sign In</span>
+          <span className="text-2xs text-fg-muted font-normal truncate max-w-28">
+            {userName ? `Hi, ${userName}` : 'Sign In'}
+          </span>
           <span className="text-xs font-semibold text-fg-primary group-hover:text-primary">
-            Account &amp; Lists
+            {subtitle}
           </span>
         </div>
       )}

@@ -79,11 +79,7 @@ export function CartProvider({
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         const raw = window.localStorage.getItem(CART_STORAGE_KEY);
-        if (
-          raw &&
-          raw.trim().startsWith('{') &&
-          (!initialItems || initialItems.length === 0)
-        ) {
+        if (raw && raw.trim().startsWith('{') && (!initialItems || initialItems.length === 0)) {
           const parsed = JSON.parse(raw);
           const validation = CartStorageStateSchema.safeParse(parsed);
           if (validation.success && Array.isArray(validation.data.items)) {

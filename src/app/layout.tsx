@@ -4,6 +4,9 @@ import { fontVariablesClass } from '../styles/typography';
 import { ThemeProvider, themeInitScript } from '../lib/theme';
 import { I18nProvider, i18nInitScript } from '../lib/i18n';
 import { QueryProvider } from '../lib/query';
+import { AuthProvider } from '@/features/auth';
+import { WishlistProvider } from '@/features/wishlist';
+import { RecentlyViewedProvider } from '@/features/recently-viewed';
 import { CartProvider } from '@/features/cart';
 
 export const metadata: Metadata = {
@@ -27,7 +30,13 @@ export default function RootLayout({
         <ThemeProvider>
           <I18nProvider>
             <QueryProvider>
-              <CartProvider>{children}</CartProvider>
+              <AuthProvider>
+                <WishlistProvider>
+                  <RecentlyViewedProvider>
+                    <CartProvider>{children}</CartProvider>
+                  </RecentlyViewedProvider>
+                </WishlistProvider>
+              </AuthProvider>
             </QueryProvider>
           </I18nProvider>
         </ThemeProvider>

@@ -140,4 +140,3 @@ export interface CartStorageState {
   items: CartItem[];
   updatedAt: string;
 }
-

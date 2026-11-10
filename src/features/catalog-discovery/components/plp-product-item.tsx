@@ -12,6 +12,7 @@ import * as React from 'react';
 import { ProductCard } from '@/components/product-card';
 import type { Product } from '@/domains/catalog/types/product';
 import { useCart } from '@/features/cart';
+import { useWishlist } from '@/features/wishlist';
 import { MOCK_SELLER_OFFERS } from '@/domains/catalog/fixtures/seller-offers.fixture';
 
 export interface PlpProductItemProps {
@@ -20,6 +21,7 @@ export interface PlpProductItemProps {
 
 export function PlpProductItem({ product }: PlpProductItemProps): React.JSX.Element {
   const { addItem } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const handleQuickAction = (): void => {
     const offer = MOCK_SELLER_OFFERS.find((o) => o.productId === product.id && o.isBuyBoxWinner) ||
@@ -58,6 +60,9 @@ export function PlpProductItem({ product }: PlpProductItemProps): React.JSX.Elem
     <ProductCard
       product={product}
       variant="standard"
+      showWishlist
+      isWishlisted={isInWishlist(product.id)}
+      onWishlistToggle={() => toggleWishlist(product)}
       showQuickAction
       quickActionLabel="Add to Cart"
       onQuickAction={handleQuickAction}

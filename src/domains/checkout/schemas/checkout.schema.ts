@@ -37,4 +37,3 @@ export const CheckoutFormSchema: z.ZodType<CheckoutFormState> = z.object({
   shipping: CheckoutShippingAddressSchema,
   deliveryMethod: DeliveryMethodTypeSchema,
 });
-

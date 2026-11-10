@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { mobileBottomNavItems } from '@/config/navigation';
 import type { MobileBottomNavItem } from '@/types/navigation';
 import { useCart } from '@/features/cart';
+import { useWishlist } from '@/features/wishlist';
 
 const navIcons: Record<MobileBottomNavItem['icon'], React.ComponentType<{ className?: string }>> = {
   home: Home,
@@ -32,6 +33,7 @@ export function MobileBottomNav({
 }: MobileBottomNavProps): React.JSX.Element {
   const pathname = usePathname();
   const { itemCount } = useCart();
+  const { itemCount: wishlistCount } = useWishlist();
 
   return (
     <nav
@@ -46,7 +48,12 @@ export function MobileBottomNav({
         {items.map((item) => {
           const Icon = navIcons[item.icon];
           const isActive = pathname === item.href;
-          const badgeCount = item.id === 'cart' ? itemCount : item.badgeCount;
+          const badgeCount =
+            item.id === 'cart'
+              ? itemCount
+              : item.id === 'wishlist'
+                ? wishlistCount
+                : item.badgeCount;
 
           return (
             <a

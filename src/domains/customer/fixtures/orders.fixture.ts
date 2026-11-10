@@ -1,0 +1,176 @@
+/**
+ * ==============================================================================
+ * CUSTOMER DOMAIN — DEMO ORDER HISTORY FIXTURES
+ * ==============================================================================
+ */
+
+import type { CustomerOrder } from '../types/order';
+import { DEMO_ADDRESSES } from './customer.fixture';
+import { createMoney } from '@/domains/catalog/utils/money';
+
+export const DEMO_ORDERS: CustomerOrder[] = [
+  {
+    orderId: 'ORD-2026-981245',
+    customerId: 'cust-demo-sarah',
+    currency: 'USD',
+    itemsSubtotal: createMoney(249900, 'USD'),
+    shippingTotal: createMoney(0, 'USD'),
+    grandTotal: createMoney(249900, 'USD'),
+    itemCount: 1,
+    status: 'delivered',
+    createdAt: '2026-02-10T14:32:00Z',
+    updatedAt: '2026-02-13T16:45:00Z',
+    shippingAddress: DEMO_ADDRESSES[0]!,
+    carrier: 'FedEx Express',
+    trackingNumber: 'FDX-982341824',
+    estimatedDelivery: 'Feb 13, 2026',
+    isDemo: true,
+    trackingEvents: [
+      {
+        status: 'Delivered',
+        location: 'Austin, TX',
+        timestamp: '2026-02-13T16:45:00Z',
+        description: 'Delivered to front porch. Signature waived.',
+      },
+      {
+        status: 'Out for Delivery',
+        location: 'Austin, TX',
+        timestamp: '2026-02-13T08:30:00Z',
+        description: 'Package sorted to local delivery vehicle.',
+      },
+      {
+        status: 'Arrived at Sort Facility',
+        location: 'Dallas, TX',
+        timestamp: '2026-02-12T02:15:00Z',
+        description: 'In transit to local destination depot.',
+      },
+      {
+        status: 'Shipped',
+        location: 'Memphis, TN',
+        timestamp: '2026-02-11T19:00:00Z',
+        description: 'Carrier picked up package from seller facility.',
+      },
+      {
+        status: 'Order Confirmed',
+        location: 'Marketplace Logistics',
+        timestamp: '2026-02-10T14:32:00Z',
+        description: 'Payment authorized and order sent to merchant.',
+      },
+    ],
+    vendorPackages: [
+      {
+        sellerId: 'seller-official',
+        sellerName: 'Official Flagship Store',
+        deliveryMethod: 'standard',
+        shippingFee: createMoney(0, 'USD'),
+        subtotal: createMoney(249900, 'USD'),
+        estimatedDays: '1-2 business days',
+        items: [
+          {
+            id: 'item-demo-macbook',
+            productId: 'prod-macbook',
+            slug: 'apple-macbook-pro-16-m3-max',
+            title: {
+              en: 'Apple MacBook Pro 16" with M3 Max Chip',
+              bn: 'অ্যাপল ম্যাকবুক প্রো ১৬" এম৩ ম্যাক্স চিপ সহ',
+              ar: 'ماك بوك برو ١٦ بوصة مع شريحة إم ٣ ماكس من آبل',
+              hi: 'एम3 मैक्स चिप के साथ एप्पल मैकबुक प्रो 16"',
+            },
+            sku: 'APL-MBP16-M3M-SB-512',
+            imageUrl: '/assets/mock/products/mbp16-hero.webp',
+            variantId: 'var-mbp16-spaceblack-512',
+            selectedOptions: { color: 'space-black', storage: '512gb' },
+            offerId: 'ofr-mbp16-official',
+            sellerId: 'seller-official',
+            sellerName: 'Official Flagship Store',
+            sellerSlug: 'official-flagship-store',
+            isSellerVerified: true,
+            unitPrice: createMoney(249900, 'USD'),
+            quantity: 1,
+            maxAvailableQuantity: 45,
+            lineTotal: createMoney(249900, 'USD'),
+            shippingEstimate: { minDays: 1, maxDays: 2, isFreeShipping: true },
+            createdAt: '2026-02-10T14:30:00Z',
+            updatedAt: '2026-02-10T14:30:00Z',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    orderId: 'ORD-2026-874120',
+    customerId: 'cust-demo-sarah',
+    currency: 'USD',
+    itemsSubtotal: createMoney(34999, 'USD'),
+    shippingTotal: createMoney(1500, 'USD'),
+    grandTotal: createMoney(36499, 'USD'),
+    itemCount: 1,
+    status: 'shipped',
+    createdAt: '2026-02-20T10:15:00Z',
+    updatedAt: '2026-02-21T11:00:00Z',
+    shippingAddress: DEMO_ADDRESSES[0]!,
+    carrier: 'UPS Ground',
+    trackingNumber: 'UPS-847291837',
+    estimatedDelivery: 'Feb 25, 2026',
+    isDemo: true,
+    trackingEvents: [
+      {
+        status: 'In Transit',
+        location: 'Louisville, KY',
+        timestamp: '2026-02-21T18:40:00Z',
+        description: 'Departed UPS hub en route to regional distribution center.',
+      },
+      {
+        status: 'Shipped',
+        location: 'Louisville, KY',
+        timestamp: '2026-02-21T11:00:00Z',
+        description: 'Picked up by UPS carrier.',
+      },
+      {
+        status: 'Order Confirmed',
+        location: 'Marketplace Logistics',
+        timestamp: '2026-02-20T10:15:00Z',
+        description: 'Order processed and packaging started.',
+      },
+    ],
+    vendorPackages: [
+      {
+        sellerId: 'seller-tech-direct',
+        sellerName: 'TechDirect Express',
+        deliveryMethod: 'express',
+        shippingFee: createMoney(1500, 'USD'),
+        subtotal: createMoney(34999, 'USD'),
+        estimatedDays: '1-2 business days',
+        items: [
+          {
+            id: 'item-demo-sony',
+            productId: 'prod-sony-headphones',
+            slug: 'sony-wh-1000xm5-wireless-noise-cancelling-headphones',
+            title: {
+              en: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones',
+              bn: 'সনি WH-1000XM5 ওয়্যারলেস নয়েজ ক্যানসেলিং হেডফোন',
+              ar: 'سماعات سوني WH-1000XM5 اللاسلكية لإلغاء الضوضاء',
+              hi: 'सोनी WH-1000XM5 वायरलेस नॉइज़ कैंसिलिंग हेडफोन',
+            },
+            sku: 'SNY-WH1000XM5-BLK',
+            imageUrl: '/assets/mock/products/sony-xm5-hero.webp',
+            variantId: 'var-sony-xm5-black',
+            selectedOptions: { color: 'black' },
+            offerId: 'ofr-sony-techdirect',
+            sellerId: 'seller-tech-direct',
+            sellerName: 'TechDirect Express',
+            sellerSlug: 'techdirect-express',
+            isSellerVerified: true,
+            unitPrice: createMoney(34999, 'USD'),
+            quantity: 1,
+            maxAvailableQuantity: 28,
+            lineTotal: createMoney(34999, 'USD'),
+            shippingEstimate: { minDays: 2, maxDays: 3, isFreeShipping: false },
+            createdAt: '2026-02-20T10:10:00Z',
+            updatedAt: '2026-02-20T10:10:00Z',
+          },
+        ],
+      },
+    ],
+  },
+];

@@ -19,6 +19,8 @@ import { topUtilityLinks, primaryNavigationLinks } from '@/config/navigation';
 import { useSafeRouter, useSafeSearchParams } from '@/lib/navigation/safe-navigation';
 import { useTheme } from '@/lib/theme/theme-context';
 import { useCart } from '@/features/cart';
+import { useAuth } from '@/features/auth';
+import { useWishlist } from '@/features/wishlist';
 import { formatMoneyMinor } from '@/domains/catalog/utils/money';
 
 export interface DesktopHeaderProps {
@@ -36,6 +38,8 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
   const currentQuery = searchParams?.get('q') ?? '';
   const { theme, resolvedTheme, setTheme } = useTheme();
   const { itemCount, subtotal, openDrawer } = useCart();
+  const { customer } = useAuth();
+  const { itemCount: wishlistCount } = useWishlist();
 
   const handleSearchSubmit = (submittedQuery: string): void => {
     const q = submittedQuery.trim();
@@ -142,8 +146,8 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
           <div className="flex items-center gap-3 shrink-0">
             <SellerAction />
             <div className="h-5 w-px bg-border-subtle" />
-            <AccountAction />
-            <WishlistAction count={2} />
+            <AccountAction userName={customer?.firstName} />
+            <WishlistAction count={wishlistCount} />
             <CartAction
               itemCount={itemCount}
               subtotal={itemCount > 0 ? formatMoneyMinor(subtotal) : undefined}

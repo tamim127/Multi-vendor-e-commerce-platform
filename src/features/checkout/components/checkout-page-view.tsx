@@ -32,6 +32,8 @@ import type {
   DeliveryMethodType,
 } from '@/domains/checkout/types/checkout';
 
+import { savePlacedOrderToStorage } from '@/domains/customer/utils/orders';
+
 export function CheckoutPageView(): React.JSX.Element {
   const { cart, items, sellerGroups, itemCount, subtotal, shippingTotal, clearCart } = useCart();
   const { t, locale } = useI18n();
@@ -151,6 +153,48 @@ export function CheckoutPageView(): React.JSX.Element {
 
     // Small delay to simulate network turn and prevent duplicate submission
     await new Promise((resolve) => setTimeout(resolve, 600));
+
+    // Save placed order into customer order history
+    savePlacedOrderToStorage({
+      orderId: orderResult.orderId,
+      currency: orderResult.currency,
+      itemsSubtotal: orderResult.itemsSubtotal,
+      shippingTotal: orderResult.shippingTotal,
+      grandTotal: orderResult.grandTotal,
+      itemCount: orderResult.itemCount,
+      status: 'processing',
+      createdAt: orderResult.createdAt,
+      updatedAt: orderResult.createdAt,
+      shippingAddress: {
+        id: `addr-${randomSuffix}`,
+        label: 'home',
+        fullName: formData.contact.fullName,
+        streetAddress: formData.shipping.address,
+        streetAddress2: undefined,
+        city: formData.shipping.city,
+        stateOrProvince: formData.shipping.state,
+        postalCode: formData.shipping.postalCode,
+        countryCode: formData.shipping.country,
+        phoneNumber: formData.contact.phone,
+        isDefaultShipping: true,
+        isDefaultBilling: true,
+        createdAt: orderResult.createdAt,
+        updatedAt: orderResult.createdAt,
+      },
+      vendorPackages: orderResult.vendorPackages,
+      isDemo: true,
+      carrier: 'Marketplace Logistics',
+      trackingNumber: `MP-${randomSuffix}`,
+      estimatedDelivery: '3-5 business days',
+      trackingEvents: [
+        {
+          status: 'Order Confirmed',
+          location: 'Marketplace Logistics Hub',
+          timestamp: orderResult.createdAt,
+          description: 'Payment authorized and vendor packaging notification initiated.',
+        },
+      ],
+    });
 
     setConfirmedOrder(orderResult);
     clearCart();

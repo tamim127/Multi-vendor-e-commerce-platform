@@ -5,6 +5,7 @@ import { AnnouncementBar } from '@/components/layout/announcement-bar/announceme
 import { SiteHeader } from '@/components/layout/header/site-header';
 import { SiteFooter } from '@/components/layout/footer/footer';
 import { MobileBottomNav } from '@/components/layout/footer/mobile-bottom-nav';
+import { CartDrawer } from '@/features/cart/components/cart-drawer';
 
 export interface AppShellProps {
   children: React.ReactNode;
@@ -62,6 +63,9 @@ export function AppShell({
 
       {/* 6. Fixed Mobile Bottom Navigation */}
       {!hideBottomNav && <MobileBottomNav />}
+
+      {/* 7. Global Slide-Over Mini-Cart Drawer */}
+      <CartDrawer />
     </div>
   );
 }

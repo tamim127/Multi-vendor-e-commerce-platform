@@ -165,7 +165,7 @@ export function PdpPurchasePanel({
           role="dialog"
           aria-modal="true"
           aria-labelledby="intent-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
         >
           <div className="relative w-full max-w-md rounded-2xl border border-border-default bg-surface p-6 shadow-xl">
             {/* Close Button */}

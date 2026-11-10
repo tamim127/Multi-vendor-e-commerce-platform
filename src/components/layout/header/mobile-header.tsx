@@ -8,6 +8,7 @@ import { MobileDrawer } from '@/components/layout/header/mobile-drawer';
 import { CartAction } from '@/components/layout/header/header-actions';
 import { SearchBar } from '@/components/layout/header/search-bar';
 import { useSafeRouter, useSafeSearchParams } from '@/lib/navigation/safe-navigation';
+import { useCart } from '@/features/cart';
 
 export interface MobileHeaderProps {
   className?: string;
@@ -23,6 +24,7 @@ export function MobileHeader({ className }: MobileHeaderProps): React.JSX.Elemen
   const searchParams = useSafeSearchParams();
   const currentQuery = searchParams?.get('q') ?? '';
   const [isSearchExpanded, setIsSearchExpanded] = React.useState<boolean>(false);
+  const { itemCount, openDrawer } = useCart();
 
   const handleSearchSubmit = (submittedQuery: string): void => {
     setIsSearchExpanded(false);
@@ -74,7 +76,14 @@ export function MobileHeader({ className }: MobileHeaderProps): React.JSX.Elemen
             {isSearchExpanded ? <X className="size-5" /> : <Search className="size-5" />}
           </button>
 
-          <CartAction compact itemCount={3} />
+          <CartAction
+            compact
+            itemCount={itemCount}
+            onClick={(e) => {
+              e.preventDefault();
+              openDrawer();
+            }}
+          />
         </div>
       </div>
 

@@ -18,6 +18,8 @@ import { LanguageSelector } from '@/components/layout/header/language-selector';
 import { topUtilityLinks, primaryNavigationLinks } from '@/config/navigation';
 import { useSafeRouter, useSafeSearchParams } from '@/lib/navigation/safe-navigation';
 import { useTheme } from '@/lib/theme/theme-context';
+import { useCart } from '@/features/cart';
+import { formatMoneyMinor } from '@/domains/catalog/utils/money';
 
 export interface DesktopHeaderProps {
   className?: string;
@@ -33,6 +35,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
   const searchParams = useSafeSearchParams();
   const currentQuery = searchParams?.get('q') ?? '';
   const { theme, resolvedTheme, setTheme } = useTheme();
+  const { itemCount, subtotal, openDrawer } = useCart();
 
   const handleSearchSubmit = (submittedQuery: string): void => {
     const q = submittedQuery.trim();
@@ -141,7 +144,14 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
             <div className="h-5 w-px bg-border-subtle" />
             <AccountAction />
             <WishlistAction count={2} />
-            <CartAction itemCount={3} subtotal="$289.00" />
+            <CartAction
+              itemCount={itemCount}
+              subtotal={itemCount > 0 ? formatMoneyMinor(subtotal) : undefined}
+              onClick={(e) => {
+                e.preventDefault();
+                openDrawer();
+              }}
+            />
           </div>
         </Container>
       </div>

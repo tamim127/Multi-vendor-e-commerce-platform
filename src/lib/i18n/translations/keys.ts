@@ -171,6 +171,64 @@ export interface TranslationsContract {
   'pdp.shippingCost': string;
   'pdp.shippingCalculatedAtCheckout': string;
   'pdp.priceUnavailable': string;
+
+  // Cart Domain & UI
+  'cart.title': string;
+  'cart.emptyTitle': string;
+  'cart.emptyDesc': string;
+  'cart.continueShopping': string;
+  'cart.proceedToCheckout': string;
+  'cart.subtotal': string;
+  'cart.shippingEstimate': string;
+  'cart.freeShipping': string;
+  'cart.grandTotal': string;
+  'cart.itemsCount': string;
+  'cart.itemSingular': string;
+  'cart.seller': string;
+  'cart.sellerSubtotal': string;
+  'cart.sellerShipping': string;
+  'cart.quantity': string;
+  'cart.remove': string;
+  'cart.clearCart': string;
+  'cart.cartDrawer': string;
+  'cart.closeDrawer': string;
+  'cart.viewCart': string;
+  'cart.currencyMismatch': string;
+  'cart.currencyMismatchDesc': string;
+  'cart.itemAdded': string;
+  'cart.unitPrice': string;
+  'cart.maxStockReached': string;
+  'cart.orderSummary': string;
+
+  // Checkout Domain & UI
+  'checkout.title': string;
+  'checkout.stepContact': string;
+  'checkout.stepShipping': string;
+  'checkout.stepDelivery': string;
+  'checkout.stepReview': string;
+  'checkout.fullName': string;
+  'checkout.email': string;
+  'checkout.phone': string;
+  'checkout.address': string;
+  'checkout.city': string;
+  'checkout.postalCode': string;
+  'checkout.country': string;
+  'checkout.state': string;
+  'checkout.standardDelivery': string;
+  'checkout.expressDelivery': string;
+  'checkout.orderSummary': string;
+  'checkout.placeOrder': string;
+  'checkout.submitting': string;
+  'checkout.orderSuccessTitle': string;
+  'checkout.orderSuccessDesc': string;
+  'checkout.orderId': string;
+  'checkout.orderDate': string;
+  'checkout.demoNotice': string;
+  'checkout.backToHome': string;
+  'checkout.cartEmpty': string;
+  'checkout.splitOrderNotice': string;
+  'checkout.vendorPackages': string;
+  'checkout.validationError': string;
 }
 
 export type TranslationKey = keyof TranslationsContract;

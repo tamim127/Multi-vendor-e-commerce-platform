@@ -6,6 +6,7 @@ import { Home, LayoutGrid, Search, Heart, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { mobileBottomNavItems } from '@/config/navigation';
 import type { MobileBottomNavItem } from '@/types/navigation';
+import { useCart } from '@/features/cart';
 
 const navIcons: Record<MobileBottomNavItem['icon'], React.ComponentType<{ className?: string }>> = {
   home: Home,
@@ -30,6 +31,7 @@ export function MobileBottomNav({
   className,
 }: MobileBottomNavProps): React.JSX.Element {
   const pathname = usePathname();
+  const { itemCount } = useCart();
 
   return (
     <nav
@@ -44,6 +46,7 @@ export function MobileBottomNav({
         {items.map((item) => {
           const Icon = navIcons[item.icon];
           const isActive = pathname === item.href;
+          const badgeCount = item.id === 'cart' ? itemCount : item.badgeCount;
 
           return (
             <a
@@ -64,9 +67,9 @@ export function MobileBottomNav({
                   )}
                 />
 
-                {item.badgeCount !== undefined && item.badgeCount > 0 && (
+                {badgeCount !== undefined && badgeCount > 0 && (
                   <span className="absolute -top-1.5 -right-2 flex size-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground ring-1 ring-surface tabular-nums">
-                    {item.badgeCount > 99 ? '99+' : item.badgeCount}
+                    {badgeCount > 99 ? '99+' : badgeCount}
                   </span>
                 )}
               </div>

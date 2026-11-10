@@ -23,6 +23,7 @@ import { PdpMobileStickyBar } from './pdp-mobile-sticky-bar';
 import { PdpTabs } from './pdp-tabs';
 import { PdpRelatedProducts } from './pdp-related-products';
 import { useI18n } from '@/lib/i18n';
+import { useCart } from '@/features/cart';
 
 export interface ProductDetailInteractiveViewProps {
   initialData: ProductDetailData;
@@ -58,6 +59,34 @@ export function ProductDetailInteractiveView({
   });
 
   const [activeTab, setActiveTab] = React.useState<string>('overview');
+  const { addItem } = useCart();
+
+  const handlePurchaseIntent = (payload: PdpPurchaseIntentPayload): void => {
+    if (selectedOffer) {
+      addItem({
+        productId: product.id,
+        slug: product.slug,
+        title: product.title,
+        sku: selectedVariant?.sku || product.defaultVariantId || product.id,
+        imageUrl: product.media[0]?.url,
+        variantId: selectedVariant?.id,
+        selectedOptions,
+        offerId: selectedOffer.offerId,
+        sellerId: selectedOffer.sellerId,
+        sellerName: selectedOffer.seller.name,
+        sellerSlug: selectedOffer.seller.slug,
+        isSellerVerified: selectedOffer.seller.isVerified,
+        unitPrice: selectedOffer.price,
+        quantity: payload.quantity,
+        maxAvailableQuantity:
+          typeof selectedOffer.inventory.quantityAvailable === 'number'
+            ? selectedOffer.inventory.quantityAvailable
+            : 99,
+        shippingEstimate: selectedOffer.shippingEstimate,
+      });
+    }
+    onPurchaseIntent?.(payload);
+  };
 
   const handleReviewsClick = (): void => {
     setActiveTab('reviews');
@@ -128,7 +157,7 @@ export function ProductDetailInteractiveView({
             isQuantityBoundedByDemo={isQuantityBoundedByDemo}
             canPurchase={canPurchase}
             onSetQuantity={setQuantity}
-            onPurchaseIntent={onPurchaseIntent}
+            onPurchaseIntent={handlePurchaseIntent}
           />
         </div>
       </div>

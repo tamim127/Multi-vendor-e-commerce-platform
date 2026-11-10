@@ -4,6 +4,7 @@ import { fontVariablesClass } from '../styles/typography';
 import { ThemeProvider, themeInitScript } from '../lib/theme';
 import { I18nProvider, i18nInitScript } from '../lib/i18n';
 import { QueryProvider } from '../lib/query';
+import { CartProvider } from '@/features/cart';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000'),
@@ -25,7 +26,9 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <I18nProvider>
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              <CartProvider>{children}</CartProvider>
+            </QueryProvider>
           </I18nProvider>
         </ThemeProvider>
       </body>

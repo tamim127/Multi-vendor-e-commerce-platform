@@ -36,7 +36,7 @@ export function PdpMobileStickyBar({
     : formatMoneyMinor(offerSummary.lowestPrice, { locale: formatLocale });
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border-default bg-surface/95 p-3 backdrop-blur-md shadow-lg safe-bottom">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[45] border-t border-border-default bg-surface/95 p-3 backdrop-blur-md shadow-lg safe-bottom">
       <div className="flex items-center justify-between gap-3">
         {/* Price Summary */}
         <div className="flex flex-col min-w-0">

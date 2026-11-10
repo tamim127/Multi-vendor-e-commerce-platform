@@ -336,6 +336,40 @@ export interface TranslationsContract {
   'settings.dangerZone': string;
   'settings.deactivateAccount': string;
   'settings.saved': string;
+
+  // Phase 5: Seller Platform & Multi-Vendor
+  'seller.title': string;
+  'seller.dashboard': string;
+  'seller.products': string;
+  'seller.inventory': string;
+  'seller.orders': string;
+  'seller.analytics': string;
+  'seller.storeSettings': string;
+  'seller.storefrontPreview': string;
+  'seller.onboardingTitle': string;
+  'seller.onboardingSubtitle': string;
+  'seller.applyNow': string;
+  'seller.applicationStatus': string;
+  'seller.pendingApproval': string;
+  'seller.approved': string;
+  'seller.rejected': string;
+  'seller.demoAutoApprove': string;
+  'seller.totalRevenue': string;
+  'seller.activeListings': string;
+  'seller.pendingOrders': string;
+  'seller.lowStockAlerts': string;
+  'seller.salesTrends': string;
+  'seller.topProducts': string;
+  'seller.addOffer': string;
+  'seller.editOffer': string;
+  'seller.updateStock': string;
+  'seller.dispatchOrder': string;
+  'seller.carrier': string;
+  'seller.trackingNumber': string;
+  'seller.fulfillmentStatus': string;
+  'seller.packageSubtotal': string;
+  'seller.ratingsAndReviews': string;
+  'seller.notifications': string;
 }
 
 export type TranslationKey = keyof TranslationsContract;

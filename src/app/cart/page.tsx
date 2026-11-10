@@ -19,3 +19,4 @@ export default function CartPage(): React.JSX.Element {
     </AppShell>
   );
 }
+

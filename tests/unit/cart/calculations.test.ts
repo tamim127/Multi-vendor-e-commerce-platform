@@ -21,12 +21,7 @@ import { createMoney } from '@/domains/catalog/utils/money';
 const mockItem1: AddToCartInput = {
   productId: 'prod-macbook',
   slug: 'apple-macbook-pro-16',
-  title: {
-    en: 'MacBook Pro 16"',
-    bn: 'ম্যাকবুক প্রো ১৬"',
-    ar: 'ماك بوك برو ١٦',
-    hi: 'मैकबुक प्रो 16',
-  },
+  title: { en: 'MacBook Pro 16"', bn: 'ম্যাকবুক প্রো ১৬"', ar: 'ماك بوك برو ١٦', hi: 'मैकबुक प्रो 16' },
   offerId: 'ofr-mbp-official',
   sellerId: 'seller-official',
   sellerName: 'Apple Flagship Store',

@@ -19,3 +19,4 @@ export default function CheckoutPage(): React.JSX.Element {
     </AppShell>
   );
 }
+

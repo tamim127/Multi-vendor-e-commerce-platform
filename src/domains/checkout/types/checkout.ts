@@ -54,3 +54,4 @@ export interface CheckoutOrderResult {
   isDemo: boolean;
   status: 'confirmed';
 }
+

@@ -40,3 +40,4 @@ export interface PublicStorefront {
     warranty?: string;
   };
 }
+

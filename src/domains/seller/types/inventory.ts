@@ -27,3 +27,4 @@ export interface InventoryAdjustmentInput {
   reason?: 'restock' | 'damaged' | 'audit_adjustment' | 'manual_override';
   notes?: string;
 }
+

@@ -29,3 +29,4 @@ export default async function StorefrontPage({ params }: PageProps): Promise<Rea
     </AppShell>
   );
 }
+

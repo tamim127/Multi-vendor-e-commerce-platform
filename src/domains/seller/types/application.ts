@@ -26,3 +26,4 @@ export interface SellerApplicationRecord extends SellerApplicationInput {
   decidedAt?: string;
   isDemoSubmission: boolean;
 }
+

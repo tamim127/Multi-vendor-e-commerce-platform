@@ -92,4 +92,3 @@ export const DEMO_PENDING_APPLICATION: SellerApplicationRecord = {
   status: 'under_review',
   isDemoSubmission: true,
 };
-

@@ -172,4 +172,3 @@ export const DEMO_SELLER_PACKAGES: SellerOrderPackage[] = [
     ],
   },
 ];
-

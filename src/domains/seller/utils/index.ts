@@ -6,4 +6,3 @@
 
 export * from './seller-storage';
 export * from './inventory';
-

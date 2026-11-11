@@ -62,4 +62,3 @@ export interface SellerProfile {
   joinedAt: string;
   updatedAt: string;
 }
-

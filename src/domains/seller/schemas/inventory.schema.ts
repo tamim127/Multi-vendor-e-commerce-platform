@@ -21,4 +21,3 @@ export const DispatchPackageSchema: z.ZodType<DispatchPackageInput> = z.object({
   trackingNumber: z.string().trim().min(3, 'Tracking number is required').max(80),
   notes: z.string().trim().max(300).optional(),
 });
-

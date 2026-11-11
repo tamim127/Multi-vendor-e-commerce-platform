@@ -29,4 +29,3 @@ export interface SellerDashboardMetrics {
   dailyTrends: DailySalesDataPoint[];
   topProducts: TopSellingProductMetric[];
 }
-

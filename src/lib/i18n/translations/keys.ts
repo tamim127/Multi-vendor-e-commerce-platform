@@ -370,6 +370,29 @@ export interface TranslationsContract {
   'seller.packageSubtotal': string;
   'seller.ratingsAndReviews': string;
   'seller.notifications': string;
+
+  // Phase 6: Admin Platform
+  'admin.title': string;
+  'admin.dashboard': string;
+  'admin.sellers': string;
+  'admin.customers': string;
+  'admin.products': string;
+  'admin.categories': string;
+  'admin.orders': string;
+  'admin.refunds': string;
+  'admin.returns': string;
+  'admin.promotions': string;
+  'admin.coupons': string;
+  'admin.reviews': string;
+  'admin.settings': string;
+  'admin.notifications': string;
+  'admin.auditLogs': string;
+  'admin.analytics': string;
+  'admin.accessDenied': string;
+  'admin.accessDeniedDesc': string;
+  'admin.totalGmv': string;
+  'admin.totalOrders': string;
+  'admin.takeRate': string;
 }
 
 export type TranslationKey = keyof TranslationsContract;

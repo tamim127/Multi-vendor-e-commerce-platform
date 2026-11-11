@@ -46,4 +46,3 @@ export interface SellerListingItem {
   isActive: boolean;
   updatedAt: string;
 }
-

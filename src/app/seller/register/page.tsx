@@ -15,4 +15,3 @@ export default function SellerRegisterPage(): React.JSX.Element {
     </AppShell>
   );
 }
-

@@ -9,6 +9,7 @@ import { WishlistProvider } from '@/features/wishlist';
 import { RecentlyViewedProvider } from '@/features/recently-viewed';
 import { CartProvider } from '@/features/cart';
 import { SellerProvider } from '@/features/seller';
+import { AdminProvider } from '@/features/admin';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000'),
@@ -35,7 +36,9 @@ export default function RootLayout({
                 <WishlistProvider>
                   <RecentlyViewedProvider>
                     <CartProvider>
-                      <SellerProvider>{children}</SellerProvider>
+                      <SellerProvider>
+                        <AdminProvider>{children}</AdminProvider>
+                      </SellerProvider>
                     </CartProvider>
                   </RecentlyViewedProvider>
                 </WishlistProvider>

@@ -12,15 +12,17 @@ export const metadata: Metadata = {
 export default function ProductsRoutePage(): React.JSX.Element {
   return (
     <AppShell>
-      <React.Suspense
-        fallback={
-          <div className="container mx-auto px-4 py-8">
-            <PlpSkeleton />
-          </div>
-        }
-      >
-        <ProductDiscoveryPage />
-      </React.Suspense>
+      <div className="bg-[#F6F8FB] min-h-screen py-6 md:py-8">
+        <React.Suspense
+          fallback={
+            <div className="container mx-auto px-4 py-8">
+              <PlpSkeleton />
+            </div>
+          }
+        >
+          <ProductDiscoveryPage />
+        </React.Suspense>
+      </div>
     </AppShell>
   );
 }

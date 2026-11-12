@@ -10,8 +10,7 @@
 'use client';
 
 import * as React from 'react';
-import { Eye, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button/button';
+import { Heart, ShoppingBag } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import type { ProductCardActionsProps } from './product-card.types';
@@ -42,11 +41,11 @@ export function ProductCardWishlistButton({
       type="button"
       onClick={handleToggle}
       className={cn(
-        'group/wishlist flex items-center justify-center rounded-full bg-surface/90 backdrop-blur-xs shadow-xs',
-        'min-h-[44px] min-w-[44px] transition-all duration-200',
-        'hover:bg-surface hover:scale-105 active:scale-95',
+        'group/wishlist flex items-center justify-center rounded-full bg-white/95 backdrop-blur-md shadow-[0_2px_10px_rgba(0,0,0,0.06)] border border-slate-100',
+        'min-h-[44px] min-w-[44px] transition-all duration-200 cursor-pointer',
+        'hover:bg-white hover:scale-110 active:scale-95 hover:shadow-[0_4px_14px_rgba(0,0,0,0.12)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-        isWishlisted ? 'text-destructive' : 'text-fg-muted hover:text-destructive',
+        isWishlisted ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500',
         className
       )}
       aria-label={label}
@@ -54,8 +53,8 @@ export function ProductCardWishlistButton({
     >
       <Heart
         className={cn(
-          'size-5 transition-transform duration-200',
-          isWishlisted ? 'fill-current' : 'fill-none group-hover/wishlist:scale-110'
+          'size-4.5 transition-transform duration-200',
+          isWishlisted ? 'fill-rose-500 text-rose-500' : 'fill-none group-hover/wishlist:scale-110'
         )}
       />
     </button>
@@ -84,19 +83,20 @@ export function ProductCardQuickActionButton({
   const label = quickActionLabel || t('productCard.quickView');
 
   return (
-    <Button
+    <button
       type="button"
-      variant="secondary"
-      size="sm"
       onClick={handleClick}
       className={cn(
-        'min-h-[44px] w-full gap-2 text-xs font-semibold shadow-xs transition-transform active:scale-98',
+        'inline-flex items-center justify-center gap-1.5 rounded-full py-2 px-3.5 text-xs font-bold transition-all duration-200 cursor-pointer',
+        'bg-slate-100/90 text-slate-800 hover:bg-primary hover:text-white shadow-xs active:scale-95',
+        'border border-slate-200/60 hover:border-primary',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         className
       )}
       aria-label={label}
     >
-      <Eye className="size-4 shrink-0" aria-hidden="true" />
-      <span>{label}</span>
-    </Button>
+      <ShoppingBag className="size-3.5 shrink-0 transition-transform group-hover:scale-110" aria-hidden="true" />
+      <span className="whitespace-nowrap">{label}</span>
+    </button>
   );
 }

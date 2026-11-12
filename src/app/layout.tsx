@@ -30,7 +30,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: i18nInitScript }} />
       </head>
       <body>
-        <ThemeProvider>
+        <ThemeProvider defaultTheme="light">
           <I18nProvider>
             <QueryProvider>
               <AuthProvider>

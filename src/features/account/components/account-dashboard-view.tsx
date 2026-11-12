@@ -75,34 +75,34 @@ export function AccountDashboardView(): React.JSX.Element {
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
       {/* 1. Welcome Header Banner */}
-      <div className="rounded-2xl border border-border-default bg-surface p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-black text-xl shadow-xs">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 font-black text-xl shadow-xs">
             {customer?.firstName.charAt(0)}
             {customer?.lastName.charAt(0)}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-fg-primary">
+              <h2 className="text-xl font-bold text-slate-900">
                 {t('account.welcome')}, {customer?.firstName}!
               </h2>
               {customer?.emailVerified ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-2xs font-semibold text-success border border-success/20">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-2xs font-semibold text-emerald-700 border border-emerald-200/60">
                   <ShieldCheck className="size-3" />
                   <span>{t('account.verified')}</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center rounded-full bg-warning/10 px-2 py-0.5 text-2xs font-semibold text-warning border border-warning/20">
+                <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-2xs font-semibold text-amber-700 border border-amber-200/60">
                   {t('account.unverified')}
                 </span>
               )}
             </div>
-            <p className="text-xs text-fg-muted mt-0.5">{customer?.email}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{customer?.email}</p>
           </div>
         </div>
 
         <Link href="/account/profile">
-          <Button variant="secondary" size="sm" className="font-semibold cursor-pointer">
+          <Button variant="secondary" size="sm" className="font-bold rounded-full px-4 text-xs cursor-pointer">
             {t('account.editProfile')}
           </Button>
         </Link>
@@ -112,18 +112,18 @@ export function AccountDashboardView(): React.JSX.Element {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link
           href="/account/orders"
-          className="group rounded-2xl border border-border-default bg-surface p-5 shadow-xs hover:border-primary/50 transition-all cursor-pointer"
+          className="group rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all cursor-pointer"
         >
-          <div className="flex items-center justify-between text-fg-muted">
-            <span className="text-xs font-medium uppercase tracking-wider">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider">
               {t('account.totalOrders')}
             </span>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-105 transition-transform">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:scale-105 transition-transform">
               <Package className="size-4.5" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-fg-primary tabular-nums">
+            <span className="text-3xl font-extrabold text-slate-900 tabular-nums">
               {orders.length}
             </span>
           </div>
@@ -131,13 +131,13 @@ export function AccountDashboardView(): React.JSX.Element {
 
         <Link
           href="/account/addresses"
-          className="group rounded-2xl border border-border-default bg-surface p-5 shadow-xs hover:border-primary/50 transition-all cursor-pointer"
+          className="group rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all cursor-pointer"
         >
-          <div className="flex items-center justify-between text-fg-muted">
-            <span className="text-xs font-medium uppercase tracking-wider">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider">
               {t('account.savedAddresses')}
             </span>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-105 transition-transform">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:scale-105 transition-transform">
               <MapPin className="size-4.5" />
             </div>
           </div>
@@ -150,18 +150,18 @@ export function AccountDashboardView(): React.JSX.Element {
 
         <Link
           href="/account/wishlist"
-          className="group rounded-2xl border border-border-default bg-surface p-5 shadow-xs hover:border-primary/50 transition-all cursor-pointer"
+          className="group rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all cursor-pointer"
         >
-          <div className="flex items-center justify-between text-fg-muted">
-            <span className="text-xs font-medium uppercase tracking-wider">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider">
               {t('account.wishlistItems')}
             </span>
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:scale-105 transition-transform">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:scale-105 transition-transform">
               <Heart className="size-4.5" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-fg-primary tabular-nums">
+            <span className="text-3xl font-extrabold text-slate-900 tabular-nums">
               {wishlistCount}
             </span>
           </div>
@@ -169,7 +169,7 @@ export function AccountDashboardView(): React.JSX.Element {
       </div>
 
       {/* 3. Recent Orders Summary */}
-      <div className="rounded-2xl border border-border-default bg-surface p-6 shadow-xs space-y-4">
+      <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold text-fg-primary flex items-center gap-2">
             <Package className="size-5 text-primary" />

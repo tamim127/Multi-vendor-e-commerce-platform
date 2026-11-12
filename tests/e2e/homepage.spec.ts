@@ -35,9 +35,9 @@ test.describe('Marketplace Customer Homepage E2E', () => {
 
     // 3. Verify Featured Categories Section
     await expect(page.getByRole('heading', { name: 'Browse by Category' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Computers & Laptops/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Audio & Headphones/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Curved Displays/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Computers & Laptops/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /Audio & Headphones/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /Curved Displays/i }).first()).toBeVisible();
 
     // 4. Verify Flash Deals & Daily Steals
     await expect(page.getByRole('heading', { name: /Flash Deals & Daily Steals/i })).toBeVisible();
@@ -87,7 +87,7 @@ test.describe('Marketplace Customer Homepage E2E', () => {
     await nextBtn.click();
 
     // Category click navigates to PLP
-    const audioCategoryLink = page.getByRole('link', { name: /Audio & Headphones/i });
+    const audioCategoryLink = page.getByRole('link', { name: /Audio & Headphones/i }).first();
     await expect(audioCategoryLink).toHaveAttribute('href', '/products?category=audio-headphones');
   });
 

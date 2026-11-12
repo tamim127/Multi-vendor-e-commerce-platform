@@ -33,7 +33,7 @@ export function ProductCardMedia({
   return (
     <div
       className={cn(
-        'relative w-full overflow-hidden bg-surface-subtle flex items-center justify-center p-3 select-none',
+        'relative w-full overflow-hidden bg-[#F8FAFC] flex items-center justify-center p-4 select-none',
         ASPECT_RATIO_STYLES[aspectRatio],
         className
       )}
@@ -73,14 +73,14 @@ export function ProductCardMedia({
 
       {/* Badges Slot (top-start) */}
       {badgesSlot && (
-        <div className="absolute top-2 start-2 z-10 flex flex-col gap-1 pointer-events-none">
+        <div className="absolute top-3.5 start-3.5 z-10 flex flex-col gap-1.5 pointer-events-none">
           {badgesSlot}
         </div>
       )}
 
       {/* Actions Slot (top-end e.g. wishlist toggle) */}
       {actionsSlot && (
-        <div className="absolute top-2 end-2 z-10 flex flex-col gap-1">{actionsSlot}</div>
+        <div className="absolute top-3.5 end-3.5 z-10 flex flex-col gap-1">{actionsSlot}</div>
       )}
 
       {/* Out of Stock / Unavailable Dim Overlay */}

@@ -79,15 +79,15 @@ export function SearchBar({
     >
       <div
         className={cn(
-          'relative flex items-center w-full rounded-md border bg-surface transition-all duration-200 shadow-2xs',
+          'relative flex items-center w-full rounded-full border bg-slate-50/70 p-1 pl-3.5 transition-all duration-200 shadow-xs',
           isFocused
-            ? 'border-primary ring-2 ring-primary/20 ring-offset-1 ring-offset-canvas'
-            : 'border-border-default hover:border-border-strong',
+            ? 'border-primary/50 bg-white ring-4 ring-primary/10 ring-offset-0'
+            : 'border-slate-200/90 hover:bg-white hover:border-slate-300',
           compact ? 'h-9' : 'h-11'
         )}
       >
         {/* Leading Search Icon */}
-        <div className="flex items-center pl-3.5 pointer-events-none text-fg-muted shrink-0">
+        <div className="flex items-center pl-1 pointer-events-none text-slate-400 shrink-0">
           <Search
             className={cn(
               'transition-colors',
@@ -111,8 +111,8 @@ export function SearchBar({
           autoComplete="off"
           spellCheck="false"
           className={cn(
-            'w-full bg-transparent px-3 text-sm text-fg-primary placeholder:text-fg-muted',
-            'focus:outline-none focus:ring-0 select-text',
+            'w-full bg-transparent px-3 text-sm text-slate-800 placeholder:text-slate-400',
+            'focus:outline-none focus:ring-0 select-text font-normal',
             '[&::-webkit-search-cancel-button]:hidden'
           )}
         />
@@ -123,7 +123,7 @@ export function SearchBar({
             type="button"
             onClick={handleClear}
             aria-label="Clear search input"
-            className="flex items-center justify-center p-1.5 mr-1 text-fg-muted hover:text-fg-primary rounded-xs transition-colors cursor-pointer"
+            className="flex items-center justify-center p-1.5 mr-1 text-slate-400 hover:text-slate-700 rounded-full transition-colors cursor-pointer"
           >
             <X className="size-4" />
           </button>
@@ -132,7 +132,7 @@ export function SearchBar({
         {/* Keyboard shortcut hint (desktop only when idle) */}
         {!query && !isFocused && !compact && (
           <div className="hidden lg:flex items-center pr-3 pointer-events-none">
-            <kbd className="rounded-xs border border-border-default bg-surface-muted px-1.5 py-0.5 text-[10px] font-mono text-fg-muted">
+            <kbd className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-mono text-slate-400">
               ⌘K
             </kbd>
           </div>
@@ -144,10 +144,10 @@ export function SearchBar({
           disabled={isLoading}
           aria-label="Perform search"
           className={cn(
-            'flex items-center justify-center px-4 rounded-r-[5px] bg-primary text-primary-foreground font-medium text-xs',
-            'hover:bg-primary-hover active:opacity-95 transition-colors cursor-pointer shrink-0',
+            'flex items-center justify-center px-4 rounded-full bg-primary text-white font-semibold text-xs',
+            'hover:bg-primary-hover active:scale-95 transition-all cursor-pointer shrink-0 shadow-xs',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-            compact ? 'h-9' : 'h-11'
+            compact ? 'h-7' : 'h-9'
           )}
         >
           <span className="hidden sm:inline font-semibold">Search</span>

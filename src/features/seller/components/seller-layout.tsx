@@ -100,56 +100,61 @@ export function SellerLayout({ children, title, subtitle }: SellerLayoutProps): 
 
   return (
     <SellerGuard>
-      <div className="min-h-screen bg-muted/20">
+      <div className="min-h-screen bg-[#F6F8FB]">
         {/* Merchant Subheader Bar */}
-        <div className="border-b border-border bg-card shadow-xs">
-          <Container className="flex items-center justify-between py-3">
+        <div className="border-b border-slate-200/80 bg-white shadow-2xs">
+          <Container className="flex items-center justify-between py-3.5">
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted md:hidden"
+                className="inline-flex items-center justify-center rounded-xl p-2 text-slate-500 hover:bg-slate-100 md:hidden"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle Seller Menu"
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
 
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 font-extrabold text-base shadow-xs">
                   {sellerProfile?.name ? sellerProfile.name.charAt(0) : 'S'}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-foreground text-sm sm:text-base">
+                    <span className="font-bold text-slate-900 text-sm sm:text-base">
                       {sellerProfile?.name || 'Seller Central'}
                     </span>
                     {isApproved && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200/60">
                         <ShieldCheck className="h-3 w-3" />
                         {t('seller.approved')}
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground hidden sm:inline">
+                  <span className="text-xs text-slate-500 hidden sm:inline">
                     {sellerProfile?.tagline || 'Marketplace Verified Merchant'}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={resetToDemo}
                 title="Reset seller data to demo fixtures"
-                className="text-xs text-muted-foreground"
+                className="text-xs text-slate-500 hover:text-slate-800 rounded-full"
               >
                 <RotateCcw className="mr-1 h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Reset Demo</span>
               </Button>
 
-              <Button variant="tertiary" size="sm" asChild className="text-xs">
+              <Button
+                variant="tertiary"
+                size="sm"
+                asChild
+                className="text-xs font-semibold rounded-full border-slate-200"
+              >
                 <Link href={`/store/${storeSlug}`} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
                   {t('seller.storefrontPreview')}
@@ -164,11 +169,11 @@ export function SellerLayout({ children, title, subtitle }: SellerLayoutProps): 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4 lg:grid-cols-5">
             {/* Desktop Navigation Sidebar */}
             <aside className="hidden md:block md:col-span-1">
-              <div className="sticky top-24 rounded-2xl border border-border bg-card p-3 shadow-xs">
-                <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="sticky top-24 rounded-3xl border border-slate-100 bg-white p-3.5 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+                <div className="px-3.5 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                   {t('seller.title')}
                 </div>
-                <nav className="mt-2 space-y-1" aria-label="Seller Portal Navigation">
+                <nav className="mt-2 space-y-1.5" aria-label="Seller Portal Navigation">
                   {navItems.map((item) => {
                     const active = isActive(item.href, item.exact);
                     const Icon = item.icon;
@@ -177,13 +182,13 @@ export function SellerLayout({ children, title, subtitle }: SellerLayoutProps): 
                         key={item.href}
                         href={item.href}
                         className={cn(
-                          'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-150',
+                          'flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all duration-150',
                           active
-                            ? 'bg-primary text-primary-foreground shadow-xs'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                            ? 'bg-slate-100 text-slate-900 shadow-2xs font-extrabold'
+                            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                         )}
                       >
-                        <Icon className="h-4 w-4 shrink-0" />
+                        <Icon className="h-4 w-4 shrink-0 text-slate-500" />
                         <span>{item.label}</span>
                       </Link>
                     );

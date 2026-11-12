@@ -20,9 +20,9 @@ export function Card({
     <div
       ref={ref}
       className={cn(
-        'rounded-lg border border-border-subtle bg-surface text-fg-primary shadow-xs transition-all duration-200',
+        'rounded-3xl border border-slate-100/80 bg-surface text-fg-primary shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300',
         interactive &&
-          'hover:shadow-md hover:border-border-default hover:-translate-y-0.5 cursor-pointer',
+          'hover:shadow-[0_12px_30px_rgba(0,0,0,0.07)] hover:border-primary/20 hover:-translate-y-1 cursor-pointer',
         className
       )}
       {...props}

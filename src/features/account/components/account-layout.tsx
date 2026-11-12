@@ -82,28 +82,28 @@ export function AccountLayout({
 
   return (
     <AuthGuard>
-      <div className="py-8 bg-surface-subtle/40 min-h-[calc(100vh-200px)]">
+      <div className="py-8 bg-[#F6F8FB] min-h-[calc(100vh-200px)]">
         <Container size="standard">
           {/* Header Bar */}
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border-subtle pb-5">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 pb-5">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-fg-primary">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
                 {title || t('account.title')}
               </h1>
-              {subtitle && <p className="text-sm text-fg-muted mt-1 leading-relaxed">{subtitle}</p>}
+              {subtitle && <p className="text-sm text-slate-500 mt-1 leading-relaxed">{subtitle}</p>}
             </div>
             {customer && (
-              <div className="flex items-center gap-2 self-start sm:self-auto rounded-full bg-surface border border-border-default px-3 py-1.5 shadow-2xs">
-                <div className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs uppercase">
+              <div className="flex items-center gap-2.5 self-start sm:self-auto rounded-full bg-white border border-slate-200/80 px-3.5 py-1.5 shadow-2xs">
+                <div className="flex size-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 font-extrabold text-xs uppercase">
                   {customer.firstName.charAt(0)}
                   {customer.lastName.charAt(0)}
                 </div>
-                <span className="text-xs font-semibold text-fg-primary truncate max-w-40">
+                <span className="text-xs font-bold text-slate-800 truncate max-w-40">
                   {customer.firstName} {customer.lastName}
                 </span>
                 {customer.emailVerified && (
                   <ShieldCheck
-                    className="size-3.5 text-success shrink-0"
+                    className="size-3.5 text-emerald-600 shrink-0"
                     aria-label="Verified Customer"
                   />
                 )}
@@ -116,7 +116,7 @@ export function AccountLayout({
             <aside className="lg:col-span-3">
               <nav
                 aria-label="Account navigation"
-                className="rounded-2xl border border-border-default bg-surface p-2 shadow-xs space-y-1"
+                className="rounded-3xl border border-slate-100 bg-white p-3 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-1.5"
               >
                 {navItems.map((item) => {
                   const Icon = item.icon;
@@ -129,23 +129,23 @@ export function AccountLayout({
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors cursor-pointer',
+                        'flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all duration-150 cursor-pointer',
                         isActive
-                          ? 'bg-primary text-primary-foreground font-semibold shadow-2xs'
-                          : 'text-fg-muted hover:bg-surface-muted hover:text-fg-primary'
+                          ? 'bg-slate-100 text-slate-900 shadow-2xs font-extrabold'
+                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                       )}
                     >
-                      <Icon className="size-4.5 shrink-0" />
+                      <Icon className="size-4.5 shrink-0 text-slate-500" />
                       <span>{item.label}</span>
                     </Link>
                   );
                 })}
 
-                <div className="border-t border-border-subtle pt-1 my-1">
+                <div className="border-t border-slate-100 pt-1.5 my-1">
                   <button
                     type="button"
                     onClick={() => logout()}
-                    className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                    className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   >
                     <LogOut className="size-4.5 shrink-0 rtl:rotate-180" />
                     <span>{t('auth.logout')}</span>

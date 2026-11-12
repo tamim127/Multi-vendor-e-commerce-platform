@@ -31,9 +31,9 @@ export function PlpToolbar({
   const { t } = useI18n();
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 py-3 border-y border-border-subtle bg-surface-subtle/50 px-3 rounded-lg mb-6">
+    <div className="flex flex-wrap items-center justify-between gap-4 py-3 px-5 border border-slate-100 bg-white rounded-2xl shadow-xs mb-6">
       {/* Total Results Summary */}
-      <div className="text-sm font-medium text-fg-muted">
+      <div className="text-sm font-semibold text-slate-800">
         {t('plp.showingResults', { count: totalCount.toString() })}
       </div>
 
@@ -44,13 +44,13 @@ export function PlpToolbar({
           variant="tertiary"
           size="sm"
           onClick={onOpenMobileFilters}
-          className="lg:hidden min-h-[44px] min-w-[44px] px-3 gap-2"
+          className="lg:hidden min-h-[44px] min-w-[44px] px-3 gap-2 rounded-full"
           aria-label={t('plp.filters')}
         >
           <SlidersHorizontal className="size-4" />
           <span>{t('plp.filters')}</span>
           {activeFiltersCount > 0 && (
-            <span className="flex size-5 items-center justify-center rounded-full bg-primary text-primary-fg text-xs font-semibold">
+            <span className="flex size-5 items-center justify-center rounded-full bg-primary text-white text-xs font-semibold">
               {activeFiltersCount}
             </span>
           )}
@@ -60,7 +60,7 @@ export function PlpToolbar({
         <div className="flex items-center gap-2">
           <label
             htmlFor="plp-sort-select"
-            className="text-xs font-medium text-fg-muted shrink-0 hidden sm:inline"
+            className="text-xs font-medium text-slate-500 shrink-0 hidden sm:inline"
           >
             {t('plp.sortBy')}:
           </label>
@@ -68,7 +68,7 @@ export function PlpToolbar({
             id="plp-sort-select"
             value={currentSort}
             onChange={(e) => onSortChange(e.target.value as CatalogSortOption)}
-            className="h-10 sm:h-9 min-h-[44px] sm:min-h-0 rounded-md border border-border-subtle bg-surface px-3 py-1 text-sm text-fg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors cursor-pointer"
+            className="h-10 sm:h-9 min-h-[44px] sm:min-h-0 rounded-full border border-slate-200/80 bg-slate-50 px-3.5 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-colors cursor-pointer"
             aria-label={t('plp.sortBy')}
           >
             <option value="relevance">{t('plp.sortRelevance')}</option>

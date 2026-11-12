@@ -37,6 +37,7 @@ export function PlpFilterSidebar({
   onResetFilters,
 }: PlpFilterSidebarProps): React.JSX.Element {
   const { t } = useI18n();
+  const [deliveryOption, setDeliveryOption] = React.useState<'standard' | 'pickup'>('standard');
 
   // Local price input state for user editing before submission
   const [minPriceInput, setMinPriceInput] = React.useState<string>(
@@ -96,26 +97,122 @@ export function PlpFilterSidebar({
   };
 
   return (
-    <aside className="w-full space-y-6" aria-label={t('plp.filters')}>
-      <div className="flex items-center justify-between pb-2 border-b border-border-subtle">
-        <h2 className="text-base font-bold text-fg-primary tracking-tight">{t('plp.filters')}</h2>
+    <aside
+      className="w-full space-y-6 bg-white p-5 rounded-3xl border border-slate-100/90 shadow-[0_4px_24px_rgba(0,0,0,0.03)]"
+      aria-label={t('plp.filters')}
+    >
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h2 className="text-base font-bold text-slate-900 tracking-tight">{t('plp.filters')}</h2>
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={onResetFilters}
-          className="text-xs text-fg-muted hover:text-fg-primary h-7 px-2"
+          className="text-xs text-slate-500 hover:text-primary h-7 px-2 font-medium"
         >
           {t('plp.clearAll')}
         </Button>
       </div>
 
+      {/* Delivery Options Pill Selector (matching Image 1) */}
+      <div className="space-y-2">
+        <span className="text-xs font-bold text-slate-800">Delivery Options</span>
+        <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100/80 rounded-full">
+          <button
+            type="button"
+            onClick={() => setDeliveryOption('standard')}
+            className={`py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
+              deliveryOption === 'standard'
+                ? 'bg-primary text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Standard
+          </button>
+          <button
+            type="button"
+            onClick={() => setDeliveryOption('pickup')}
+            className={`py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${
+              deliveryOption === 'pickup'
+                ? 'bg-primary text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Pick Up
+          </button>
+        </div>
+      </div>
+
       <Accordion
         type="multiple"
-        defaultValue={['category', 'brand', 'price', 'rating', 'availability']}
+        defaultValue={['price', 'category', 'brand', 'rating', 'availability']}
         className="space-y-2"
       >
-        {/* 1. Category Facet */}
+        {/* 1. Price Facet with curve histogram and pill tags */}
+        <AccordionItem value="price">
+          <AccordionTrigger>{t('plp.price')}</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3 pt-1">
+              <p className="text-[11px] text-slate-400">The average price is $300</p>
+              {/* Stylized Price Curve Bars */}
+              <div className="flex items-end justify-between h-8 gap-0.5 px-1 pb-1 border-b border-indigo-100">
+                <div className="w-1.5 bg-indigo-200 rounded-t h-2" />
+                <div className="w-1.5 bg-indigo-200 rounded-t h-3" />
+                <div className="w-1.5 bg-indigo-300 rounded-t h-5" />
+                <div className="w-1.5 bg-indigo-400 rounded-t h-7" />
+                <div className="w-1.5 bg-indigo-500 rounded-t h-8" />
+                <div className="w-1.5 bg-indigo-400 rounded-t h-6" />
+                <div className="w-1.5 bg-indigo-300 rounded-t h-4" />
+                <div className="w-1.5 bg-indigo-200 rounded-t h-2" />
+              </div>
+              <form onSubmit={handleApplyPrice} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <label htmlFor="price-min" className="text-2xs text-slate-500 block mb-1">
+                      {t('plp.minPrice')} ($)
+                    </label>
+                    <Input
+                      id="price-min"
+                      type="number"
+                      min="0"
+                      step="1"
+                      placeholder="0"
+                      value={minPriceInput}
+                      onChange={(e) => setMinPriceInput(e.target.value)}
+                      className="h-8 text-xs font-mono rounded-xl bg-slate-50 border-slate-200"
+                    />
+                  </div>
+                  <span className="text-slate-400 mt-5 text-xs">–</span>
+                  <div className="flex-1">
+                    <label htmlFor="price-max" className="text-2xs text-slate-500 block mb-1">
+                      {t('plp.maxPrice')} ($)
+                    </label>
+                    <Input
+                      id="price-max"
+                      type="number"
+                      min="0"
+                      step="1"
+                      placeholder="3000"
+                      value={maxPriceInput}
+                      onChange={(e) => setMaxPriceInput(e.target.value)}
+                      className="h-8 text-xs font-mono rounded-xl bg-slate-50 border-slate-200"
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  size="sm"
+                  className="w-full text-xs h-8 rounded-full font-bold bg-slate-100 hover:bg-primary hover:text-white transition-colors"
+                >
+                  {t('plp.applyFilters')}
+                </Button>
+              </form>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* 2. Category Facet */}
         <AccordionItem value="category">
           <AccordionTrigger>{t('plp.category')}</AccordionTrigger>
           <AccordionContent>
@@ -127,14 +224,18 @@ export function PlpFilterSidebar({
                     key={cat.id}
                     type="button"
                     onClick={() => handleCategorySelect(cat.slug)}
-                    className={`flex w-full items-center justify-between px-2 py-1.5 rounded-md text-xs transition-colors text-start cursor-pointer ${
+                    className={`flex w-full items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors text-start cursor-pointer ${
                       isSelected
-                        ? 'bg-primary/10 text-primary font-semibold'
-                        : 'text-fg-muted hover:text-fg-primary hover:bg-surface-subtle'
+                        ? 'bg-primary text-white font-bold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
                     <span>{cat.label}</span>
-                    <span className="font-mono text-fg-subtle text-2xs">({cat.count})</span>
+                    <span
+                      className={`font-mono text-2xs ${isSelected ? 'text-white/80' : 'text-slate-400'}`}
+                    >
+                      ({cat.count})
+                    </span>
                   </button>
                 );
               })}
@@ -142,7 +243,7 @@ export function PlpFilterSidebar({
           </AccordionContent>
         </AccordionItem>
 
-        {/* 2. Brand Facet */}
+        {/* 3. Brand Facet */}
         <AccordionItem value="brand">
           <AccordionTrigger>{t('plp.brand')}</AccordionTrigger>
           <AccordionContent>
@@ -155,58 +256,13 @@ export function PlpFilterSidebar({
                       id={`sidebar-brand-${brand.slug}`}
                       checked={isChecked}
                       onCheckedChange={() => handleBrandToggle(brand.slug)}
-                      label={<span className="text-xs">{brand.label}</span>}
+                      label={<span className="text-xs font-medium text-slate-700">{brand.label}</span>}
                     />
-                    <span className="font-mono text-fg-subtle text-2xs">({brand.count})</span>
+                    <span className="font-mono text-slate-400 text-2xs">({brand.count})</span>
                   </div>
                 );
               })}
             </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* 3. Price Facet */}
-        <AccordionItem value="price">
-          <AccordionTrigger>{t('plp.price')}</AccordionTrigger>
-          <AccordionContent>
-            <form onSubmit={handleApplyPrice} className="space-y-3 pt-1">
-              <div className="flex items-center gap-2">
-                <div className="flex-1">
-                  <label htmlFor="price-min" className="text-2xs text-fg-muted block mb-1">
-                    {t('plp.minPrice')} ($)
-                  </label>
-                  <Input
-                    id="price-min"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="0"
-                    value={minPriceInput}
-                    onChange={(e) => setMinPriceInput(e.target.value)}
-                    className="h-8 text-xs font-mono"
-                  />
-                </div>
-                <span className="text-fg-muted mt-5 text-xs">–</span>
-                <div className="flex-1">
-                  <label htmlFor="price-max" className="text-2xs text-fg-muted block mb-1">
-                    {t('plp.maxPrice')} ($)
-                  </label>
-                  <Input
-                    id="price-max"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="3000"
-                    value={maxPriceInput}
-                    onChange={(e) => setMaxPriceInput(e.target.value)}
-                    className="h-8 text-xs font-mono"
-                  />
-                </div>
-              </div>
-              <Button type="submit" variant="secondary" size="sm" className="w-full text-xs h-8">
-                {t('plp.applyFilters')}
-              </Button>
-            </form>
           </AccordionContent>
         </AccordionItem>
 
@@ -222,10 +278,10 @@ export function PlpFilterSidebar({
                     key={stars}
                     type="button"
                     onClick={() => handleRatingSelect(stars)}
-                    className={`flex w-full items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-colors text-start cursor-pointer ${
+                    className={`flex w-full items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs transition-colors text-start cursor-pointer ${
                       isSelected
-                        ? 'bg-primary/10 text-primary font-semibold'
-                        : 'text-fg-muted hover:text-fg-primary hover:bg-surface-subtle'
+                        ? 'bg-amber-50 text-amber-900 font-bold border border-amber-200'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
                     <Rating value={stars} max={5} showValue={false} size="sm" />
@@ -246,9 +302,9 @@ export function PlpFilterSidebar({
                 id="sidebar-stock-only"
                 checked={params.inventoryStates?.includes('in_stock') ?? false}
                 onCheckedChange={handleStockToggle}
-                label={<span className="text-xs">{t('plp.inStockOnly')}</span>}
+                label={<span className="text-xs font-medium text-slate-700">{t('plp.inStockOnly')}</span>}
               />
-              <span className="font-mono text-fg-subtle text-2xs">({facets.inStockCount})</span>
+              <span className="font-mono text-slate-400 text-2xs">({facets.inStockCount})</span>
             </div>
           </AccordionContent>
         </AccordionItem>

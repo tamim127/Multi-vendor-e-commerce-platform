@@ -108,11 +108,11 @@ export function ProductCard({
     <Card
       interactive
       className={cn(
-        'group relative flex overflow-hidden border border-border-subtle bg-surface text-fg-primary',
-        'transition-all duration-200 hover:shadow-md hover:border-border-strong focus-within:ring-2 focus-within:ring-primary',
+        'group relative flex overflow-hidden rounded-[26px] border border-slate-100/90 bg-white text-slate-900',
+        'shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] hover:border-slate-200/80 hover:-translate-y-1 transition-all duration-300',
         isHorizontal ? 'flex-col sm:flex-row items-stretch' : 'flex-col justify-between h-full',
-        isSponsored && 'border-primary/20 bg-surface-subtle/30',
-        isEditorial && 'p-1 bg-surface-elevated shadow-sm',
+        isSponsored && 'ring-1 ring-primary/20 bg-slate-50/30',
+        isEditorial && 'p-1 bg-white shadow-sm',
         isUnavailable && 'opacity-75 grayscale-25',
         className
       )}
@@ -193,24 +193,26 @@ export function ProductCard({
             </div>
           )}
 
-          {/* Pricing & Offers Guidance */}
-          <div className="pt-2 border-t border-border-subtle mt-1 flex flex-col gap-2">
-            <ProductCardPrice
-              lowestPriceFormatted={lowestPriceFormatted}
-              compareAtPriceFormatted={compareAtPriceFormatted}
-              discountPercent={discountPercent}
-              hasMultipleOffers={hasMultipleOffers}
-              offerCount={offerCount}
-              showCompareAtPrice={showCompareAtPrice}
-              showDiscount={showDiscount}
-              showOfferCount={showOfferCount}
-              isFlashSale={isFlashSale}
-              flashSaleProgressPercent={flashSaleProgressPercent}
-            />
+          {/* Pricing & Offers Guidance + Pill Quick Action */}
+          <div className="pt-2.5 border-t border-slate-100/90 mt-auto flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <ProductCardPrice
+                lowestPriceFormatted={lowestPriceFormatted}
+                compareAtPriceFormatted={compareAtPriceFormatted}
+                discountPercent={discountPercent}
+                hasMultipleOffers={hasMultipleOffers}
+                offerCount={offerCount}
+                showCompareAtPrice={showCompareAtPrice}
+                showDiscount={showDiscount}
+                showOfferCount={showOfferCount}
+                isFlashSale={isFlashSale}
+                flashSaleProgressPercent={flashSaleProgressPercent}
+              />
+            </div>
 
             {/* Quick Action Button (Isolated pointer-events) */}
             {showQuickAction && (
-              <div className="pt-1 pointer-events-auto">
+              <div className="shrink-0 pointer-events-auto">
                 <ProductCardQuickActionButton
                   product={product}
                   quickActionLabel={quickActionLabel}

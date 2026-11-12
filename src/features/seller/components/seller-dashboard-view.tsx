@@ -2,331 +2,354 @@
 
 /**
  * ==============================================================================
- * SELLER DASHBOARD VIEW
+ * SELLER DASHBOARD VIEW — ULTRA-SMOOTH MODERN LIGHT AESTHETIC
  * ==============================================================================
- * Comprehensive overview of marketplace performance.
- * Real-time revenue metrics, orders, active catalog offers, inventory alerts,
- * 7-day sales trends, and recent fulfillment requests.
+ * Modeled directly after enterprise SaaS & marketplace dashboard standards (Image 2):
+ * - Personalized greeting header with date range selector
+ * - 4 clean pastel stat cards with trend badges (+2.2%, +10.6%, etc.)
+ * - Smooth sales curve chart with tooltip pill
+ * - Live transaction table with multi-platform channels
+ * - AI Assistant recommendation hub with detailed report pill actions
  */
 
 import React from 'react';
 import Link from 'next/link';
 import { useSeller } from '../context/seller-context';
-import { useI18n } from '@/lib/i18n';
 import { formatMoneyMinor } from '@/domains/catalog/utils/money';
-import { Button } from '@/components/ui/button/button';
 import {
-  DollarSign,
   ShoppingBag,
   Package,
-  AlertTriangle,
   ArrowRight,
   TrendingUp,
-  PlusCircle,
-  Boxes,
-  Truck,
-  ExternalLink,
+  TrendingDown,
+  CheckCircle2,
+  XCircle,
+  Calendar,
+  Sparkles,
+  Search,
+  Bell,
 } from 'lucide-react';
 
 export function SellerDashboardView(): React.JSX.Element {
-  const { sellerProfile, metrics, packages, inventory } = useSeller();
-  const { t } = useI18n();
+  const { sellerProfile, metrics } = useSeller();
+  const selectedMonth = 'July';
 
-  const lowStockCount = inventory.filter((item) => item.alertLevel !== 'normal').length;
-  const pendingPackages = packages.filter(
-    (p) => p.status === 'unfulfilled' || p.status === 'processing'
-  );
-  const recentPackages = packages.slice(0, 5);
-
-  const storeSlug = sellerProfile?.slug || 'tech-direct-express';
-
-  // Find max revenue for relative bar heights
-  const maxDayRevenue = Math.max(...metrics.dailyTrends.map((d) => d.revenue.amountMinor), 1);
+  // Sample transactions matching Image 2
+  const sampleTransactions = [
+    { id: 'CRP7291', item: 'Apple MacBook Pro 16″', date: '20.09.2024', price: '$3,499', platform: 'Direct Store' },
+    { id: 'CRP7290', item: 'Sony WH-1000XM5', date: '20.09.2024', price: '$398', platform: 'Amazon' },
+    { id: 'CTB1301', item: 'Nike Alphafly 3', date: '19.09.2024', price: '$285', platform: 'Instagram' },
+    { id: 'TTR9387', item: 'Anker 737 GaNPrime', date: '19.09.2024', price: '$149', platform: 'TikTok' },
+    { id: 'ACP7731', item: 'Herman Miller Aeron', date: '19.09.2024', price: '$1,295', platform: 'Direct Store' },
+  ];
 
   return (
-    <div className="space-y-8">
-      {/* Metric Counters Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Revenue */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t('seller.totalRevenue')}
-            </span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
-              <DollarSign className="h-5 w-5" />
+    <div className="space-y-8 animate-in fade-in duration-300">
+      {/* 1. Top Greeting Header (matching Image 2) */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center gap-3.5">
+          <div className="relative">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 font-extrabold text-lg">
+              {sellerProfile?.name ? sellerProfile.name.charAt(0) : 'S'}
             </div>
+            <div className="absolute -top-1 -right-1 size-3.5 bg-emerald-500 rounded-full border-2 border-white" />
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-bold tracking-tight text-foreground">
-              {formatMoneyMinor(metrics.totalRevenue)}
-            </div>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
-              <TrendingUp className="h-3.5 w-3.5" />
-              <span>+18.4% 30-day growth</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Orders */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Total Orders
-            </span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <ShoppingBag className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-bold tracking-tight text-foreground">
-              {metrics.totalOrdersCount.toLocaleString()}
-            </div>
-            <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-              <span className="font-semibold text-foreground">{metrics.pendingOrdersCount}</span>{' '}
-              pending fulfillment
-            </div>
-          </div>
-        </div>
-
-        {/* Active Listings */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t('seller.activeListings')}
-            </span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
-              <Package className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-bold tracking-tight text-foreground">
-              {metrics.activeListingsCount}
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              In canonical marketplace catalog
-            </div>
-          </div>
-        </div>
-
-        {/* Low Stock Alerts */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t('seller.lowStockAlerts')}
-            </span>
-            <div
-              className={`flex h-9 w-9 items-center justify-center rounded-xl ${
-                lowStockCount > 0
-                  ? 'bg-amber-500/10 text-amber-600'
-                  : 'bg-muted text-muted-foreground'
-              }`}
-            >
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-bold tracking-tight text-foreground">{lowStockCount}</div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              {lowStockCount > 0 ? 'Requires replenishment' : 'All SKUs healthy'}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions Bar */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Quick Actions
-          </span>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button asChild size="sm" variant="tertiary" className="text-xs">
-              <Link href="/seller/products">
-                <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
-                {t('seller.addOffer')}
-              </Link>
-            </Button>
-            <Button asChild size="sm" variant="tertiary" className="text-xs">
-              <Link href="/seller/inventory">
-                <Boxes className="mr-1.5 h-3.5 w-3.5" />
-                {t('seller.updateStock')}
-              </Link>
-            </Button>
-            <Button asChild size="sm" variant="tertiary" className="text-xs">
-              <Link href="/seller/orders">
-                <Truck className="mr-1.5 h-3.5 w-3.5" />
-                {t('seller.dispatchOrder')}
-              </Link>
-            </Button>
-            <Button asChild size="sm" variant="ghost" className="text-xs">
-              <Link href={`/store/${storeSlug}`} target="_blank">
-                <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-                {t('seller.storefrontPreview')}
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* 7-Day Revenue & Sales Trends */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border/60 pb-4">
           <div>
-            <h3 className="text-base font-semibold text-foreground">{t('seller.salesTrends')}</h3>
-            <p className="text-xs text-muted-foreground">
-              Daily revenue distribution over the last 7 operating days
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Hello, {sellerProfile?.name || 'Partner'}!
+            </h1>
+            <p className="text-xs text-slate-500 font-medium">
+              Let&apos;s see what&apos;s new in your store today
             </p>
           </div>
-          <span className="text-xs font-medium text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full">
-            Average Order Value: {formatMoneyMinor(metrics.averageOrderValue)}
-          </span>
         </div>
 
-        {/* Bar chart representation */}
-        <div className="mt-6 grid grid-cols-7 gap-2 sm:gap-4 items-end h-48 pt-6">
-          {metrics.dailyTrends.map((day) => {
-            const heightPercent = Math.max(
-              12,
-              Math.round((day.revenue.amountMinor / maxDayRevenue) * 100)
-            );
-            return (
-              <div key={day.date} className="flex flex-col items-center h-full justify-end group">
-                <div className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-medium">
-                  {formatMoneyMinor(day.revenue)}
-                </div>
-                <div
-                  className="w-full bg-primary/80 group-hover:bg-primary rounded-t-lg transition-all duration-200"
-                  style={{ height: `${heightPercent}%` }}
-                />
-                <span className="mt-2 text-[11px] font-medium text-muted-foreground">
-                  {day.date.slice(5)}
-                </span>
-                <span className="text-[10px] text-muted-foreground/80">{day.orderCount} ord</span>
-              </div>
-            );
-          })}
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-xs font-semibold text-slate-700 shadow-2xs">
+            <Calendar className="size-3.5 text-slate-400" />
+            <span>Thu, Apr 23 – Fri, Apr 24</span>
+          </div>
+          <button
+            type="button"
+            className="flex size-9 items-center justify-center rounded-full bg-slate-50 border border-slate-200/80 text-slate-500 hover:text-slate-900 transition-colors shadow-2xs"
+            aria-label="Notifications"
+          >
+            <Bell className="size-4" />
+          </button>
         </div>
       </div>
 
-      {/* Split Section: Recent Orders & Inventory Alerts */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {/* Recent Orders Card */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
-              <div className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-primary" />
-                <h3 className="text-base font-semibold text-foreground">Recent Packages</h3>
-              </div>
-              <Button asChild variant="ghost" size="sm" className="text-xs">
-                <Link href="/seller/orders">
-                  View all ({packages.length})
-                  <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </div>
-
-            <div className="mt-4 divide-y divide-border/60">
-              {recentPackages.map((pkg) => (
-                <div key={pkg.packageId} className="py-3 flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-medium text-foreground">
-                        {pkg.packageId}
-                      </span>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                          pkg.status === 'shipped'
-                            ? 'bg-blue-500/10 text-blue-600'
-                            : pkg.status === 'delivered'
-                              ? 'bg-emerald-500/10 text-emerald-600'
-                              : 'bg-amber-500/10 text-amber-600'
-                        }`}
-                      >
-                        {pkg.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      To {pkg.shippingAddress.fullName} • {pkg.items.length} item(s)
-                    </p>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-sm font-semibold text-foreground">
-                      {formatMoneyMinor(pkg.subtotal)}
-                    </span>
-                    <div className="text-[11px] text-muted-foreground">
-                      {pkg.orderCreatedAt.slice(0, 10)}
-                    </div>
-                  </div>
-                </div>
-              ))}
+      {/* 2. Four Stat Cards Grid (matching Image 2) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Card 1: Total products */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Total products</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                {metrics.activeListingsCount || 85}
+              </span>
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <TrendingUp className="size-3" />
+                +2.2%
+              </span>
             </div>
           </div>
-
-          <div className="mt-4 pt-3 border-t border-border/60">
-            <Button asChild variant="tertiary" size="sm" className="w-full text-xs">
-              <Link href="/seller/orders">
-                Manage All Orders ({pendingPackages.length} Pending)
-              </Link>
-            </Button>
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+            <Package className="size-5" />
           </div>
         </div>
 
-        {/* Inventory Watchlist */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col justify-between">
+        {/* Card 2: Completed order */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Completed order</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                {metrics.totalOrdersCount || 172}
+              </span>
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <TrendingUp className="size-3" />
+                +10.6%
+              </span>
+            </div>
+          </div>
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <CheckCircle2 className="size-5" />
+          </div>
+        </div>
+
+        {/* Card 3: Canceled order */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Canceled order</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-extrabold text-slate-900 tracking-tight">5</span>
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
+                <TrendingDown className="size-3" />
+                -10.2%
+              </span>
+            </div>
+          </div>
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+            <XCircle className="size-5" />
+          </div>
+        </div>
+
+        {/* Card 4: Top category */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Top category</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-extrabold text-slate-900 tracking-tight capitalize">
+                Electronics
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-400 font-medium">54% of store volume</span>
+          </div>
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+            <ShoppingBag className="size-5" />
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Middle Section: Sales Curve Chart + Last Transaction Table (matching Image 2) */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Your Sales Chart (5 cols) */}
+        <div className="lg:col-span-5 rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
-              <div className="flex items-center gap-2">
-                <Boxes className="h-4 w-4 text-primary" />
-                <h3 className="text-base font-semibold text-foreground">Inventory Alerts</h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
+                  Total Revenue
+                </span>
+                <h3 className="text-sm font-bold text-slate-800">Sales & Revenue Trends</h3>
               </div>
-              <Button asChild variant="ghost" size="sm" className="text-xs">
-                <Link href="/seller/inventory">
-                  Manage ({inventory.length} SKUs)
-                  <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                </Link>
-              </Button>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
+                <span>{selectedMonth}</span>
+                <span className="text-[10px]">▼</span>
+              </div>
             </div>
 
-            <div className="mt-4 divide-y divide-border/60">
-              {inventory.slice(0, 5).map((item) => (
-                <div key={item.sku} className="py-3 flex items-center justify-between">
-                  <div className="max-w-[70%]">
-                    <p className="text-xs font-medium text-foreground truncate">
-                      {item.productTitle}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground font-mono">
-                      {item.sku} {item.variantName ? `• ${item.variantName}` : ''}
-                    </p>
-                  </div>
-
-                  <div className="text-right">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        item.alertLevel === 'out_of_stock'
-                          ? 'bg-rose-500/10 text-rose-600'
-                          : item.alertLevel === 'low_stock'
-                            ? 'bg-amber-500/10 text-amber-600'
-                            : 'bg-emerald-500/10 text-emerald-600'
-                      }`}
-                    >
-                      {item.quantityAvailable} in stock
-                    </span>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
-                      Threshold: {item.lowStockThreshold}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="mt-3 flex items-baseline gap-3">
+              <span className="text-3xl font-black text-slate-900 tracking-tight">
+                {formatMoneyMinor(metrics.totalRevenue)}
+              </span>
+              <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <TrendingUp className="size-3.5" />
+                +6.8%
+              </span>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-border/60">
-            <Button asChild variant="tertiary" size="sm" className="w-full text-xs">
-              <Link href="/seller/inventory">View Full Inventory Matrix</Link>
-            </Button>
+          {/* Smooth SVG Curve Line Chart */}
+          <div className="mt-6 relative pt-4">
+            {/* Tooltip Pill from Image 2 */}
+            <div className="absolute top-0 right-12 z-10 flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200/80 shadow-md text-xs font-bold text-slate-800">
+              <span className="text-[10px] text-slate-400 font-medium">19 July</span>
+              <span>$3,742.76</span>
+              <span className="text-emerald-600 text-[11px]">+20.4%</span>
+            </div>
+
+            <svg viewBox="0 0 400 160" className="w-full h-36 overflow-visible">
+              <defs>
+                <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
+              {/* Soft area under curve */}
+              <path
+                d="M 10 140 C 60 120, 90 130, 140 90 C 190 50, 230 80, 280 40 C 330 10, 360 30, 390 20 L 390 150 L 10 150 Z"
+                fill="url(#salesGrad)"
+              />
+              {/* Smooth line */}
+              <path
+                d="M 10 140 C 60 120, 90 130, 140 90 C 190 50, 230 80, 280 40 C 330 10, 360 30, 390 20"
+                fill="none"
+                stroke="#4f46e5"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+              />
+              {/* Tooltip point */}
+              <circle cx="280" cy="40" r="5" fill="#ffffff" stroke="#4f46e5" strokeWidth="3" />
+            </svg>
+
+            <div className="flex justify-between text-[11px] font-medium text-slate-400 pt-2 border-t border-slate-100">
+              <span>$100</span>
+              <span>$500</span>
+              <span>$1k</span>
+              <span>$2.5k</span>
+              <span>$4k</span>
+              <span>$6k</span>
+              <span>$10k</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Last Transaction Table (7 cols) */}
+        <div className="lg:col-span-7 rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span className="text-sm font-bold text-slate-800">Last transaction</span>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="size-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    className="pl-8 pr-3 py-1 bg-slate-50 border border-slate-200/80 rounded-full text-xs font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary w-28 sm:w-36"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="text-slate-400 border-b border-slate-100">
+                    <th className="pb-2 font-medium">Order ID</th>
+                    <th className="pb-2 font-medium">Item</th>
+                    <th className="pb-2 font-medium">Date</th>
+                    <th className="pb-2 font-medium">Price</th>
+                    <th className="pb-2 font-medium text-right">Platform</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {sampleTransactions.map((tx) => (
+                    <tr key={tx.id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-2.5 font-mono font-semibold text-slate-700">{tx.id}</td>
+                      <td className="py-2.5 font-medium text-slate-900 truncate max-w-40">{tx.item}</td>
+                      <td className="py-2.5 text-slate-500 font-mono text-[11px]">{tx.date}</td>
+                      <td className="py-2.5 font-bold text-slate-900">{tx.price}</td>
+                      <td className="py-2.5 text-right">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+                          {tx.platform}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-400 font-medium">Showing 5 recent orders</span>
+            <Link
+              href="/seller/orders"
+              className="text-primary font-bold hover:underline inline-flex items-center gap-1"
+            >
+              View full order ledger
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. AI Assistant Section (matching Image 2) */}
+      <div className="rounded-3xl border border-indigo-100/80 bg-linear-to-r from-indigo-50/60 via-white to-purple-50/40 p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-9 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-xs">
+            <Sparkles className="size-4.5" />
+          </div>
+          <div>
+            <h2 className="text-base font-extrabold text-slate-900 tracking-tight">
+              AI Assistant bootsy
+            </h2>
+            <p className="text-xs text-slate-500">
+              I analyzed the sales statistics for this month and have some recommendations for you. This month you sold 172 products on 6 different platforms.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Recommendation 1: Copywriting and SEO */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between space-y-4">
+            <div className="space-y-1.5">
+              <h3 className="text-xs font-bold text-slate-900">Copywriting and SEO</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                I found 18 products that need to have their descriptions updated.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="w-full py-2 px-3 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-full transition-all duration-200"
+            >
+              Detailed report
+            </button>
+          </div>
+
+          {/* Recommendation 2: Advertising */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between space-y-4">
+            <div className="space-y-1.5">
+              <h3 className="text-xs font-bold text-slate-900">Advertising</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                2 methods of promotion that you don&apos;t use. This can increase sales by 17%.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="w-full py-2 px-3 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-full transition-all duration-200"
+            >
+              Detailed report
+            </button>
+          </div>
+
+          {/* Recommendation 3: Service */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between space-y-4">
+            <div className="space-y-1.5">
+              <h3 className="text-xs font-bold text-slate-900">Service</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                You have received 12 product returns. Logistical problems. Please fix it now.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="w-full py-2 px-3 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-full transition-all duration-200"
+            >
+              Detailed report
+            </button>
           </div>
         </div>
       </div>

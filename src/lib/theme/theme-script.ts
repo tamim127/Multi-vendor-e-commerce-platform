@@ -13,7 +13,8 @@ export const themeInitScript: string = `(function() {
     var storageKey = '${THEME_STORAGE_KEY}';
     var stored = localStorage.getItem(storageKey);
     var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var isDark = stored === 'dark' || ((!stored || stored === 'system') && prefersDark);
+    // Strictly default to fresh modern LIGHT theme unless user explicitly chose dark
+    var isDark = stored === 'dark';
     var root = document.documentElement;
     if (isDark) {
       root.classList.add('dark');

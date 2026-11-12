@@ -71,6 +71,7 @@ interface HeroSlide {
   gradientClass: string;
   accentColor: string;
   icon: React.ComponentType<{ className?: string }>;
+  image: string;
 }
 
 const HERO_SLIDES: HeroSlide[] = [
@@ -91,6 +92,7 @@ const HERO_SLIDES: HeroSlide[] = [
     gradientClass: 'from-slate-900 via-indigo-950 to-slate-900 text-white',
     accentColor: 'text-indigo-400',
     icon: Laptop,
+    image: '/assets/mock/products/mbp16-hero.webp',
   },
   {
     id: 'hero-sony-xm5',
@@ -114,6 +116,7 @@ const HERO_SLIDES: HeroSlide[] = [
     gradientClass: 'from-zinc-900 via-neutral-900 to-stone-900 text-white',
     accentColor: 'text-amber-400',
     icon: Headphones,
+    image: '/assets/mock/products/sony-xm5-hero.webp',
   },
   {
     id: 'hero-samsung-g9',
@@ -137,6 +140,7 @@ const HERO_SLIDES: HeroSlide[] = [
     gradientClass: 'from-cyan-950 via-slate-900 to-blue-950 text-white',
     accentColor: 'text-cyan-400',
     icon: Monitor,
+    image: '/assets/mock/products/samsung-neo-g9.webp',
   },
 ];
 
@@ -149,6 +153,7 @@ const FEATURED_CATEGORIES = [
     count: '650+ Products',
     icon: Laptop,
     accentBg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    image: '/assets/mock/products/mbp16-hero.webp',
   },
   {
     id: 'cat-audio-headphones',
@@ -157,6 +162,7 @@ const FEATURED_CATEGORIES = [
     count: '380+ Products',
     icon: Headphones,
     accentBg: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+    image: '/assets/mock/products/sony-xm5-hero.webp',
   },
   {
     id: 'cat-monitors-displays',
@@ -165,6 +171,7 @@ const FEATURED_CATEGORIES = [
     count: '140+ Products',
     icon: Monitor,
     accentBg: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+    image: '/assets/mock/products/samsung-neo-g9.webp',
   },
   {
     id: 'cat-mens-footwear',
@@ -173,6 +180,7 @@ const FEATURED_CATEGORIES = [
     count: '280+ Products',
     icon: Footprints,
     accentBg: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+    image: '/assets/mock/products/nike-alphafly-3-hero.webp',
   },
   {
     id: 'cat-office-furniture',
@@ -181,6 +189,7 @@ const FEATURED_CATEGORIES = [
     count: '190+ Products',
     icon: Armchair,
     accentBg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    image: '/assets/mock/products/herman-miller-aeron.webp',
   },
   {
     id: 'cat-mobile-accessories',
@@ -189,6 +198,7 @@ const FEATURED_CATEGORIES = [
     count: '290+ Products',
     icon: Zap,
     accentBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    image: '/assets/mock/products/anker-737.webp',
   },
 ];
 
@@ -400,19 +410,27 @@ export default function HomePage(): React.JSX.Element {
 
               {/* Slide Visual Feature Card */}
               <div className="lg:col-span-5 flex justify-center">
-                <div className="relative w-full max-w-md rounded-3xl border border-white/20 bg-white/5 p-6 backdrop-blur-xl shadow-2xl space-y-6">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
-                        <activeSlide.icon className="h-6 w-6" />
+                <div className="relative w-full max-w-md rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur-xl shadow-2xl space-y-4">
+                  {/* Real Product Photography Feature */}
+                  <div className="relative aspect-16/10 w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center p-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={activeSlide.image}
+                      alt={activeSlide.title}
+                      className="h-full w-full object-contain drop-shadow-2xl transition-transform duration-500 hover:scale-105"
+                    />
+                    <span className="absolute top-2.5 right-2.5 rounded-full bg-black/60 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-bold text-white border border-white/20">
+                      {activeSlide.badge}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                    <div>
+                      <div className="text-[10px] font-semibold text-white/60 uppercase tracking-wider">
+                        Featured Flagship
                       </div>
-                      <div>
-                        <div className="text-xs font-semibold text-white/60 uppercase">
-                          Featured Flagship
-                        </div>
-                        <div className="text-sm font-bold text-white truncate max-w-[180px]">
-                          {activeSlide.title}
-                        </div>
+                      <div className="text-sm font-bold text-white truncate max-w-[200px]">
+                        {activeSlide.title}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 text-amber-300 text-xs font-bold bg-white/10 px-2.5 py-1 rounded-full">
@@ -421,33 +439,22 @@ export default function HomePage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-white/60">
-                      Multi-Vendor Buy-Box Winner
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/10 p-3.5 flex items-center justify-between">
-                      <div>
-                        <div className="text-xs font-bold text-white">TechDirect Express</div>
-                        <div className="text-[11px] text-white/70">
-                          Authorized Distributor • Same-Day Dispatch
-                        </div>
+                  <div className="rounded-xl border border-white/10 bg-white/10 p-3 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-bold text-white">TechDirect Express</div>
+                      <div className="text-[10px] text-white/70">
+                        Authorized Distributor • Same-Day Dispatch
                       </div>
-                      <Badge variant="success" className="text-[10px] font-bold">
-                        Top Rated
-                      </Badge>
                     </div>
+                    <Badge variant="success" className="text-[10px] font-bold">
+                      Top Rated
+                    </Badge>
                   </div>
 
-                  <div className="rounded-2xl bg-black/30 p-4 space-y-2 text-xs text-white/80">
+                  <div className="rounded-xl bg-black/30 p-3 space-y-1.5 text-xs text-white/80">
                     <div className="flex justify-between">
                       <span className="text-white/60">Carrier Tracking:</span>
-                      <span className="font-medium text-white">
-                        Express Air (2-3 Business Days)
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/60">Warranty:</span>
-                      <span className="font-medium text-white">2-Year Official Protection</span>
+                      <span className="font-medium text-white">Express Air (2-3 Days)</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-white/60">Payment Protection:</span>
@@ -589,13 +596,21 @@ export default function HomePage(): React.JSX.Element {
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}
-                className="group flex flex-col justify-between rounded-2xl border border-border-subtle bg-surface p-4 transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md text-left"
+                className="group flex flex-col justify-between rounded-2xl border border-border-subtle bg-surface p-3.5 transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg text-left"
               >
-                <div className="space-y-3">
-                  <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-xl ${cat.accentBg} transition-transform duration-200 group-hover:scale-110`}
-                  >
-                    <cat.icon className="h-6 w-6" />
+                <div>
+                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-surface-subtle/80 flex items-center justify-center p-3 mb-3 border border-border-subtle/50 group-hover:border-primary/30">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div
+                      className={`absolute bottom-2 left-2 flex h-8 w-8 items-center justify-center rounded-lg ${cat.accentBg} backdrop-blur-md shadow-xs`}
+                    >
+                      <cat.icon className="h-4 w-4" />
+                    </div>
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-fg-primary group-hover:text-primary transition-colors line-clamp-1">
@@ -605,8 +620,8 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                  Shop Department
+                <div className="mt-3 flex items-center text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                  Shop Now
                   <ChevronRight className="ml-1 h-3.5 w-3.5" />
                 </div>
               </Link>
@@ -773,8 +788,13 @@ export default function HomePage(): React.JSX.Element {
               >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary font-black text-lg">
-                      <Store className="h-6 w-6" />
+                    <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl overflow-hidden border border-border-subtle bg-surface-muted shadow-xs">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={seller.logoUrl}
+                        alt={seller.name}
+                        className="h-full w-full object-cover"
+                      />
                     </div>
                     {seller.isVerified && (
                       <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">

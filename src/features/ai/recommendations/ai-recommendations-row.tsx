@@ -10,7 +10,6 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Sparkles, Star } from 'lucide-react';
 import { getSimilarProducts } from '@/domains/ai/utils/recommendations';
 import { formatMoneyMinor } from '@/domains/catalog/utils/money';
@@ -69,12 +68,11 @@ export function AIRecommendationsRow({
           >
             <div className="space-y-2.5">
               <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-muted">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={item.primaryImage}
                   alt={item.title}
-                  fill
-                  sizes="(max-width: 640px) 50vw, 25vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <span className="absolute top-2 left-2 rounded-md bg-black/60 backdrop-blur-xs px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
                   {item.reasonLabel}

@@ -10,6 +10,7 @@ import { RecentlyViewedProvider } from '@/features/recently-viewed';
 import { CartProvider } from '@/features/cart';
 import { SellerProvider } from '@/features/seller';
 import { AdminProvider } from '@/features/admin';
+import { AIAssistantProvider, AIAssistantWidget, AIAssistantModal } from '@/features/ai';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000'),
@@ -37,7 +38,13 @@ export default function RootLayout({
                   <RecentlyViewedProvider>
                     <CartProvider>
                       <SellerProvider>
-                        <AdminProvider>{children}</AdminProvider>
+                        <AdminProvider>
+                          <AIAssistantProvider>
+                            {children}
+                            <AIAssistantWidget />
+                            <AIAssistantModal />
+                          </AIAssistantProvider>
+                        </AdminProvider>
                       </SellerProvider>
                     </CartProvider>
                   </RecentlyViewedProvider>

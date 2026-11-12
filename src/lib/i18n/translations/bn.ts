@@ -377,6 +377,7 @@ export const bnTranslations: TranslationsContract = {
   'seller.packageSubtotal': 'প্যাকেজ সাবটোটাল',
   'seller.ratingsAndReviews': 'গ্রাহক রিভিউ ও রেটিং',
   'seller.notifications': 'মার্চেন্ট নোটিফিকেশন সেন্টার',
+  'seller.aiStudio': 'এআই স্টুডিও',
 
   // Phase 6: Admin Platform
   'admin.title': 'মার্কেটপ্লেস প্রশাসন',
@@ -395,9 +396,17 @@ export const bnTranslations: TranslationsContract = {
   'admin.notifications': 'অপারেশনাল নোটিফিকেশন',
   'admin.auditLogs': 'কমপ্লায়েন্স অডিট লগ',
   'admin.analytics': 'আর্থিক অ্যানালিটিক্স',
+  'admin.aiCopilot': 'এআই কোপাইলট',
   'admin.accessDenied': 'অননুমোদিত অ্যাক্সেস: পারমিশন প্রয়োজন',
   'admin.accessDeniedDesc': 'আপনার বর্তমান ভূমিকা এই সাবসিস্টেম অ্যাক্সেস করার অনুমতি দেয় না।',
   'admin.totalGmv': 'প্ল্যাটফর্ম মোট বিক্রয় মূল্য (GMV)',
   'admin.totalOrders': 'মোট মার্কেটপ্লেস অর্ডার',
   'admin.takeRate': 'নেট কমিশন রেট',
+
+  // Phase 7: AI Platform
+  'ai.assistantTitle': 'মার্কেটপ্লেস এআই শপিং অ্যাসিস্ট্যান্ট',
+  'ai.assistantSubtitle': 'পণ্য অনুসন্ধান ও পলিসি সহায়ক',
+  'ai.askPlaceholder': 'ল্যাপটপ, হেডফোন বা পলিসি সম্পর্কে জিজ্ঞাসা করুন...',
+  'ai.disclaimer': 'এআই-জেনারেটেড ফলাফল • পণ্যের পেজে বিবরণ যাচাই করুন',
+  'ai.recommendedProducts': 'প্রস্তাবিত পণ্যসমূহ',
 };

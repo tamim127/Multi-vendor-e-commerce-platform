@@ -370,6 +370,7 @@ export interface TranslationsContract {
   'seller.packageSubtotal': string;
   'seller.ratingsAndReviews': string;
   'seller.notifications': string;
+  'seller.aiStudio': string;
 
   // Phase 6: Admin Platform
   'admin.title': string;
@@ -388,11 +389,19 @@ export interface TranslationsContract {
   'admin.notifications': string;
   'admin.auditLogs': string;
   'admin.analytics': string;
+  'admin.aiCopilot': string;
   'admin.accessDenied': string;
   'admin.accessDeniedDesc': string;
   'admin.totalGmv': string;
   'admin.totalOrders': string;
   'admin.takeRate': string;
+
+  // Phase 7: AI Platform
+  'ai.assistantTitle': string;
+  'ai.assistantSubtitle': string;
+  'ai.askPlaceholder': string;
+  'ai.disclaimer': string;
+  'ai.recommendedProducts': string;
 }
 
 export type TranslationKey = keyof TranslationsContract;

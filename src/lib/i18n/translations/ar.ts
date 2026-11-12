@@ -375,6 +375,7 @@ export const arTranslations: TranslationsContract = {
   'seller.packageSubtotal': 'صافي قيمة الطرد',
   'seller.ratingsAndReviews': 'تقييمات العملاء وآراؤهم',
   'seller.notifications': 'مركز إشعارات التاجر',
+  'seller.aiStudio': 'استوديو الذكاء الاصطناعي',
 
   // Phase 6: Admin Platform
   'admin.title': 'إدارة المنصة والسوق',
@@ -393,9 +394,17 @@ export const arTranslations: TranslationsContract = {
   'admin.notifications': 'التنبيهات التشغيلية',
   'admin.auditLogs': 'سجلات التدقيق والأمان',
   'admin.analytics': 'التحليلات المالية',
+  'admin.aiCopilot': 'مساعد العمليات الذكي',
   'admin.accessDenied': 'تم تقييد الوصول: مطلوب صلاحية',
   'admin.accessDeniedDesc': 'دورك الإداري الحالي لا يملك الصلاحيات الكافية للوصول إلى هذا القسم.',
   'admin.totalGmv': 'إجمالي قيمة البضائع للمنصة (GMV)',
   'admin.totalOrders': 'إجمالي طلبات السوق',
   'admin.takeRate': 'صافي معدل العمولة للمنصة',
+
+  // Phase 7: AI Platform
+  'ai.assistantTitle': 'مساعد التسوق بالذكاء الاصطناعي',
+  'ai.assistantSubtitle': 'اكتشاف المنتجات وسياسات السوق باللغة الطبيعية',
+  'ai.askPlaceholder': 'اسأل عن الحواسيب، السماعات، سياسة الإرجاع...',
+  'ai.disclaimer': 'استجابة مولدة بالذكاء الاصطناعي • يرجى التحقق من تفاصيل المنتج',
+  'ai.recommendedProducts': 'منتجات مقترحة',
 };

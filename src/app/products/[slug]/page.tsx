@@ -9,6 +9,7 @@ import {
   getAllProductSlugs,
   ProductDetailInteractiveView,
 } from '@/features/product-detail';
+import { AIRecommendationsRow } from '@/features/ai';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -162,6 +163,9 @@ export default async function ProductDetailPage({ params }: PageProps): Promise<
       />
 
       <ProductDetailInteractiveView initialData={data} />
+      <div className="container mx-auto px-4 pb-12">
+        <AIRecommendationsRow productId={product.id} />
+      </div>
     </AppShell>
   );
 }

@@ -35,6 +35,7 @@ import {
   ShieldCheck,
   Menu,
   X,
+  Sparkles,
 } from 'lucide-react';
 
 interface NavItem {
@@ -158,6 +159,12 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps): Re
       label: t('admin.analytics') || 'Analytics',
       href: '/admin/analytics',
       icon: LineChart,
+      requiredPermission: 'analytics:read',
+    },
+    {
+      label: t('admin.aiCopilot') || 'AI Copilot',
+      href: '/admin/ai',
+      icon: Sparkles,
       requiredPermission: 'analytics:read',
     },
   ];

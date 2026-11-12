@@ -27,6 +27,7 @@ import {
   Menu,
   X,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { Container } from '@/components/layout/container/container';
 import { Button } from '@/components/ui/button/button';
@@ -72,6 +73,12 @@ export function SellerLayout({ children, title, subtitle }: SellerLayoutProps): 
       label: t('seller.analytics'),
       href: '/seller/analytics',
       icon: BarChart3,
+      exact: false,
+    },
+    {
+      label: t('seller.aiStudio') || 'AI Studio',
+      href: '/seller/ai',
+      icon: Sparkles,
       exact: false,
     },
     {

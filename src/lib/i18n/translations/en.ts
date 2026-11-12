@@ -380,6 +380,7 @@ export const enTranslations: TranslationsContract = {
   'seller.packageSubtotal': 'Package Net Subtotal',
   'seller.ratingsAndReviews': 'Customer Reviews & Feedback',
   'seller.notifications': 'Merchant Notification Center',
+  'seller.aiStudio': 'AI Studio',
 
   // Phase 6: Admin Platform
   'admin.title': 'Marketplace Operations',
@@ -398,10 +399,18 @@ export const enTranslations: TranslationsContract = {
   'admin.notifications': 'Operational Alerts',
   'admin.auditLogs': 'Compliance Audit Logs',
   'admin.analytics': 'Financial Telemetry',
+  'admin.aiCopilot': 'AI Operations Copilot',
   'admin.accessDenied': 'Access Restricted: Permission Required',
   'admin.accessDeniedDesc':
     'Your current administrative role does not possess authorization to access this subsystem.',
   'admin.totalGmv': 'Platform Gross Merchandise Value',
   'admin.totalOrders': 'Total Marketplace Orders',
   'admin.takeRate': 'Net Platform Take Rate',
+
+  // Phase 7: AI Platform
+  'ai.assistantTitle': 'Marketplace Shopping Assistant',
+  'ai.assistantSubtitle': 'Natural language product discovery and policy Q&A',
+  'ai.askPlaceholder': 'Ask about laptops, headphones, return policy...',
+  'ai.disclaimer': 'AI-generated response • Verify details on product pages',
+  'ai.recommendedProducts': 'Recommended Products',
 };

@@ -2,966 +2,1268 @@
 
 /**
  * ==============================================================================
- * ENTERPRISE MULTI-VENDOR MARKETPLACE — HOMEPAGE
+ * AUREON GLOBAL MULTI-VENDOR MARKETPLACE — HOMEPAGE
  * ==============================================================================
- * Production customer-facing marketplace homepage.
- * Pure Light Theme aesthetic with smooth pill navigation, soft pastel trust cards,
- * crisp rounded-3xl product cards, responsive flash deal timer, verified merchant
- * storefront showcase, and AI recommendations.
+ * Ultra-premium, world-class e-commerce experience inspired by the Aureon design:
+ * - Dark luxury topbar and intelligent search header
+ * - Smooth category mega-nav with dropdowns
+ * - Cinematic dark & warm gold hero showcase with interactive carousel
+ * - Clean category discovery cards with soft shadows
+ * - Dual promo grid: Flash Deals with live countdown & New Arrivals interior banner
+ * - 5-column trending products with discount badges, wishlist toggle & quick add-to-cart
+ * - Trusted brands strip with worldwide guarantees
+ * - 3-column value cards: Aureon Prime, AI Shopping Assistant, and Mobile App
+ * - Full dark luxury footer with newsletter subscription & localization
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
-  Laptop,
-  Headphones,
-  Monitor,
-  Footprints,
-  Armchair,
   Zap,
-  ShieldCheck,
-  Truck,
-  RotateCcw,
-  Headset,
-  Sparkles,
   Flame,
-  Clock,
   Star,
+  Heart,
+  ShoppingCart,
+  User,
+  Search,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ArrowRight,
-  Store,
-  CheckCircle2,
-  Award,
-  Layers,
-  ShoppingBag,
-  ExternalLink,
-  TrendingUp,
+  Play,
+  Check,
+  Truck,
+  ShieldCheck,
+  Headphones,
+  Sparkles,
+  Bot,
+  Crown,
+  Grid,
+  Smartphone,
 } from 'lucide-react';
 
-import { AppShell } from '@/components/layout/shell/app-shell';
-import { Container, Section } from '@/components/layout/container/container';
-import { Button } from '@/components/ui/button/button';
-import { Badge } from '@/components/ui/badge/badge';
-import { ProductCard } from '@/components/product-card/product-card';
-import { AIRecommendationsRow } from '@/features/ai/recommendations/ai-recommendations-row';
-import { RecentlyViewedSection } from '@/features/recently-viewed/components/recently-viewed-section';
 import { useCart } from '@/features/cart';
 import { useWishlist } from '@/features/wishlist';
-import { useI18n } from '@/lib/i18n';
-import { MOCK_PRODUCTS, MOCK_SELLERS, MOCK_SELLER_OFFERS } from '@/domains/catalog/fixtures';
+import { useAuth } from '@/features/auth';
+import { useAIAssistant } from '@/features/ai';
+import { MOCK_PRODUCTS } from '@/domains/catalog/fixtures';
 import type { Product } from '@/domains/catalog/types/product';
 import type { AddToCartInput } from '@/domains/cart/types/cart';
 
-// Hero promotional slides data (Light Theme)
+// Hero promotional carousel slides data
 interface HeroSlide {
   id: string;
   badge: string;
-  badgeVariant: 'brand' | 'destructive' | 'info' | 'neutral';
-  title: string;
+  titleLight: string;
+  titleGold: string;
   subtitle: string;
-  priceHeadline: string;
-  compareAt?: string;
-  productSlug: string;
   ctaText: string;
-  secondaryCtaText: string;
-  secondaryHref: string;
-  features: string[];
-  gradientClass: string;
-  accentColor: string;
-  icon: React.ComponentType<{ className?: string }>;
+  ctaHref: string;
+  videoHref?: string;
+  featuredSlug: string;
   image: string;
 }
 
 const HERO_SLIDES: HeroSlide[] = [
   {
-    id: 'hero-mbp-16',
-    badge: 'FLAGSHIP RELEASE',
-    badgeVariant: 'brand',
-    title: 'Apple MacBook Pro 16″ M3 Max',
-    subtitle:
-      'Massive speed and extreme capability for demanding professional workflows. Featuring Liquid Retina XDR display and up to 22 hours of battery life.',
-    priceHeadline: 'From $3,499.00',
-    compareAt: '$3,999.00',
-    productSlug: 'apple-macbook-pro-16-m3-max',
-    ctaText: 'Shop MacBook Pro',
-    secondaryCtaText: 'View 4 Seller Offers',
-    secondaryHref: '/products/apple-macbook-pro-16-m3-max',
-    features: ['M3 Max 16-Core CPU', '40-Core GPU', 'Liquid Retina XDR', 'Up to 22h Battery Life'],
-    gradientClass: 'from-indigo-50/80 via-white to-purple-50/60',
-    accentColor: 'text-indigo-600',
-    icon: Laptop,
-    image: '/assets/mock/products/mbp16-hero.webp',
+    id: 'hero-next-gen',
+    badge: '★ Big Sale • Up to 70% OFF',
+    titleLight: 'Next-Gen Technology',
+    titleGold: 'for a Better Tomorrow',
+    subtitle: 'Discover premium products from trusted sellers around the world.',
+    ctaText: 'Shop the Deal',
+    ctaHref: '/products?deals=true',
+    featuredSlug: 'apple-macbook-pro-16-m3-max',
+    image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=900&q=85',
   },
   {
-    id: 'hero-sony-xm5',
-    badge: 'LIMITED TIME DEAL • 15% OFF',
-    badgeVariant: 'destructive',
-    title: 'Sony WH-1000XM5 Noise Canceling',
-    subtitle:
-      'Industry-leading active noise cancellation with dual processors, 8 microphones, and ultra-lightweight comfortable design.',
-    priceHeadline: 'Special Deal $398.00',
-    compareAt: '$469.00',
-    productSlug: 'sony-wh-1000xm5-wireless-headphones',
-    ctaText: 'Claim Audio Deal',
-    secondaryCtaText: 'Explore All Audio',
-    secondaryHref: '/products?category=audio-headphones',
-    features: [
-      'Auto NC Optimizer',
-      '30-Hour Battery Life',
-      'Hi-Res Wireless Audio',
-      'Crystal Clear Calls',
-    ],
-    gradientClass: 'from-amber-50/80 via-white to-orange-50/50',
-    accentColor: 'text-amber-600',
-    icon: Headphones,
+    id: 'hero-audio-spatial',
+    badge: '★ Flagship Sound • 35% OFF',
+    titleLight: 'Acoustic Precision',
+    titleGold: 'Wireless Hi-Fi Sound',
+    subtitle: 'Industry-leading noise cancellation engineered for true audiophiles.',
+    ctaText: 'Explore Audio',
+    ctaHref: '/products?category=audio-headphones',
+    featuredSlug: 'sony-wh-1000xm5-wireless-headphones',
     image: '/assets/mock/products/sony-xm5-hero.webp',
   },
   {
-    id: 'hero-samsung-g9',
-    badge: 'ULTRAWIDE GAMING',
-    badgeVariant: 'info',
-    title: 'Samsung Odyssey OLED G9 49″',
-    subtitle:
-      'Dual QHD curved display with 240Hz refresh rate and 0.03ms response time for unprecedented immersion and fluid competitive gaming.',
-    priceHeadline: '$1,799.99',
-    compareAt: '$2,199.99',
-    productSlug: 'samsung-odyssey-oled-g9-49',
-    ctaText: 'Discover Gaming Monitor',
-    secondaryCtaText: 'All Displays',
-    secondaryHref: '/products?category=monitors-displays',
-    features: [
-      'Dual QHD 5120x1440',
-      '240Hz OLED / 0.03ms',
-      '1800R Curvature',
-      'Neo Quantum Processor',
-    ],
-    gradientClass: 'from-cyan-50/80 via-white to-blue-50/60',
-    accentColor: 'text-cyan-600',
-    icon: Monitor,
+    id: 'hero-ultrawide-gaming',
+    badge: '★ OLED Innovation • 240Hz',
+    titleLight: 'Dual Curved Displays',
+    titleGold: 'Infinite Immersion',
+    subtitle: 'Quantum Dot OLED delivers pure blacks and lightning-fast 0.03ms response.',
+    ctaText: 'Discover Monitors',
+    ctaHref: '/products?category=monitors-displays',
+    featuredSlug: 'samsung-odyssey-oled-g9-49',
     image: '/assets/mock/products/samsung-neo-g9.webp',
   },
 ];
 
-// Featured categories mapping
-const FEATURED_CATEGORIES = [
+// Clean category discovery cards
+const CATEGORY_CARDS = [
   {
-    id: 'cat-computers-laptops',
+    id: 'cat-electronics',
+    name: 'Electronics',
+    discount: 'Up to 60% Off',
     slug: 'computers-laptops',
-    name: 'Computers & Laptops',
-    count: '650+ Products',
-    icon: Laptop,
-    accentBg: 'bg-blue-500/10 text-blue-600',
-    image: '/assets/mock/products/mbp16-hero.webp',
+    image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=400&q=80',
   },
   {
-    id: 'cat-audio-headphones',
-    slug: 'audio-headphones',
-    name: 'Audio & Headphones',
-    count: '380+ Products',
-    icon: Headphones,
-    accentBg: 'bg-purple-500/10 text-purple-600',
+    id: 'cat-fashion',
+    name: 'Fashion',
+    discount: 'Up to 50% Off',
+    slug: 'fashion',
+    image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 'cat-home-living',
+    name: 'Home & Living',
+    discount: 'Up to 60% Off',
+    slug: 'office-furniture',
+    image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 'cat-beauty-health',
+    name: 'Beauty & Health',
+    discount: 'Up to 50% Off',
+    slug: 'beauty',
+    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 'cat-sports',
+    name: 'Sports',
+    discount: 'Up to 50% Off',
+    slug: 'mens-footwear',
+    image: 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=400&q=80',
+  },
+  {
+    id: 'cat-toys-games',
+    name: 'Toys & Games',
+    discount: 'Up to 50% Off',
+    slug: 'toys-games',
+    image: 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?auto=format&fit=crop&w=400&q=80',
+  },
+];
+
+// 5 Curated Trending Products exactly matching the design
+interface CuratedTrendingProduct {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  badge: string;
+  rating: number;
+  reviews: string;
+  price: number;
+  originalPrice: number;
+  image: string;
+}
+
+const TRENDING_PRODUCTS: CuratedTrendingProduct[] = [
+  {
+    id: 'prod-sony-xm5',
+    slug: 'sony-wh-1000xm5-wireless-headphones',
+    title: 'Sony WH-1000XM5',
+    category: 'Wireless Headphones',
+    badge: '-35%',
+    rating: 4.8,
+    reviews: '12.5k',
+    price: 349.0,
+    originalPrice: 539.0,
     image: '/assets/mock/products/sony-xm5-hero.webp',
   },
   {
-    id: 'cat-monitors-displays',
-    slug: 'monitors-displays',
-    name: 'Curved Displays',
-    count: '140+ Products',
-    icon: Monitor,
-    accentBg: 'bg-cyan-500/10 text-cyan-600',
-    image: '/assets/mock/products/samsung-neo-g9.webp',
+    id: 'prod-apple-watch-10',
+    slug: 'apple-watch-series-10',
+    title: 'Apple Watch Series 10',
+    category: 'GPS 42mm',
+    badge: '-40%',
+    rating: 4.7,
+    reviews: '8.2k',
+    price: 399.0,
+    originalPrice: 669.0,
+    image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=500&q=80',
   },
   {
-    id: 'cat-mens-footwear',
-    slug: 'mens-footwear',
-    name: 'Athletic Footwear',
-    count: '280+ Products',
-    icon: Footprints,
-    accentBg: 'bg-rose-500/10 text-rose-600',
+    id: 'prod-macbook-pro-16',
+    slug: 'apple-macbook-pro-16-m3-max',
+    title: 'MacBook Air M3',
+    category: '13-inch',
+    badge: '-25%',
+    rating: 4.9,
+    reviews: '6.1k',
+    price: 1099.0,
+    originalPrice: 1469.0,
+    image: '/assets/mock/products/mbp16-hero.webp',
+  },
+  {
+    id: 'prod-nike-pegasus',
+    slug: 'nike-air-zoom-pegasus-41',
+    title: 'Nike Air Zoom Pegasus 41',
+    category: 'Running Shoes',
+    badge: '-30%',
+    rating: 4.7,
+    reviews: '4.3k',
+    price: 125.0,
+    originalPrice: 179.0,
     image: '/assets/mock/products/nike-alphafly-3-hero.webp',
   },
   {
-    id: 'cat-office-furniture',
-    slug: 'office-furniture',
-    name: 'Office Furniture',
-    count: '190+ Products',
-    icon: Armchair,
-    accentBg: 'bg-emerald-500/10 text-emerald-600',
-    image: '/assets/mock/products/herman-miller-aeron.webp',
-  },
-  {
-    id: 'cat-mobile-accessories',
-    slug: 'mobile-accessories',
-    name: 'Power & Accessories',
-    count: '290+ Products',
-    icon: Zap,
-    accentBg: 'bg-amber-500/10 text-amber-600',
-    image: '/assets/mock/products/anker-737.webp',
+    id: 'prod-airpods-pro-2',
+    slug: 'airpods-pro-2nd-gen',
+    title: 'AirPods Pro (2nd Gen)',
+    category: 'Wireless Earbuds',
+    badge: '-20%',
+    rating: 4.8,
+    reviews: '9.7k',
+    price: 249.0,
+    originalPrice: 309.0,
+    image: 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=500&q=80',
   },
 ];
 
 export default function HomePage(): React.JSX.Element {
-  const { locale } = useI18n();
-  const { addItem } = useCart();
-  const { isInWishlist, toggleWishlist } = useWishlist();
+  const router = useRouter();
+  const { addItem, itemCount, openDrawer } = useCart();
+  const { isInWishlist, toggleWishlist, itemCount: wishlistCount } = useWishlist();
+  const { customer, isAuthenticated } = useAuth();
+  const { toggleOpen: openAIAssistant } = useAIAssistant();
 
-  // Active hero carousel state
-  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
-  const [isCarouselPaused, setIsCarouselPaused] = useState<boolean>(false);
+  // Search input state
+  const [searchQuery, setSearchQuery] = useState('');
+  const selectedSearchCategory = 'All Categories';
 
-  // Trending filter tab state
-  const [activeTrendingTab, setActiveTrendingTab] = useState<
-    'all' | 'electronics' | 'footwear' | 'office'
-  >('all');
+  // Hero Carousel State
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
-  // Flash sale countdown simulation
-  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
-    hours: 8,
-    minutes: 42,
-    seconds: 15,
+  // Trending filter tabs
+  const [trendingTab, setTrendingTab] = useState<'popular' | 'best' | 'rated' | 'new'>('popular');
+
+  // Live Flash Deal countdown
+  const [countdown, setCountdown] = useState({
+    days: 2,
+    hours: 14,
+    minutes: 37,
+    seconds: 25,
   });
 
-  // Action feedback banner state
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // Action toast state
+  const [toast, setToast] = useState<string | null>(null);
 
-  const showToast = useCallback((msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
+  const triggerToast = useCallback((message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // Carousel auto-advance timer
-  useEffect(() => {
-    if (isCarouselPaused) return;
-    const interval = setInterval(() => {
-      setCurrentSlideIndex((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [isCarouselPaused]);
-
-  // Flash sale countdown timer tick
+  // Countdown timer tick
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        }
-        return { hours: 12, minutes: 0, seconds: 0 };
+      setCountdown((prev) => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        if (prev.days > 0) return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
+        return { days: 2, hours: 14, minutes: 37, seconds: 25 };
       });
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Quick Add to Cart handler
-  const handleQuickAddToCart = useCallback(
-    (product: Product) => {
-      const winningOffer =
-        MOCK_SELLER_OFFERS.find((o) => o.productId === product.id && o.isBuyBoxWinner) ||
-        MOCK_SELLER_OFFERS.find((o) => o.productId === product.id);
+  // Carousel auto-advance
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [isPaused]);
 
-      const cartInput: AddToCartInput = {
-        productId: product.id,
-        slug: product.slug,
-        title: product.title,
-        imageUrl: product.media[0]?.url,
-        offerId: winningOffer ? winningOffer.offerId : `offer-${product.id}`,
-        sellerId: winningOffer ? winningOffer.sellerId : 'seller-tech-direct',
-        sellerName: winningOffer ? winningOffer.seller.name : 'TechDirect Express',
-        unitPrice: winningOffer ? winningOffer.price : product.offerSummary.lowestPrice,
-        quantity: 1,
-      };
-
-      const added = addItem(cartInput);
-      if (added) {
-        const titleText = (locale && product.title[locale]) || product.title.en;
-        showToast(`Added "${titleText}" to your shopping cart.`);
-      }
-    },
-    [addItem, locale, showToast]
-  );
-
-  // Filter trending products by category tab
-  const filteredTrendingProducts = useMemo(() => {
-    if (activeTrendingTab === 'all') return MOCK_PRODUCTS;
-    if (activeTrendingTab === 'electronics') {
-      return MOCK_PRODUCTS.filter((p) => p.categoryPath.includes('electronics'));
+  // Search submission handler
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) {
+      router.push('/products');
+      return;
     }
-    if (activeTrendingTab === 'footwear') {
-      return MOCK_PRODUCTS.filter((p) => p.categoryId.includes('footwear'));
-    }
-    if (activeTrendingTab === 'office') {
-      return MOCK_PRODUCTS.filter(
-        (p) => p.categoryPath.includes('office') || p.categoryPath.includes('furniture')
-      );
-    }
-    return MOCK_PRODUCTS;
-  }, [activeTrendingTab]);
+    router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`);
+  };
 
-  // Flash deal products subset
-  const flashSaleProducts = useMemo(() => {
-    return MOCK_PRODUCTS.slice(1, 4); // Sony XM5, Nike Alphafly, Herman Miller
-  }, []);
+  // Add to cart from trending cards
+  const handleAddToCart = (product: CuratedTrendingProduct) => {
+    const input: AddToCartInput = {
+      productId: product.id,
+      slug: product.slug,
+      title: { en: product.title },
+      imageUrl: product.image,
+      offerId: `offer-${product.id}`,
+      sellerId: 'seller-tech-direct',
+      sellerName: 'Aureon Official Flagship',
+      unitPrice: {
+        amountMinor: Math.round(product.price * 100),
+        currency: 'USD',
+      },
+      quantity: 1,
+    };
+    addItem(input);
+    triggerToast(`Added ${product.title} to your cart.`);
+  };
 
-  const activeSlide = HERO_SLIDES[currentSlideIndex] ?? HERO_SLIDES[0]!;
+  // Toggle wishlist from trending cards
+  const handleToggleWishlist = (prod: CuratedTrendingProduct) => {
+    const existing =
+      MOCK_PRODUCTS.find((p) => p.id === prod.id || p.slug === prod.slug) ||
+      ({
+        ...MOCK_PRODUCTS[0]!,
+        id: prod.id,
+        slug: prod.slug,
+        title: { en: prod.title },
+      } as Product);
+
+    const added = toggleWishlist(existing);
+    triggerToast(added ? `Added ${prod.title} to wishlist` : `Removed from wishlist`);
+  };
+
+  const activeSlide = HERO_SLIDES[slideIndex] ?? HERO_SLIDES[0]!;
 
   return (
-    <AppShell className="bg-[#F6F8FB]">
-      {/* Toast Feedback Notification */}
-      {toastMessage && (
+    <div className="min-h-screen bg-[#F8F9FA] text-[#1E2022] font-sans antialiased">
+      {/* Toast Notification */}
+      {toast && (
         <div
           role="status"
-          aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-primary/20 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-md text-sm font-semibold text-slate-900 animate-in fade-in slide-in-from-bottom-4 duration-200"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-amber-400/30 bg-[#0B0B0C]/95 text-white px-5 py-3.5 shadow-2xl backdrop-blur-md text-sm font-medium animate-in fade-in slide-in-from-bottom-4 duration-200"
         >
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-            <CheckCircle2 className="h-4 w-4" />
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-slate-950 font-bold">
+            <Check className="h-3.5 w-3.5" />
           </div>
-          <span>{toastMessage}</span>
+          <span>{toast}</span>
         </div>
       )}
 
-      {/* 0. HORIZONTAL PILL CATEGORY BAR (Matching Reference Image 1) */}
-      <section className="border-b border-slate-200/70 bg-white py-2.5 shadow-2xs">
-        <Container>
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-            <Link
-              href="/products"
-              className="rounded-full bg-primary px-4 py-1.5 text-xs font-bold text-white shadow-xs shrink-0 hover:bg-primary-hover transition-all"
-            >
-              All Categories
-            </Link>
-            <Link
-              href="/products?deals=true"
-              className="rounded-full border border-slate-200/80 bg-slate-50/70 px-4 py-1.5 text-xs font-semibold text-slate-700 shrink-0 hover:bg-white hover:border-slate-300 transition-all flex items-center gap-1.5"
-            >
-              <Flame className="h-3.5 w-3.5 text-rose-500" />
-              Deals
-            </Link>
-            {FEATURED_CATEGORIES.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/products?category=${cat.slug}`}
-                className="rounded-full border border-slate-200/80 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 shrink-0 hover:border-primary/40 hover:text-primary transition-all flex items-center gap-1.5 shadow-2xs"
-              >
-                <cat.icon className="h-3.5 w-3.5 text-slate-400" />
-                {cat.name}
-              </Link>
-            ))}
+      {/* ==================================================================== */}
+      {/* 1. TOP UTILITY ANNOUNCEMENT BAR (Dark Charcoal Aureon Style) */}
+      {/* ==================================================================== */}
+      <div className="bg-[#0B0B0C] border-b border-[#1E1E22] text-xs text-[#9CA3AF] py-2 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Left Announcement */}
+          <div className="flex items-center gap-2">
+            <span className="text-amber-400 font-bold">⚡</span>
+            <span className="font-medium text-white/90">
+              Free Shipping on orders over $50
+            </span>
+            <span className="text-[#4B5563]">•</span>
+            <span className="hidden sm:inline text-[#9CA3AF]">30 Days Free Return</span>
           </div>
-        </Container>
-      </section>
 
-      {/* 1. HERO SECTION (Pure Light Theme Promotional Carousel) */}
-      <section
-        aria-label="Promotional Carousel"
-        className="relative overflow-hidden py-4 sm:py-6"
-        onMouseEnter={() => setIsCarouselPaused(true)}
-        onMouseLeave={() => setIsCarouselPaused(false)}
-      >
-        <Container>
-          <div
-            className={`relative w-full rounded-3xl border border-slate-200/80 bg-gradient-to-br ${activeSlide.gradientClass} p-6 sm:p-10 lg:p-12 shadow-sm transition-all duration-700`}
+          {/* Right Utility Links */}
+          <div className="flex items-center gap-4 sm:gap-6 text-[11px]">
+            <Link href="/help" className="hover:text-white transition-colors">
+              Help
+            </Link>
+            <Link href="/account/orders" className="hover:text-white transition-colors">
+              Track Order
+            </Link>
+            <Link href="/seller" className="hover:text-white transition-colors">
+              Seller Center
+            </Link>
+            <div className="h-3 w-px bg-[#26262B]" />
+            <div className="flex items-center gap-1 cursor-pointer hover:text-white">
+              <span>🇺🇸</span>
+              <span>English</span>
+              <ChevronDown className="h-3 w-3" />
+            </div>
+            <div className="flex items-center gap-1 cursor-pointer hover:text-white">
+              <span>USD</span>
+              <ChevronDown className="h-3 w-3" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ==================================================================== */}
+      {/* 2. MAIN HEADER (Brand Logo, Search Bar, Header Actions) */}
+      {/* ==================================================================== */}
+      <header className="sticky top-0 z-40 bg-[#0B0B0C] border-b border-[#1A1A1E] px-4 sm:px-8 py-3.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 lg:gap-8">
+          {/* Aureon Brand Logo */}
+          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+              <span className="text-slate-950 font-black text-lg tracking-tighter">▲</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-2xl font-black tracking-tight text-white leading-none">
+                Aureon
+              </span>
+              <span className="text-[9px] tracking-wider text-[#9CA3AF] uppercase font-semibold mt-0.5">
+                Marketplace
+              </span>
+            </div>
+          </Link>
+
+          {/* Intelligent Search Input */}
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex flex-1 max-w-2xl items-center rounded-full bg-[#18181B] border border-[#27272A] p-1.5 focus-within:border-amber-400/80 focus-within:ring-2 focus-within:ring-amber-400/20 transition-all"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Slide Content */}
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for products, brands and more..."
+              className="flex-1 bg-transparent px-4 py-1.5 text-xs sm:text-sm text-white placeholder-[#71717A] focus:outline-none"
+            />
+            {/* Category Dropdown Pill */}
+            <div className="hidden lg:flex items-center gap-1 text-xs text-[#A1A1AA] border-l border-[#27272A] px-3 py-1 cursor-pointer hover:text-white">
+              <span>{selectedSearchCategory}</span>
+              <ChevronDown className="h-3 w-3" />
+            </div>
+            {/* Search Button */}
+            <button
+              type="submit"
+              aria-label="Search"
+              className="h-9 w-9 rounded-full bg-white text-slate-950 flex items-center justify-center hover:bg-amber-400 transition-colors shrink-0 cursor-pointer"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          </form>
+
+          {/* User Account, Wishlist, Cart Actions */}
+          <div className="flex items-center gap-4 sm:gap-6 text-white text-xs font-semibold shrink-0">
+            {/* Account Action */}
+            <Link
+              href={isAuthenticated ? '/account' : '/login'}
+              className="flex items-center gap-2 hover:text-amber-400 transition-colors"
+            >
+              <div className="h-8 w-8 rounded-full bg-[#1F1F23] flex items-center justify-center text-white">
+                <User className="h-4 w-4" />
+              </div>
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="text-[10px] text-[#A1A1AA] font-normal leading-tight">
+                  {isAuthenticated ? 'Hello,' : 'Sign In'}
+                </span>
+                <span className="flex items-center gap-0.5 font-bold">
+                  {isAuthenticated ? customer?.firstName || 'Account' : 'Account'}
+                  <ChevronDown className="h-3 w-3 opacity-60" />
+                </span>
+              </div>
+            </Link>
+
+            {/* Wishlist Action */}
+            <Link
+              href="/wishlist"
+              className="relative flex items-center gap-1.5 hover:text-amber-400 transition-colors"
+            >
+              <div className="relative">
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white rounded-full h-4 min-w-[16px] px-1 text-[9px] font-bold flex items-center justify-center leading-none">
+                    {wishlistCount}
+                  </span>
+                )}
+              </div>
+              <span className="hidden sm:inline">Wishlist</span>
+            </Link>
+
+            {/* Cart Action */}
+            <button
+              type="button"
+              onClick={openDrawer}
+              aria-label="Open Cart"
+              className="relative flex items-center gap-1.5 hover:text-amber-400 transition-colors cursor-pointer"
+            >
+              <div className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {itemCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2 bg-amber-500 text-slate-950 rounded-full h-4 min-w-[16px] px-1 text-[9px] font-bold flex items-center justify-center leading-none">
+                    {itemCount}
+                  </span>
+                )}
+              </div>
+              <span className="hidden sm:inline">Cart</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ==================================================================== */}
+      {/* 3. CATEGORY NAVIGATION BAR (Mega Nav Pill) */}
+      {/* ==================================================================== */}
+      <nav className="bg-[#0B0B0C] border-b border-[#1A1A1E] text-xs text-[#D1D5DB] px-4 sm:px-8 py-2">
+        <div className="max-w-7xl mx-auto flex items-center gap-3 overflow-x-auto no-scrollbar">
+          {/* All Categories Button */}
+          <Link
+            href="/products"
+            className="flex items-center gap-2 rounded-full bg-[#18181B] text-white border border-[#27272A] hover:border-amber-400/50 px-4 py-2 font-bold shrink-0 transition-all"
+          >
+            <Grid className="h-3.5 w-3.5 text-amber-400" />
+            <span>All Categories</span>
+            <ChevronDown className="h-3 w-3 text-[#A1A1AA]" />
+          </Link>
+
+          {/* Quick Nav Links */}
+          <Link
+            href="/products?deals=true"
+            className="font-bold text-amber-400 hover:text-amber-300 px-3 py-2 shrink-0 flex items-center gap-1"
+          >
+            <Flame className="h-3.5 w-3.5 text-amber-400" />
+            Today&apos;s Deals
+          </Link>
+
+          {[
+            { name: 'Electronics', slug: 'computers-laptops' },
+            { name: 'Fashion', slug: 'fashion' },
+            { name: 'Home & Living', slug: 'office-furniture' },
+            { name: 'Beauty & Health', slug: 'beauty' },
+            { name: 'Sports', slug: 'mens-footwear' },
+            { name: 'Toys & Games', slug: 'toys-games' },
+            { name: 'More', slug: 'more' },
+          ].map((item) => (
+            <Link
+              key={item.name}
+              href={`/products?category=${item.slug}`}
+              className="flex items-center gap-1 text-[#9CA3AF] hover:text-white px-3 py-2 shrink-0 font-medium transition-colors"
+            >
+              <span>{item.name}</span>
+              <ChevronDown className="h-3 w-3 opacity-50" />
+            </Link>
+          ))}
+        </div>
+      </nav>
+
+      {/* ==================================================================== */}
+      {/* 4. HERO SECTION (Cinematic Dark & Warm Gold Experience) */}
+      {/* ==================================================================== */}
+      <section
+        className="px-4 sm:px-8 py-6"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#0C0C0E] via-[#16130E] to-[#0A0A0C] border border-[#27272A] shadow-2xl p-6 sm:p-12 lg:p-16">
+            {/* Ambient Lighting Background Accents */}
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 right-10 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+              {/* Left Column: Headlines & Call to Actions */}
               <div className="lg:col-span-7 space-y-6 text-left">
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-primary/10 text-primary border border-primary/20 px-3 py-1 font-bold tracking-wide uppercase text-xs">
-                    {activeSlide.badge}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                    Verified Marketplace Guarantee
-                  </span>
+                {/* Sale Badge */}
+                <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/15 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300">
+                  <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                  <span>{activeSlide.badge}</span>
                 </div>
 
-                <div className="space-y-3">
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 leading-[1.15]">
-                    {activeSlide.title}
-                  </h1>
-                  <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
-                    {activeSlide.subtitle}
-                  </p>
-                </div>
-
-                {/* Price & Features */}
-                <div className="flex flex-wrap items-baseline gap-3 pt-1">
-                  <span className="text-3xl sm:text-4xl font-black text-slate-900">
-                    {activeSlide.priceHeadline}
+                {/* Main Dynamic Headline */}
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
+                  <span>{activeSlide.titleLight}</span>
+                  <br />
+                  <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
+                    {activeSlide.titleGold}
                   </span>
-                  {activeSlide.compareAt && (
-                    <span className="text-lg text-slate-400 line-through font-medium">
-                      {activeSlide.compareAt}
-                    </span>
-                  )}
-                  <span className="rounded-full bg-emerald-100 text-emerald-800 px-3 py-1 text-xs font-bold">
-                    Multiple Sellers In Stock
-                  </span>
-                </div>
+                </h1>
 
-                {/* Bullet Points */}
-                <div className="grid grid-cols-2 gap-2.5 pt-1 text-xs sm:text-sm text-slate-700 font-medium">
-                  {activeSlide.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                      <span>{feat}</span>
-                    </div>
-                  ))}
-                </div>
+                {/* Subtitle */}
+                <p className="text-sm sm:text-base text-[#9CA3AF] max-w-xl leading-relaxed">
+                  {activeSlide.subtitle}
+                </p>
 
-                {/* Call to Actions (Smooth Rounded Pills) */}
-                <div className="flex flex-wrap items-center gap-3.5 pt-3">
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="primary"
-                    className="rounded-full px-7 font-bold shadow-md shadow-primary/25 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-4 pt-2">
+                  <Link
+                    href={activeSlide.ctaHref}
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-bold px-7 py-3 text-sm shadow-lg shadow-amber-500/25 hover:brightness-110 hover:-translate-y-0.5 transition-all"
                   >
-                    <Link href={`/products/${activeSlide.productSlug}`}>
-                      <ShoppingBag className="mr-2 h-5 w-5" />
-                      {activeSlide.ctaText}
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="tertiary"
-                    className="rounded-full px-6 border-slate-200 bg-white text-slate-700 hover:bg-slate-50 font-semibold shadow-xs"
+                    <span>{activeSlide.ctaText}</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/products/${activeSlide.featuredSlug}`)}
+                    className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 text-sm border border-white/10 backdrop-blur-md transition-all cursor-pointer"
                   >
-                    <Link href={activeSlide.secondaryHref}>
-                      {activeSlide.secondaryCtaText}
-                      <ArrowRight className="ml-1.5 h-4 w-4" />
-                    </Link>
-                  </Button>
+                    <Play className="h-3.5 w-3.5 fill-white" />
+                    <span>Watch Video</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Slide Visual Feature Card (Pure White Glass Card) */}
-              <div className="lg:col-span-5 flex justify-center">
-                <div className="relative w-full max-w-md rounded-3xl border border-slate-200/90 bg-white/95 p-5 backdrop-blur-xl shadow-xl space-y-4">
-                  {/* Real Product Photography Feature */}
-                  <div className="relative aspect-16/10 w-full rounded-2xl overflow-hidden bg-slate-50 flex items-center justify-center p-3 border border-slate-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={activeSlide.image}
-                      alt={activeSlide.title}
-                      className="h-full w-full object-contain drop-shadow-md transition-transform duration-500 hover:scale-105"
-                    />
-                    <span className="absolute top-2.5 right-2.5 rounded-full bg-white/90 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-bold text-slate-800 border border-slate-200/80 shadow-2xs">
-                      {activeSlide.badge}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        Featured Flagship
-                      </div>
-                      <div className="text-sm font-bold text-slate-900 truncate max-w-[200px]">
-                        {activeSlide.title}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-amber-500 text-xs font-bold bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">
-                      <Star className="h-3.5 w-3.5 fill-amber-500" />
-                      4.9 / 5.0
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3 flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-bold text-slate-900">TechDirect Express</div>
-                      <div className="text-[11px] text-slate-500">
-                        Authorized Distributor • Same-Day Dispatch
-                      </div>
-                    </div>
-                    <Badge variant="success" className="text-[10px] font-bold rounded-full">
-                      Top Rated
-                    </Badge>
-                  </div>
-
-                  <div className="rounded-2xl bg-white p-3 space-y-1.5 text-xs text-slate-600 border border-slate-100">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Carrier Tracking:</span>
-                      <span className="font-semibold text-slate-800">Express Air (2-3 Days)</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Payment Protection:</span>
-                      <span className="font-semibold text-emerald-600">Escrow Secured</span>
-                    </div>
-                  </div>
-
-                  <Button
-                    asChild
-                    variant="secondary"
-                    className="w-full rounded-full font-bold text-slate-800 bg-slate-100 hover:bg-slate-200"
-                  >
-                    <Link href={`/products/${activeSlide.productSlug}`}>
-                      View Product Specifications
-                      <ChevronRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </Button>
+              {/* Right Column: 3D Pedestal Product Showcase */}
+              <div className="lg:col-span-5 flex justify-center items-center relative">
+                <div className="relative w-full max-w-md aspect-square rounded-2xl flex items-center justify-center p-4">
+                  {/* Glowing Pedestal Disc */}
+                  <div className="absolute bottom-4 w-64 h-16 bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-amber-500/20 rounded-full blur-xl" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={activeSlide.image}
+                    alt={activeSlide.titleLight}
+                    className="relative z-10 max-h-80 w-auto object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.8)] hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Carousel Controls (Dots & Navigation) */}
-            <div className="mt-8 flex items-center justify-between border-t border-slate-200/60 pt-4">
-              <div className="flex items-center gap-2">
-                {HERO_SLIDES.map((slide, idx) => (
-                  <button
-                    key={slide.id}
-                    type="button"
-                    onClick={() => setCurrentSlideIndex(idx)}
-                    className={`h-2.5 rounded-full transition-all duration-300 ${
-                      currentSlideIndex === idx
-                        ? 'w-8 bg-primary'
-                        : 'w-2.5 bg-slate-300 hover:bg-slate-400'
-                    }`}
-                    aria-label={`Go to slide ${idx + 1}: ${slide.title}`}
-                    aria-current={currentSlideIndex === idx}
-                  />
-                ))}
-              </div>
+            {/* Slider Navigation Arrows */}
+            <button
+              type="button"
+              onClick={() =>
+                setSlideIndex((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1))
+              }
+              aria-label="Previous Slide"
+              className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 border border-white/15 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all backdrop-blur-md cursor-pointer"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
 
-              <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSlideIndex((prev) => (prev + 1) % HERO_SLIDES.length)}
+              aria-label="Next Slide"
+              className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 border border-white/15 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all backdrop-blur-md cursor-pointer"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+
+            {/* Carousel Dots */}
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2">
+              {HERO_SLIDES.map((_, idx) => (
                 <button
+                  key={idx}
                   type="button"
-                  onClick={() =>
-                    setCurrentSlideIndex(
-                      (prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length
-                    )
-                  }
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-xs transition hover:bg-slate-50 hover:border-slate-300"
-                  aria-label="Previous slide"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentSlideIndex((prev) => (prev + 1) % HERO_SLIDES.length)}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-xs transition hover:bg-slate-50 hover:border-slate-300"
-                  aria-label="Next slide"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </div>
+                  onClick={() => setSlideIndex(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className={`h-2 rounded-full transition-all cursor-pointer ${
+                    idx === slideIndex ? 'w-8 bg-amber-400' : 'w-2 bg-white/30 hover:bg-white/60'
+                  }`}
+                />
+              ))}
             </div>
           </div>
-        </Container>
-
-        {/* 2. VALUE PROPOSITION RIBBON (Pastel Trust Cards matching Reference Image 3) */}
-        <div className="pt-6">
-          <Container>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="flex items-center gap-3.5 p-4 rounded-3xl bg-sky-50/70 border border-sky-100 shadow-2xs">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-600">
-                  <Truck className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-sky-950">Free Express Shipping</div>
-                  <div className="text-xs text-sky-700/80">Complimentary on orders over $150</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3.5 p-4 rounded-3xl bg-emerald-50/70 border border-emerald-100 shadow-2xs">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-emerald-950">100% Authentic Guarantee</div>
-                  <div className="text-xs text-emerald-700/80">Direct from certified distributors</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3.5 p-4 rounded-3xl bg-purple-50/70 border border-purple-100 shadow-2xs">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-600">
-                  <RotateCcw className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-purple-950">30-Day Hassle-Free Returns</div>
-                  <div className="text-xs text-purple-700/80">
-                    Prepaid shipping labels & instant refunds
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3.5 p-4 rounded-3xl bg-amber-50/70 border border-amber-100 shadow-2xs">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600">
-                  <Headset className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-amber-950">24/7 Verified Support</div>
-                  <div className="text-xs text-amber-700/80">Dedicated multi-vendor assistance</div>
-                </div>
-              </div>
-            </div>
-          </Container>
         </div>
       </section>
 
-      {/* 3. FEATURED CATEGORIES SHOWCASE (Smooth Rounded Cards) */}
-      <Section spacing="md">
-        <Container>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-                <Layers className="h-4 w-4" />
-                Marketplace Catalog
-              </div>
-              <h2 className="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                Browse by Category
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Explore thousands of authenticated products across top verified departments
-              </p>
-            </div>
-            <Button asChild variant="tertiary" size="sm" className="rounded-full shadow-2xs">
-              <Link href="/products">
-                View All Categories
-                <ArrowRight className="ml-1.5 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
-            {FEATURED_CATEGORIES.map((cat) => (
+      {/* ==================================================================== */}
+      {/* 5. CATEGORY DISCOVERY CARDS (6 Crisp White Rounded Cards) */}
+      {/* ==================================================================== */}
+      <section className="px-4 sm:px-8 py-4">
+        <div className="max-w-7xl mx-auto relative">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
+            {CATEGORY_CARDS.map((cat) => (
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}
-                className="group flex flex-col justify-between rounded-3xl border border-slate-100 bg-white p-3.5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 text-left"
+                className="group relative rounded-2xl bg-white border border-[#E5E7EB] p-4 flex flex-col items-center text-center shadow-xs hover:shadow-md hover:-translate-y-1 transition-all"
               >
-                <div>
-                  <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-slate-50/80 flex items-center justify-center p-3 mb-3 border border-slate-100/80 group-hover:bg-slate-100/60 transition-colors">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={cat.image}
-                      alt={cat.name}
-                      className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div
-                      className={`absolute bottom-2 left-2 flex h-7 w-7 items-center justify-center rounded-lg ${cat.accentBg} backdrop-blur-md shadow-xs`}
-                    >
-                      <cat.icon className="h-3.5 w-3.5" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-800 group-hover:text-primary transition-colors line-clamp-1">
-                      {cat.name}
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">{cat.count}</p>
-                  </div>
+                <div className="w-20 h-20 rounded-xl overflow-hidden mb-3 bg-[#F9FAFB] flex items-center justify-center p-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="h-full w-full object-cover rounded-lg group-hover:scale-105 transition-transform"
+                  />
                 </div>
-
-                <div className="mt-3 flex items-center text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                  Shop Now
-                  <ChevronRight className="ml-1 h-3.5 w-3.5" />
-                </div>
+                <h3 className="font-bold text-xs sm:text-sm text-[#111827] group-hover:text-amber-600 transition-colors">
+                  {cat.name}
+                </h3>
+                <span className="text-[11px] text-[#6B7280] font-medium mt-0.5">
+                  {cat.discount}
+                </span>
               </Link>
             ))}
           </div>
-        </Container>
-      </Section>
 
-      {/* 4. FLASH DEALS & LIMITED-TIME OFFERS SHELF */}
-      <Section spacing="md" className="bg-slate-50/80 border-y border-slate-200/60">
-        <Container>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-7">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 border border-rose-100">
-                <Flame className="h-6 w-6" />
+          {/* Right Navigation Arrow Pill */}
+          <Link
+            href="/products"
+            aria-label="View more categories"
+            className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white border border-[#D1D5DB] shadow-md items-center justify-center text-[#374151] hover:bg-amber-400 hover:text-black transition-colors"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* ==================================================================== */}
+      {/* 6. DUAL PROMO GRID (Flash Deal Left + New Arrivals Living Room Right) */}
+      {/* ==================================================================== */}
+      <section className="px-4 sm:px-8 py-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Promo Card: Flash Deal (Dark Gaming Theme) */}
+          <div className="lg:col-span-5 rounded-3xl bg-[#0F0F12] border border-[#27272A] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-xl text-white">
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs tracking-wide">
+                <span>Flash Deal</span>
+                <Zap className="h-3.5 w-3.5 fill-amber-400" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                    Flash Deals & Daily Steals
-                  </h2>
-                  <span className="rounded-full bg-rose-500 text-white px-2.5 py-0.5 font-bold text-2xs uppercase tracking-wider animate-pulse">
-                    Hot Deals
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                  Limited quantities available at discounted rates from verified merchants
-                </p>
+
+              {/* Countdown Digits */}
+              <div className="flex items-center gap-2">
+                {[
+                  { val: String(countdown.days).padStart(2, '0'), label: 'Days' },
+                  { val: String(countdown.hours).padStart(2, '0'), label: 'Hours' },
+                  { val: String(countdown.minutes).padStart(2, '0'), label: 'Mins' },
+                  { val: String(countdown.seconds).padStart(2, '0'), label: 'Secs' },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-[#1F1F24] border border-[#2E2E35] text-center"
+                  >
+                    <span className="text-base font-black text-white leading-none">
+                      {item.val}
+                    </span>
+                    <span className="text-[8px] text-[#9CA3AF] uppercase font-semibold mt-1">
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-2">
+                <h3 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+                  Up to <span className="text-amber-400">70% OFF</span>
+                </h3>
+                <p className="text-xs text-[#9CA3AF] font-medium mt-1">Limited Time Only</p>
+              </div>
+
+              <div className="pt-2">
+                <Link
+                  href="/products?deals=true"
+                  className="inline-flex items-center gap-2 rounded-full bg-amber-400 text-slate-950 px-6 py-2.5 font-bold text-xs hover:bg-amber-300 shadow-md shadow-amber-400/20 transition-all"
+                >
+                  <span>Shop Now</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
               </div>
             </div>
 
-            {/* Countdown Timer (Smooth Pill Tags matching Reference Image 3) */}
-            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 shadow-xs">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 px-1">
-                <Clock className="h-3.5 w-3.5" />
-                <span>Ends In:</span>
-              </div>
-              <div className="flex items-center gap-1 text-xs font-mono font-bold text-slate-800">
-                <span className="rounded-md bg-slate-100 px-2 py-0.5">
-                  {String(timeLeft.hours).padStart(2, '0')}h
-                </span>
-                <span>:</span>
-                <span className="rounded-md bg-slate-100 px-2 py-0.5">
-                  {String(timeLeft.minutes).padStart(2, '0')}m
-                </span>
-                <span>:</span>
-                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-rose-600">
-                  {String(timeLeft.seconds).padStart(2, '0')}s
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {flashSaleProducts.map((prod, idx) => (
-              <ProductCard
-                key={prod.id}
-                product={prod}
-                variant="flash-sale"
-                flashSaleProgressPercent={75 - idx * 15}
-                isWishlisted={isInWishlist(prod.id)}
-                onWishlistToggle={() => toggleWishlist(prod)}
-                onQuickAction={() => handleQuickAddToCart(prod)}
-                quickActionLabel="Add to Cart"
-                showQuickAction
+            {/* PlayStation 5 console product image */}
+            <div className="relative mt-4 flex justify-end">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=600&q=80"
+                alt="Flash Deal Console"
+                className="max-h-48 object-contain rounded-xl opacity-90 drop-shadow-xl"
               />
-            ))}
+            </div>
           </div>
-        </Container>
-      </Section>
 
-      {/* 5. TRENDING & TOP-SELLING PRODUCTS (Multi-Vendor Grid) */}
-      <Section spacing="md">
-        <Container>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-7">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-                <TrendingUp className="h-4 w-4" />
-                Customer Favorites
-              </div>
-              <h2 className="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                Trending Marketplace Selections
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Best-selling products backed by multiple competitive vendor offers
+          {/* Right Promo Card: New Arrivals (Warm Interior Furniture Theme) */}
+          <div className="lg:col-span-7 rounded-3xl bg-[#EFECE6] border border-[#E2DDD5] p-6 sm:p-10 flex flex-col justify-between relative overflow-hidden shadow-md">
+            <div className="relative z-10 max-w-sm space-y-3">
+              <span className="text-xs font-bold text-[#6B7280] uppercase tracking-wider">
+                New Arrivals
+              </span>
+              <h3 className="text-2xl sm:text-4xl font-black text-[#111827] tracking-tight leading-tight">
+                Smart Choices.
+                <br />
+                Better Living.
+              </h3>
+              <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed">
+                Discover our latest collection with premium quality craftsmanship.
               </p>
+              <div className="pt-3">
+                <Link
+                  href="/products?category=office-furniture"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#111827] text-white px-6 py-2.5 font-bold text-xs hover:bg-black transition-colors"
+                >
+                  <span>Explore Collection</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
             </div>
 
-            {/* Filter Tabs (Smooth Pills matching Reference Image 1) */}
-            <div className="flex flex-wrap items-center gap-1.5 rounded-full border border-slate-200/80 p-1 bg-white shadow-xs">
-              {(
-                [
-                  { id: 'all', label: 'All Products' },
-                  { id: 'electronics', label: 'Electronics' },
-                  { id: 'footwear', label: 'Footwear' },
-                  { id: 'office', label: 'Office Setup' },
-                ] as const
-              ).map((tab) => (
+            {/* Living room furniture aesthetic photo */}
+            <div className="relative mt-4 flex justify-end">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=650&q=80"
+                alt="Modern Living Armchair"
+                className="max-h-60 object-contain rounded-2xl drop-shadow-md"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================================================================== */}
+      {/* 7. TRENDING PRODUCTS (5-Column Grid with Badges & Add to Cart) */}
+      {/* ==================================================================== */}
+      <section className="px-4 sm:px-8 py-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Section Header with Filter Tabs */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E7EB] pb-4">
+            <div>
+              <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider">
+                <span className="h-0.5 w-5 bg-amber-500 inline-block" />
+                <span>Trending Products</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-[#111827] tracking-tight mt-1">
+                Most popular items this week
+              </h2>
+            </div>
+
+            {/* Filter Tabs & Arrows */}
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              {[
+                { key: 'popular', label: 'Popular' },
+                { key: 'best', label: 'Best Selling' },
+                { key: 'rated', label: 'Top Rated' },
+                { key: 'new', label: 'New Arrivals' },
+              ].map((tab) => (
                 <button
-                  key={tab.id}
+                  key={tab.key}
                   type="button"
-                  onClick={() => setActiveTrendingTab(tab.id)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                    activeTrendingTab === tab.id
-                      ? 'bg-primary text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  onClick={() => setTrendingTab(tab.key as any)}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                    trendingTab === tab.key
+                      ? 'bg-[#111827] text-white shadow-xs'
+                      : 'bg-white border border-[#E5E7EB] text-[#4B5563] hover:border-slate-400'
                   }`}
                 >
                   {tab.label}
                 </button>
               ))}
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredTrendingProducts.slice(0, 8).map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                variant="standard"
-                isWishlisted={isInWishlist(product.id)}
-                onWishlistToggle={() => toggleWishlist(product)}
-                onQuickAction={() => handleQuickAddToCart(product)}
-                quickActionLabel="Quick Add"
-                showQuickAction
-              />
-            ))}
-          </div>
-        </Container>
-      </Section>
-
-      {/* 6. FEATURED MULTI-VENDOR STORES SHOWCASE */}
-      <Section spacing="md" className="bg-slate-50/70 border-y border-slate-200/60">
-        <Container>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600">
-                <Award className="h-4 w-4" />
-                Verified Merchant Network
+              <div className="flex items-center gap-1 pl-2">
+                <button
+                  type="button"
+                  aria-label="Previous Page"
+                  className="h-8 w-8 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#6B7280] hover:text-black hover:border-black cursor-pointer"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next Page"
+                  className="h-8 w-8 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#6B7280] hover:text-black hover:border-black cursor-pointer"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
-              <h2 className="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-                Featured Brand Stores & Merchants
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Shop directly from authorized distributors, flagship stores, and certified sellers
-              </p>
             </div>
-            <Button asChild variant="tertiary" size="sm" className="rounded-full shadow-2xs">
-              <Link href="/seller/register">
-                Become a Seller
-                <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
-              </Link>
-            </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {MOCK_SELLERS.map((seller) => (
-              <div
-                key={seller.id}
-                className="group flex flex-col justify-between rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg text-left"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl overflow-hidden border border-slate-200/80 bg-slate-50 shadow-xs">
+          {/* 5-Column Product Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {TRENDING_PRODUCTS.map((prod) => {
+              const inWish = isInWishlist(prod.id);
+              return (
+                <div
+                  key={prod.id}
+                  className="group rounded-2xl bg-white border border-[#E5E7EB] p-4 flex flex-col justify-between shadow-xs hover:shadow-lg transition-all"
+                >
+                  {/* Card Top: Discount Pill & Wishlist Button */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="rounded-full bg-rose-500 text-white font-black text-[10px] px-2 py-0.5">
+                        {prod.badge}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleWishlist(prod)}
+                        aria-label="Toggle Wishlist"
+                        className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                          inWish
+                            ? 'bg-rose-50 text-rose-500'
+                            : 'bg-[#F3F4F6] text-[#9CA3AF] hover:text-rose-500'
+                        }`}
+                      >
+                        <Heart className={`h-4 w-4 ${inWish ? 'fill-rose-500' : ''}`} />
+                      </button>
+                    </div>
+
+                    {/* Product Image */}
+                    <Link
+                      href={`/products/${prod.slug}`}
+                      className="block aspect-square w-full rounded-xl overflow-hidden bg-[#F9FAFB] p-3 flex items-center justify-center mb-3"
+                    >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={seller.logoUrl}
-                        alt={seller.name}
-                        className="h-full w-full object-cover"
+                        src={prod.image}
+                        alt={prod.title}
+                        className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
                       />
-                    </div>
-                    {seller.isVerified && (
-                      <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-100">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Verified
-                      </span>
-                    )}
-                  </div>
+                    </Link>
 
-                  <div>
-                    <h3 className="font-bold text-base text-slate-900 group-hover:text-primary transition-colors">
-                      {seller.name}
-                    </h3>
-                    <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                      <div className="flex items-center gap-1 font-semibold text-amber-500">
-                        <Star className="h-3.5 w-3.5 fill-amber-500" />
-                        {seller.rating.average.toFixed(1)}
-                      </div>
-                      <span>•</span>
-                      <span>{seller.rating.count.toLocaleString()} reviews</span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {seller.badges.map((b) => (
-                      <span
-                        key={b}
-                        className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-slate-600 capitalize"
+                    {/* Product Meta */}
+                    <div className="space-y-1">
+                      <Link
+                        href={`/products/${prod.slug}`}
+                        className="font-bold text-xs sm:text-sm text-[#111827] hover:text-amber-600 line-clamp-1"
                       >
-                        {b.replace('_', ' ')}
-                      </span>
-                    ))}
+                        {prod.title}
+                      </Link>
+                      <div className="text-[11px] text-[#6B7280] font-medium">{prod.category}</div>
+
+                      {/* Ratings */}
+                      <div className="flex items-center gap-1 pt-1 text-xs">
+                        <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                        <span className="font-bold text-[#111827]">{prod.rating}</span>
+                        <span className="text-[#9CA3AF] text-[10px]">({prod.reviews})</span>
+                      </div>
+
+                      {/* Pricing */}
+                      <div className="flex items-baseline gap-2 pt-1">
+                        <span className="font-black text-sm sm:text-base text-[#111827]">
+                          ${prod.price.toFixed(2)}
+                        </span>
+                        <span className="text-xs text-[#9CA3AF] line-through font-medium">
+                          ${prod.originalPrice.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-3 text-xs text-slate-600 space-y-1 border border-slate-100">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Positive Feedback:</span>
-                      <span className="font-bold text-slate-800">
-                        {seller.rating.positiveFeedbackPercent}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Fulfillment:</span>
-                      <span className="font-bold text-slate-800">Insured Express</span>
-                    </div>
+                  {/* Add to Cart Button */}
+                  <div className="pt-4">
+                    <button
+                      type="button"
+                      onClick={() => handleAddToCart(prod)}
+                      className="w-full rounded-full bg-[#111827] hover:bg-amber-400 hover:text-slate-950 text-white font-bold text-xs py-2.5 transition-colors cursor-pointer"
+                    >
+                      Add to Cart
+                    </button>
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-                <div className="mt-5 pt-4 border-t border-slate-100">
-                  <Button
-                    asChild
-                    variant="secondary"
-                    size="sm"
-                    className="w-full rounded-full font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800"
-                  >
-                    <Link href={`/store/${seller.slug}`}>
-                      Visit Storefront
-                      <ChevronRight className="ml-1 h-3.5 w-3.5" />
-                    </Link>
-                  </Button>
+      {/* ==================================================================== */}
+      {/* 8. TRUSTED BRANDS & WORLDWIDE SERVICE STRIP */}
+      {/* ==================================================================== */}
+      <section className="px-4 sm:px-8 py-6">
+        <div className="max-w-7xl mx-auto rounded-3xl bg-white border border-[#E5E7EB] p-6 sm:p-8 shadow-xs">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Brand Showcase */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider">
+                <span className="h-0.5 w-5 bg-amber-500 inline-block" />
+                <span>Trusted by Millions Worldwide</span>
+              </div>
+              <p className="text-xs text-[#6B7280]">Join over 10M+ happy global customers</p>
+
+              {/* Brand Logos Row */}
+              <div className="flex flex-wrap items-center gap-6 sm:gap-8 pt-1 text-[#4B5563] font-bold text-sm">
+                <span className="tracking-tighter text-lg font-black text-black"> Apple</span>
+                <span className="tracking-wider uppercase font-black">Samsung</span>
+                <span className="tracking-tight italic uppercase font-black">Nike</span>
+                <span className="tracking-wider font-extrabold">adidas</span>
+                <span className="tracking-widest font-black uppercase">SONY</span>
+                <span className="tracking-wider font-black">DELL</span>
+                <span className="tracking-tight font-black bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-sm text-xs">
+                  mi
+                </span>
+              </div>
+            </div>
+
+            {/* Right Worldwide Service Guarantees */}
+            <div className="lg:col-span-5 grid grid-cols-3 gap-4 border-t lg:border-t-0 lg:border-l border-[#E5E7EB] pt-6 lg:pt-0 lg:pl-8 text-left">
+              <div className="space-y-1">
+                <Truck className="h-5 w-5 text-[#111827]" />
+                <div className="text-xs font-bold text-[#111827]">Free Shipping</div>
+                <div className="text-[10px] text-[#6B7280]">Worldwide</div>
+              </div>
+
+              <div className="space-y-1">
+                <ShieldCheck className="h-5 w-5 text-[#111827]" />
+                <div className="text-xs font-bold text-[#111827]">Secure Payment</div>
+                <div className="text-[10px] text-[#6B7280]">100% Secure</div>
+              </div>
+
+              <div className="space-y-1">
+                <Headphones className="h-5 w-5 text-[#111827]" />
+                <div className="text-xs font-bold text-[#111827]">24/7 Support</div>
+                <div className="text-[10px] text-[#6B7280]">Always Here</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================================================================== */}
+      {/* 9. THREE-COLUMN FEATURE CARDS (Aureon Prime, AI, App Download) */}
+      {/* ==================================================================== */}
+      <section className="px-4 sm:px-8 py-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1: Exclusive Member Benefits (Gold Crown) */}
+          <div className="rounded-3xl bg-[#141416] border border-[#27272A] p-6 flex flex-col justify-between text-white shadow-xl relative overflow-hidden">
+            <div className="space-y-3 relative z-10">
+              <h3 className="font-black text-lg text-white">Exclusive Member Benefits</h3>
+              <p className="text-xs text-[#9CA3AF]">Get more with Aureon Prime</p>
+
+              <div className="space-y-2 pt-2 text-xs font-medium">
+                <div className="flex items-center gap-2 text-amber-300">
+                  <Check className="h-3.5 w-3.5" />
+                  <span>Free Shipping</span>
+                </div>
+                <div className="flex items-center gap-2 text-amber-300">
+                  <Check className="h-3.5 w-3.5" />
+                  <span>Exclusive Deals</span>
+                </div>
+                <div className="flex items-center gap-2 text-amber-300">
+                  <Check className="h-3.5 w-3.5" />
+                  <span>Early Access</span>
                 </div>
               </div>
-            ))}
+            </div>
+
+            <div className="flex items-end justify-between pt-6 relative z-10">
+              <Link
+                href="/account/settings"
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 text-slate-950 font-bold text-xs px-5 py-2.5 hover:bg-amber-300 transition-colors"
+              >
+                <span>Join Prime</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <Crown className="h-14 w-14 text-amber-400/80 drop-shadow-lg" />
+            </div>
           </div>
-        </Container>
-      </Section>
 
-      {/* 7. AI RECOMMENDATIONS & RECENTLY VIEWED SHELF */}
-      <Section spacing="md">
-        <Container className="space-y-8">
-          <AIRecommendationsRow
-            productId="prod-macbook-pro-16"
-            title="AI-Curated Recommendations For You"
-            limit={4}
-          />
-          <RecentlyViewedSection />
-        </Container>
-      </Section>
-
-      {/* 8. MARKETPLACE TRUST & BUYER PROTECTION DETAILS */}
-      <Section spacing="lg" className="border-t border-slate-200/60 bg-white">
-        <Container>
-          <div className="rounded-3xl border border-slate-200/70 bg-gradient-to-br from-white via-indigo-50/20 to-slate-50 p-8 sm:p-12 shadow-sm">
-            <div className="max-w-3xl space-y-3">
-              <span className="rounded-full bg-primary/10 text-primary border border-primary/20 px-3 py-1 font-bold uppercase text-2xs tracking-wider inline-block">
-                Enterprise Standards
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
-                Why Millions Trust Our Global Multi-Vendor Platform
-              </h2>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                We connect certified independent merchants with discerning shoppers, providing
-                strict quality moderation, competitive multi-offer pricing, and end-to-end
-                transaction security.
+          {/* Card 2: Shop Smarter with AI (Robot Assistant) */}
+          <div className="rounded-3xl bg-[#1E1B2E] border border-[#352D4F] p-6 flex flex-col justify-between text-white shadow-xl relative overflow-hidden">
+            <div className="space-y-3 relative z-10">
+              <h3 className="font-black text-lg text-white">Shop Smarter with AI</h3>
+              <p className="text-xs text-[#A5B4FC]">
+                Get personalized recommendations powered by AI.
               </p>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-200/60">
-              <div className="space-y-2">
-                <div className="text-primary font-bold text-sm flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4" />
-                  Buyer Protection Escrow
-                </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Payments are held securely in escrow until order delivery and verification,
-                  eliminating counterfeit risk and non-fulfillment.
-                </p>
-              </div>
+            <div className="flex items-end justify-between pt-8 relative z-10">
+              <button
+                type="button"
+                onClick={openAIAssistant}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white text-slate-950 font-bold text-xs px-5 py-2.5 hover:bg-amber-400 transition-colors cursor-pointer"
+              >
+                <span>Try AI Shopping</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+              <Bot className="h-14 w-14 text-purple-300 drop-shadow-lg" />
+            </div>
+          </div>
 
-              <div className="space-y-2">
-                <div className="text-primary font-bold text-sm flex items-center gap-1.5">
-                  <Store className="h-4 w-4" />
-                  Vetted Merchant Registry
-                </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Every merchant undergoes business license verification, tax ID validation, and
-                  ongoing fulfillment metric audits before listing.
-                </p>
-              </div>
+          {/* Card 3: Download Our App (Mobile Phone) */}
+          <div className="rounded-3xl bg-[#101014] border border-[#27272A] p-6 flex flex-col justify-between text-white shadow-xl relative overflow-hidden">
+            <div className="space-y-3 relative z-10">
+              <h3 className="font-black text-lg text-white">Download Our App</h3>
+              <p className="text-xs text-[#9CA3AF]">Shop anytime, anywhere.</p>
+            </div>
 
+            <div className="flex items-end justify-between pt-8 relative z-10">
               <div className="space-y-2">
-                <div className="text-primary font-bold text-sm flex items-center gap-1.5">
-                  <RotateCcw className="h-4 w-4" />
-                  Universal Return Policy
+                <div className="rounded-lg bg-black/60 border border-white/20 px-3 py-1.5 text-[10px] font-bold cursor-pointer hover:border-amber-400">
+                  Download on the App Store
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Standardized 30-day return policy across all merchants with automated prepaid
-                  shipping labels and instant refund processing.
-                </p>
+                <div className="rounded-lg bg-black/60 border border-white/20 px-3 py-1.5 text-[10px] font-bold cursor-pointer hover:border-amber-400">
+                  GET IT ON Google Play
+                </div>
+              </div>
+              <Smartphone className="h-14 w-14 text-slate-300 drop-shadow-lg" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================================================================== */}
+      {/* 10. WORLD-CLASS DARK LUXURY FOOTER */}
+      {/* ==================================================================== */}
+      <footer className="bg-[#0B0B0C] border-t border-[#1F1F24] text-white pt-16 pb-12 px-4 sm:px-8 mt-12">
+        <div className="max-w-7xl mx-auto space-y-12">
+          {/* Main Footer Links Columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+            {/* Brand Column */}
+            <div className="space-y-4 lg:col-span-1">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg bg-amber-400 flex items-center justify-center font-black text-slate-950 text-sm">
+                  ▲
+                </div>
+                <span className="text-xl font-black text-white tracking-tight">Aureon</span>
+              </div>
+              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                Shop Better. Live Smarter. Global multi-vendor marketplace connecting verified sellers
+                with millions of customers worldwide.
+              </p>
+              <div className="flex items-center gap-3 pt-2 text-[#9CA3AF]">
+                <span className="h-8 w-8 rounded-full bg-[#18181B] border border-[#27272A] flex items-center justify-center hover:text-white cursor-pointer text-xs">
+                  f
+                </span>
+                <span className="h-8 w-8 rounded-full bg-[#18181B] border border-[#27272A] flex items-center justify-center hover:text-white cursor-pointer text-xs">
+                  𝕏
+                </span>
+                <span className="h-8 w-8 rounded-full bg-[#18181B] border border-[#27272A] flex items-center justify-center hover:text-white cursor-pointer text-xs">
+                  ▶
+                </span>
+                <span className="h-8 w-8 rounded-full bg-[#18181B] border border-[#27272A] flex items-center justify-center hover:text-white cursor-pointer text-xs">
+                  in
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="space-y-3">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-white">Quick Links</h4>
+              <ul className="space-y-2 text-xs text-[#9CA3AF]">
+                <li>
+                  <Link href="/" className="hover:text-amber-400">
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products" className="hover:text-amber-400">
+                    Products
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products" className="hover:text-amber-400">
+                    Categories
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products?deals=true" className="hover:text-amber-400">
+                    Flash Sale
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/help" className="hover:text-amber-400">
+                    Contact Us
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Customer Service */}
+            <div className="space-y-3">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-white">
+                Customer Service
+              </h4>
+              <ul className="space-y-2 text-xs text-[#9CA3AF]">
+                <li>
+                  <Link href="/help" className="hover:text-amber-400">
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/account/orders" className="hover:text-amber-400">
+                    Track Order
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/help" className="hover:text-amber-400">
+                    Returns & Refunds
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/help" className="hover:text-amber-400">
+                    Shipping Info
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/help" className="hover:text-amber-400">
+                    FAQ
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* About Aureon */}
+            <div className="space-y-3">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-white">About Aureon</h4>
+              <ul className="space-y-2 text-xs text-[#9CA3AF]">
+                <li>
+                  <Link href="/about" className="hover:text-amber-400">
+                    Our Story
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/careers" className="hover:text-amber-400">
+                    Careers
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/news" className="hover:text-amber-400">
+                    Press & News
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/affiliate" className="hover:text-amber-400">
+                    Affiliate Program
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/seller/register" className="hover:text-amber-400">
+                    Become a Seller
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Stay Connected (Newsletter) */}
+            <div className="space-y-3">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-white">
+                Stay Connected
+              </h4>
+              <p className="text-xs text-[#9CA3AF]">
+                Subscribe to our newsletter for updates and exclusive offers.
+              </p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  triggerToast('Thank you for subscribing to our newsletter!');
+                }}
+                className="flex items-center rounded-xl bg-[#18181B] border border-[#27272A] p-1 focus-within:border-amber-400"
+              >
+                <input
+                  type="email"
+                  required
+                  placeholder="Enter your email"
+                  className="bg-transparent px-3 py-1.5 text-xs text-white placeholder-[#71717A] focus:outline-none flex-1"
+                />
+                <button
+                  type="submit"
+                  aria-label="Subscribe"
+                  className="h-8 w-8 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center hover:bg-amber-300 shrink-0 cursor-pointer"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Bottom Copyright and Localization Bar */}
+          <div className="border-t border-[#1F1F24] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9CA3AF]">
+            <div>© 2026 Aureon. All rights reserved.</div>
+
+            <div className="flex items-center gap-4 text-[11px]">
+              <Link href="/privacy" className="hover:text-white">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="hover:text-white">
+                Terms of Service
+              </Link>
+              <Link href="/cookies" className="hover:text-white">
+                Cookie Settings
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-4 text-[11px]">
+              <div className="flex items-center gap-1 cursor-pointer hover:text-white">
+                <span>🌐</span>
+                <span>English</span>
+                <ChevronDown className="h-3 w-3" />
+              </div>
+              <div className="flex items-center gap-1 cursor-pointer hover:text-white">
+                <span>USD</span>
+                <ChevronDown className="h-3 w-3" />
               </div>
             </div>
           </div>
-        </Container>
-      </Section>
-    </AppShell>
+        </div>
+      </footer>
+    </div>
   );
 }

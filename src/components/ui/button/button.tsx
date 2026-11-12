@@ -81,29 +81,51 @@ export function Button({
   rightIcon,
   disabled,
   children,
+  type,
   ...props
 }: ButtonProps): React.JSX.Element {
   const isIconOnly = variant === 'icon';
   const Comp = asChild ? Slot : 'button';
   const isDisabled = disabled || loading;
 
+  const dynamicProps = asChild
+    ? {
+        className: cn(
+          buttonVariants({
+            variant,
+            size,
+            touchTarget: touchTarget ?? (size === 'lg' || size === 'xl'),
+            className,
+          })
+        ),
+        ...(loading ? { 'aria-busy': 'true' as const } : {}),
+        ...(isDisabled ? { 'aria-disabled': 'true' as const } : {}),
+      }
+    : {
+        type: type ?? 'button',
+        disabled: isDisabled,
+        'aria-busy': loading ? ('true' as const) : undefined,
+        'aria-disabled': isDisabled ? ('true' as const) : undefined,
+        className: cn(
+          buttonVariants({
+            variant,
+            size,
+            touchTarget: touchTarget ?? (size === 'lg' || size === 'xl'),
+            className,
+          })
+        ),
+      };
+
+  if (asChild) {
+    return (
+      <Comp ref={ref} {...dynamicProps} {...props}>
+        {children}
+      </Comp>
+    );
+  }
+
   return (
-    <Comp
-      ref={ref}
-      type={asChild ? undefined : (props.type ?? 'button')}
-      disabled={isDisabled}
-      aria-busy={loading ? 'true' : undefined}
-      aria-disabled={isDisabled ? 'true' : undefined}
-      className={cn(
-        buttonVariants({
-          variant,
-          size,
-          touchTarget: touchTarget ?? (size === 'lg' || size === 'xl'),
-          className,
-        })
-      )}
-      {...props}
-    >
+    <Comp ref={ref} {...dynamicProps} {...props}>
       {loading ? (
         <>
           <Spinner size={size === 'xs' || size === 'sm' ? 'sm' : 'md'} />

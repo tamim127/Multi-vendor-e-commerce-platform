@@ -29,7 +29,7 @@ import {
 } from '@/domains/seller/fixtures/seller.fixture';
 import { DEMO_SELLER_PACKAGES } from '@/domains/seller/fixtures/seller-orders.fixture';
 import { DEMO_SELLER_METRICS } from '@/domains/seller/fixtures/analytics.fixture';
-import { MOCK_PRODUCTS, MOCK_SELLER_OFFERS } from '@/domains/catalog/fixtures';
+import { MOCK_PRODUCTS, MOCK_SELLER_OFFERS, MOCK_SELLERS } from '@/domains/catalog/fixtures';
 
 import {
   getStoredSellerProfile,
@@ -376,34 +376,68 @@ export function SellerProvider({ children }: { children: React.ReactNode }): Rea
         targetProfile = DEMO_SELLER_PROFILE;
       }
 
-      if (!targetProfile) return null;
+      if (targetProfile) {
+        const activeOffers = offers.filter((o: SellerOffer) => o.sellerId === targetProfile!.id);
 
-      const activeOffers = offers.filter((o: SellerOffer) => o.sellerId === targetProfile!.id);
+        const storefront: PublicStorefront = {
+          id: targetProfile.id,
+          slug: targetProfile.slug,
+          name: targetProfile.name,
+          tagline: targetProfile.tagline,
+          description: targetProfile.description,
+          logoUrl: targetProfile.logoUrl,
+          bannerUrl: targetProfile.bannerUrl,
+          rating: targetProfile.rating,
+          badges: targetProfile.badges,
+          isVerified: targetProfile.isVerified,
+          memberSinceYear: new Date(targetProfile.joinedAt).getFullYear(),
+          totalProductsCount: activeOffers.length,
+          policies: {
+            shipping: `Standard handling: ${targetProfile.fulfillmentSettings.standardHandlingDays} day(s). Insured delivery.`,
+            returns: `${targetProfile.fulfillmentSettings.returnWindowDays}-day return window on factory-sealed items.`,
+            warranty: 'Comprehensive 1-year authorized manufacturer warranty included.',
+          },
+        };
 
-      const storefront: PublicStorefront = {
-        id: targetProfile.id,
-        slug: targetProfile.slug,
-        name: targetProfile.name,
-        tagline: targetProfile.tagline,
-        description: targetProfile.description,
-        logoUrl: targetProfile.logoUrl,
-        bannerUrl: targetProfile.bannerUrl,
-        rating: targetProfile.rating,
-        badges: targetProfile.badges,
-        isVerified: targetProfile.isVerified,
-        memberSinceYear: new Date(targetProfile.joinedAt).getFullYear(),
-        totalProductsCount: activeOffers.length,
-        policies: {
-          shipping: `Standard handling: ${targetProfile.fulfillmentSettings.standardHandlingDays} day(s). Insured delivery.`,
-          returns: `${targetProfile.fulfillmentSettings.returnWindowDays}-day return window on factory-sealed items.`,
-          warranty: 'Comprehensive 1-year authorized manufacturer warranty included.',
-        },
-      };
+        return {
+          storefront,
+          activeOffers,
+        };
+      }
 
-      return {
-        storefront,
-        activeOffers,
-      };
+      // Check catalog mock sellers
+      const matchedMockSeller = MOCK_SELLERS.find((s) => s.slug === slug);
+      if (matchedMockSeller) {
+        const activeOffers = offers.filter((o: SellerOffer) => o.sellerId === matchedMockSeller.id);
+
+        const storefront: PublicStorefront = {
+          id: matchedMockSeller.id,
+          slug: matchedMockSeller.slug,
+          name: matchedMockSeller.name,
+          tagline: 'Authorized marketplace merchant offering certified authentic inventory.',
+          description: `${matchedMockSeller.name} is a verified merchant on Enterprise Multi-Vendor Marketplace, providing high-quality catalog selection with insured carrier shipping and certified warranty protection.`,
+          logoUrl: matchedMockSeller.logoUrl,
+          bannerUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200',
+          rating: matchedMockSeller.rating,
+          badges: matchedMockSeller.badges,
+          isVerified: matchedMockSeller.isVerified,
+          memberSinceYear: 2023,
+          totalProductsCount: activeOffers.length,
+          policies: {
+            shipping:
+              'Standard handling: 1-2 business days. Express domestic and international carrier tracking.',
+            returns: '30-day return policy for unopened items in original retail packaging.',
+            warranty: 'Comprehensive authorized manufacturer warranty included on all items.',
+          },
+        };
+
+        return {
+          storefront,
+          activeOffers,
+        };
+      }
+
+      return null;
     },
     [sellerProfile, offers]
   );

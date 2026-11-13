@@ -8,7 +8,7 @@
 'use client';
 
 import * as React from 'react';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button/button';
 import type { CatalogSortOption } from '@/domains/catalog/types/query';
 import { useI18n } from '@/lib/i18n';
@@ -31,26 +31,29 @@ export function PlpToolbar({
   const { t } = useI18n();
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 py-3 px-5 border border-slate-100 bg-white rounded-2xl shadow-xs mb-6">
+    <div className="flex flex-wrap items-center justify-between gap-4 py-3 px-5 border border-slate-200/80 bg-white rounded-2xl shadow-xs mb-6">
       {/* Total Results Summary */}
-      <div className="text-sm font-semibold text-slate-800">
-        {t('plp.showingResults', { count: totalCount.toString() })}
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-amber-500 inline-block" />
+        <span className="text-sm font-bold text-slate-900">
+          {t('plp.showingResults', { count: totalCount.toString() })}
+        </span>
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Mobile Filter Drawer Trigger (Mobile/Tablet only, touch target >= 44px) */}
+        {/* Mobile Filter Drawer Trigger */}
         <Button
           type="button"
           variant="tertiary"
           size="sm"
           onClick={onOpenMobileFilters}
-          className="lg:hidden min-h-[44px] min-w-[44px] px-3 gap-2 rounded-full"
+          className="lg:hidden min-h-[44px] min-w-[44px] px-4 gap-2 rounded-full border border-slate-200 bg-slate-50 font-bold hover:bg-slate-100"
           aria-label={t('plp.filters')}
         >
-          <SlidersHorizontal className="size-4" />
+          <SlidersHorizontal className="size-4 text-amber-500" />
           <span>{t('plp.filters')}</span>
           {activeFiltersCount > 0 && (
-            <span className="flex size-5 items-center justify-center rounded-full bg-primary text-white text-xs font-semibold">
+            <span className="flex size-5 items-center justify-center rounded-full bg-amber-400 text-slate-950 text-xs font-black">
               {activeFiltersCount}
             </span>
           )}
@@ -60,15 +63,16 @@ export function PlpToolbar({
         <div className="flex items-center gap-2">
           <label
             htmlFor="plp-sort-select"
-            className="text-xs font-medium text-slate-500 shrink-0 hidden sm:inline"
+            className="text-xs font-bold text-slate-600 shrink-0 hidden sm:inline flex items-center gap-1"
           >
-            {t('plp.sortBy')}:
+            <ArrowUpDown className="size-3 text-slate-400" />
+            <span>{t('plp.sortBy')}:</span>
           </label>
           <select
             id="plp-sort-select"
             value={currentSort}
             onChange={(e) => onSortChange(e.target.value as CatalogSortOption)}
-            className="h-10 sm:h-9 min-h-[44px] sm:min-h-0 rounded-full border border-slate-200/80 bg-slate-50 px-3.5 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-colors cursor-pointer"
+            className="h-10 sm:h-9 min-h-[44px] sm:min-h-0 rounded-full border border-slate-200 bg-slate-50/80 px-3.5 py-1 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all cursor-pointer shadow-2xs"
             aria-label={t('plp.sortBy')}
           >
             <option value="relevance">{t('plp.sortRelevance')}</option>

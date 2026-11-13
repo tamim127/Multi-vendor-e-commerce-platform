@@ -301,7 +301,11 @@ export function CartPageView(): React.JSX.Element {
 
             <div className="pt-2">
               <Link href="/checkout" className="w-full block">
-                <Button variant="primary" size="lg" className="w-full font-bold cursor-pointer">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full font-black rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 hover:brightness-110 shadow-lg shadow-amber-500/20 cursor-pointer py-3.5 transition-all"
+                >
                   <Lock className="size-4" />
                   <span>{t('cart.proceedToCheckout')}</span>
                   <ArrowRight className="size-4 rtl:rotate-180" />

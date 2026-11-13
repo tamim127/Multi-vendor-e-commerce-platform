@@ -2,8 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Sun, Moon, Flame } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container/container';
 import { SearchBar } from '@/components/layout/header/search-bar';
@@ -13,9 +12,9 @@ import {
   CartAction,
   SellerAction,
 } from '@/components/layout/header/header-actions';
-import { MegaMenu } from '@/components/layout/header/mega-menu';
+import { MegaNavBar } from '@/components/layout/header/mega-nav-bar';
 import { LanguageSelector } from '@/components/layout/header/language-selector';
-import { topUtilityLinks, primaryNavigationLinks } from '@/config/navigation';
+import { topUtilityLinks } from '@/config/navigation';
 import { useSafeRouter, useSafeSearchParams } from '@/lib/navigation/safe-navigation';
 import { useTheme } from '@/lib/theme/theme-context';
 import { useCart } from '@/features/cart';
@@ -33,7 +32,6 @@ export interface DesktopHeaderProps {
  */
 export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Element {
   const router = useSafeRouter();
-  const pathname = usePathname();
   const searchParams = useSafeSearchParams();
   const currentQuery = searchParams?.get('q') ?? '';
   const { theme, resolvedTheme, setTheme } = useTheme();
@@ -162,49 +160,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
       </div>
 
       {/* 3. Category & Mega Menu Navigation Row */}
-      <div className="border-t border-[#1A1A1E] bg-[#0B0B0C] py-2">
-        <Container size="standard" className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Mega Menu Trigger */}
-            <MegaMenu />
-
-            <div className="h-4 w-px bg-[#26262B]" />
-
-            {/* Primary Category Links with route-aware states */}
-            <nav aria-label="Primary navigation" className="flex items-center gap-2">
-              {primaryNavigationLinks.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <a
-                    key={item.id}
-                    href={item.href}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={cn(
-                      'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
-                      isActive
-                        ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
-                        : 'text-[#9CA3AF] hover:text-white hover:bg-[#18181B]'
-                    )}
-                  >
-                    <span>{item.label}</span>
-                    {item.badge && (
-                      <span className="rounded-full bg-rose-500 text-white px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider">
-                        {item.badge}
-                      </span>
-                    )}
-                  </a>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className="hidden xl:flex items-center text-xs text-[#9CA3AF] font-medium gap-1.5">
-            <Flame className="size-3.5 text-amber-400" />
-            <span>24/7 Verified Merchant Support</span>
-          </div>
-        </Container>
-      </div>
+      <MegaNavBar />
     </div>
   );
 }

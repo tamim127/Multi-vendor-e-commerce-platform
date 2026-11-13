@@ -32,8 +32,21 @@ export function MegaMenu({
   const [activeCategoryId, setActiveCategoryId] = React.useState<string>(categories[0]?.id || '');
   const menuRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const activeCategory = categories.find((cat) => cat.id === activeCategoryId) || categories[0];
+
+  const handleMouseEnter = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 180);
+  };
 
   // Close on outside click
   React.useEffect(() => {
@@ -61,7 +74,13 @@ export function MegaMenu({
   };
 
   return (
-    <div ref={menuRef} onKeyDown={handleKeyDown} className={cn('relative inline-block', className)}>
+    <div
+      ref={menuRef}
+      onKeyDown={handleKeyDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={cn('relative inline-block', className)}
+    >
       {/* Trigger Button */}
       <button
         ref={triggerRef}

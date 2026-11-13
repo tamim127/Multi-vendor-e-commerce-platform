@@ -21,7 +21,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Zap,
-  Flame,
   Star,
   Heart,
   ShoppingCart,
@@ -39,10 +38,11 @@ import {
   Sparkles,
   Bot,
   Crown,
-  Grid,
   Smartphone,
 } from 'lucide-react';
 
+import { cn } from '@/lib/utils';
+import { MegaNavBar } from '@/components/layout/header/mega-nav-bar';
 import { useCart } from '@/features/cart';
 import { useWishlist } from '@/features/wishlist';
 import { useAuth } from '@/features/auth';
@@ -231,9 +231,11 @@ export default function HomePage(): React.JSX.Element {
   const { customer, isAuthenticated } = useAuth();
   const { toggleOpen: openAIAssistant } = useAIAssistant();
 
-  // Search input state
+  // Search input & category filter state
   const [searchQuery, setSearchQuery] = useState('');
-  const selectedSearchCategory = 'All Categories';
+  const [selectedSearchCategory, setSelectedSearchCategory] = useState('All Categories');
+  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   // Hero Carousel State
   const [slideIndex, setSlideIndex] = useState(0);
@@ -284,11 +286,24 @@ export default function HomePage(): React.JSX.Element {
   // Search submission handler
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) {
-      router.push('/products');
-      return;
+    const q = searchQuery.trim();
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (selectedSearchCategory !== 'All Categories') {
+      const catMap: Record<string, string> = {
+        Electronics: 'computers-laptops',
+        Fashion: 'fashion',
+        'Home & Living': 'office-furniture',
+        'Beauty & Health': 'beauty',
+        Sports: 'mens-footwear',
+        'Toys & Games': 'toys-games',
+      };
+      if (catMap[selectedSearchCategory]) {
+        params.set('category', catMap[selectedSearchCategory]);
+      }
     }
-    router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`);
+    const queryStr = params.toString();
+    router.push(queryStr ? `/products?${queryStr}` : '/products');
   };
 
   // Add to cart from trending cards
@@ -403,10 +418,10 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </Link>
 
-          {/* Intelligent Search Input */}
+          {/* Intelligent Search Input with Interactive Category Selector */}
           <form
             onSubmit={handleSearch}
-            className="hidden md:flex flex-1 max-w-2xl items-center rounded-full bg-[#18181B] border border-[#27272A] p-1.5 focus-within:border-amber-400/80 focus-within:ring-2 focus-within:ring-amber-400/20 transition-all"
+            className="hidden md:flex flex-1 max-w-2xl items-center rounded-full bg-[#18181B] border border-[#27272A] p-1.5 focus-within:border-amber-400/80 focus-within:ring-2 focus-within:ring-amber-400/20 transition-all shadow-inner relative"
           >
             <input
               type="text"
@@ -415,16 +430,78 @@ export default function HomePage(): React.JSX.Element {
               placeholder="Search for products, brands and more..."
               className="flex-1 bg-transparent px-4 py-1.5 text-xs sm:text-sm text-white placeholder-[#71717A] focus:outline-none"
             />
-            {/* Category Dropdown Pill */}
-            <div className="hidden lg:flex items-center gap-1 text-xs text-[#A1A1AA] border-l border-[#27272A] px-3 py-1 cursor-pointer hover:text-white">
-              <span>{selectedSearchCategory}</span>
-              <ChevronDown className="h-3 w-3" />
+
+            {/* Clear Query button */}
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="text-[#71717A] hover:text-white px-2 py-1 text-xs cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+
+            {/* Interactive Category Dropdown Pill */}
+            <div className="relative hidden lg:block">
+              <button
+                type="button"
+                onClick={() => setIsCategoryPickerOpen(!isCategoryPickerOpen)}
+                className="flex items-center gap-1.5 text-xs text-[#A1A1AA] border-l border-[#27272A] px-3.5 py-1 cursor-pointer hover:text-white select-none transition-colors"
+              >
+                <span className="font-medium">{selectedSearchCategory}</span>
+                <ChevronDown
+                  className={cn(
+                    'h-3 w-3 transition-transform duration-200',
+                    isCategoryPickerOpen && 'rotate-180 text-amber-400'
+                  )}
+                />
+              </button>
+
+              {isCategoryPickerOpen && (
+                <div
+                  onMouseLeave={() => setIsCategoryPickerOpen(false)}
+                  className="absolute right-0 top-full mt-3 w-48 rounded-2xl border border-[#27272A] bg-[#121216]/98 backdrop-blur-xl p-1.5 shadow-2xl z-50 animate-in fade-in-0 duration-150"
+                >
+                  <div className="px-2.5 py-1 text-[10px] font-bold text-[#71717A] uppercase tracking-wider border-b border-[#27272A] mb-1">
+                    Filter by Department
+                  </div>
+                  {[
+                    'All Categories',
+                    'Electronics',
+                    'Fashion',
+                    'Home & Living',
+                    'Beauty & Health',
+                    'Sports',
+                    'Toys & Games',
+                  ].map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => {
+                        setSelectedSearchCategory(cat);
+                        setIsCategoryPickerOpen(false);
+                      }}
+                      className={cn(
+                        'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer',
+                        selectedSearchCategory === cat
+                          ? 'bg-amber-400 text-slate-950 font-bold'
+                          : 'text-[#A1A1AA] hover:text-white hover:bg-[#18181B]'
+                      )}
+                    >
+                      <span>{cat}</span>
+                      {selectedSearchCategory === cat && <Check className="h-3.5 w-3.5 text-slate-950" />}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            {/* Search Button */}
+
+            {/* Search Submit Button */}
             <button
               type="submit"
               aria-label="Search"
-              className="h-9 w-9 rounded-full bg-white text-slate-950 flex items-center justify-center hover:bg-amber-400 transition-colors shrink-0 cursor-pointer"
+              className="h-9 w-9 rounded-full bg-white hover:bg-amber-400 text-slate-950 flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-md hover:scale-105 active:scale-95"
             >
               <Search className="h-4 w-4" />
             </button>
@@ -432,29 +509,118 @@ export default function HomePage(): React.JSX.Element {
 
           {/* User Account, Wishlist, Cart Actions */}
           <div className="flex items-center gap-4 sm:gap-6 text-white text-xs font-semibold shrink-0">
-            {/* Account Action */}
-            <Link
-              href={isAuthenticated ? '/account' : '/login'}
-              className="flex items-center gap-2 hover:text-amber-400 transition-colors"
+            {/* Account Action with Hover Flyout Menu */}
+            <div
+              className="relative"
+              onMouseEnter={() => setIsAccountMenuOpen(true)}
+              onMouseLeave={() => setIsAccountMenuOpen(false)}
             >
-              <div className="h-8 w-8 rounded-full bg-[#1F1F23] flex items-center justify-center text-white">
-                <User className="h-4 w-4" />
-              </div>
-              <div className="hidden sm:flex flex-col text-left">
-                <span className="text-[10px] text-[#A1A1AA] font-normal leading-tight">
-                  {isAuthenticated ? 'Hello,' : 'Sign In'}
-                </span>
-                <span className="flex items-center gap-0.5 font-bold">
-                  {isAuthenticated ? customer?.firstName || 'Account' : 'Account'}
-                  <ChevronDown className="h-3 w-3 opacity-60" />
-                </span>
-              </div>
-            </Link>
+              <Link
+                href={isAuthenticated ? '/account' : '/login'}
+                className="flex items-center gap-2 hover:text-amber-400 transition-colors py-1"
+              >
+                <div className="h-8 w-8 rounded-full bg-[#1F1F23] border border-[#27272A] flex items-center justify-center text-white">
+                  <User className="h-4 w-4" />
+                </div>
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-[10px] text-[#A1A1AA] font-normal leading-tight">
+                    {isAuthenticated ? 'Hello,' : 'Sign In'}
+                  </span>
+                  <span className="flex items-center gap-0.5 font-bold">
+                    {isAuthenticated ? customer?.firstName || 'Account' : 'Account'}
+                    <ChevronDown
+                      className={cn(
+                        'h-3 w-3 opacity-60 transition-transform duration-200',
+                        isAccountMenuOpen && 'rotate-180 opacity-100 text-amber-400'
+                      )}
+                    />
+                  </span>
+                </div>
+              </Link>
+
+              {isAccountMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl border border-[#27272A] bg-[#121216]/98 backdrop-blur-xl p-2.5 shadow-2xl z-50 animate-in fade-in-0 duration-150">
+                  <div className="px-3 py-2 border-b border-[#27272A] mb-1.5">
+                    <p className="text-xs font-bold text-white">
+                      {isAuthenticated ? `Welcome back, ${customer?.firstName}!` : 'Welcome to Aureon!'}
+                    </p>
+                    <p className="text-[11px] text-[#71717A] mt-0.5">
+                      {isAuthenticated ? customer?.email : 'Sign in for personalized recommendations'}
+                    </p>
+                  </div>
+
+                  {!isAuthenticated ? (
+                    <div className="p-1 mb-1 border-b border-[#27272A]">
+                      <Link
+                        href="/login"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        className="flex items-center justify-center w-full py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-bold text-xs mb-1.5 shadow-sm transition-all"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/register"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        className="flex items-center justify-center w-full py-2 rounded-xl bg-[#18181B] hover:bg-[#202025] text-white font-semibold text-xs border border-[#27272A] transition-all"
+                      >
+                        Create Account
+                      </Link>
+                    </div>
+                  ) : null}
+
+                  <div className="py-1 space-y-0.5 text-xs">
+                    <Link
+                      href="/account"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#A1A1AA] hover:text-white hover:bg-[#18181B] transition-colors"
+                    >
+                      <User className="h-3.5 w-3.5 text-amber-400" />
+                      <span>My Account Profile</span>
+                    </Link>
+                    <Link
+                      href="/account/orders"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#A1A1AA] hover:text-white hover:bg-[#18181B] transition-colors"
+                    >
+                      <Truck className="h-3.5 w-3.5 text-amber-400" />
+                      <span>Orders & Shipment Tracking</span>
+                    </Link>
+                    <Link
+                      href="/wishlist"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#A1A1AA] hover:text-white hover:bg-[#18181B] transition-colors"
+                    >
+                      <Heart className="h-3.5 w-3.5 text-rose-400" />
+                      <span>Saved Wishlist ({wishlistCount})</span>
+                    </Link>
+                  </div>
+
+                  <div className="border-t border-[#27272A] pt-1.5 mt-1 space-y-0.5 text-xs">
+                    <Link
+                      href="/seller"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-400/10 transition-colors font-semibold"
+                    >
+                      <Crown className="h-3.5 w-3.5 text-amber-400" />
+                      <span>Seller Central Portal</span>
+                    </Link>
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#A1A1AA] hover:text-white hover:bg-[#18181B] transition-colors"
+                    >
+                      <ShieldCheck className="h-3.5 w-3.5 text-blue-400" />
+                      <span>Platform Admin</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Wishlist Action */}
             <Link
               href="/wishlist"
-              className="relative flex items-center gap-1.5 hover:text-amber-400 transition-colors"
+              className="relative flex items-center gap-1.5 hover:text-amber-400 transition-colors py-1"
             >
               <div className="relative">
                 <Heart className="h-5 w-5" />
@@ -472,7 +638,7 @@ export default function HomePage(): React.JSX.Element {
               type="button"
               onClick={openDrawer}
               aria-label="Open Cart"
-              className="relative flex items-center gap-1.5 hover:text-amber-400 transition-colors cursor-pointer"
+              className="relative flex items-center gap-1.5 hover:text-amber-400 transition-colors cursor-pointer py-1"
             >
               <div className="relative">
                 <ShoppingCart className="h-5 w-5" />
@@ -489,49 +655,9 @@ export default function HomePage(): React.JSX.Element {
       </header>
 
       {/* ==================================================================== */}
-      {/* 3. CATEGORY NAVIGATION BAR (Mega Nav Pill) */}
+      {/* 3. CATEGORY NAVIGATION BAR WITH CLICKABLE NAV & HOVER MEGA MENU */}
       {/* ==================================================================== */}
-      <nav className="bg-[#0B0B0C] border-b border-[#1A1A1E] text-xs text-[#D1D5DB] px-4 sm:px-8 py-2">
-        <div className="max-w-7xl mx-auto flex items-center gap-3 overflow-x-auto no-scrollbar">
-          {/* All Categories Button */}
-          <Link
-            href="/products"
-            className="flex items-center gap-2 rounded-full bg-[#18181B] text-white border border-[#27272A] hover:border-amber-400/50 px-4 py-2 font-bold shrink-0 transition-all"
-          >
-            <Grid className="h-3.5 w-3.5 text-amber-400" />
-            <span>All Categories</span>
-            <ChevronDown className="h-3 w-3 text-[#A1A1AA]" />
-          </Link>
-
-          {/* Quick Nav Links */}
-          <Link
-            href="/products?deals=true"
-            className="font-bold text-amber-400 hover:text-amber-300 px-3 py-2 shrink-0 flex items-center gap-1"
-          >
-            <Flame className="h-3.5 w-3.5 text-amber-400" />
-            Today&apos;s Deals
-          </Link>
-
-          {[
-            { name: 'Electronics', slug: 'computers-laptops' },
-            { name: 'Fashion', slug: 'fashion' },
-            { name: 'Home & Living', slug: 'office-furniture' },
-            { name: 'Beauty & Health', slug: 'beauty' },
-            { name: 'Sports', slug: 'mens-footwear' },
-            { name: 'Toys & Games', slug: 'toys-games' },
-            { name: 'More', slug: 'more' },
-          ].map((item) => (
-            <Link
-              key={item.name}
-              href={`/products?category=${item.slug}`}
-              className="flex items-center gap-1 text-[#9CA3AF] hover:text-white px-3 py-2 shrink-0 font-medium transition-colors"
-            >
-              <span>{item.name}</span>
-              <ChevronDown className="h-3 w-3 opacity-50" />
-            </Link>
-          ))}
-        </div>
-      </nav>
+      <MegaNavBar />
 
       {/* ==================================================================== */}
       {/* 4. HERO SECTION (Cinematic Dark & Warm Gold Experience) */}

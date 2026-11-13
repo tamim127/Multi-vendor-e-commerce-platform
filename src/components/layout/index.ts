@@ -5,6 +5,7 @@ export * from './header/desktop-header';
 export * from './header/mobile-header';
 export * from './header/mobile-drawer';
 export * from './header/mega-menu';
+export * from './header/mega-nav-bar';
 export * from './header/search-bar';
 export * from './header/header-actions';
 export * from './header/language-selector';

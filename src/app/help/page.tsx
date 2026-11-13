@@ -41,7 +41,7 @@ export default function HelpCenterPage(): React.JSX.Element {
 
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-12 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-12 px-4 sm:px-8">
         <div className="max-w-5xl mx-auto space-y-12">
           {/* Header & Search */}
           <div className="text-center space-y-4">
@@ -49,19 +49,19 @@ export default function HelpCenterPage(): React.JSX.Element {
               <HelpCircle className="h-4 w-4 text-amber-400" />
               <span>Aureon Customer Care Desk</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               How can we help you today?
             </h1>
 
             <div className="max-w-xl mx-auto mt-4">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#71717A]" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 dark:text-[#71717A]" />
                 <input
                   type="text"
                   placeholder="Search questions, returns, shipping, policies..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-full border border-[#27272A] bg-[#121216] pl-12 pr-4 py-3.5 text-sm text-white placeholder-[#71717A] focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 shadow-xl"
+                  className="w-full rounded-full border border-slate-200 dark:border-[#27272A] bg-[#121216] pl-12 pr-4 py-3.5 text-sm text-white placeholder-[#71717A] focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 shadow-xl"
                 />
               </div>
             </div>
@@ -69,12 +69,12 @@ export default function HelpCenterPage(): React.JSX.Element {
 
           {/* Quick Support Channels */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="rounded-3xl border border-[#27272A] bg-[#121216] p-6 text-center space-y-3">
+            <div className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-[#121216] p-6 text-center space-y-3">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-400 border border-amber-400/20">
                 <MessageSquare className="h-6 w-6" />
               </div>
-              <h3 className="font-bold text-white text-base">24/7 Live Chat</h3>
-              <p className="text-xs text-[#9CA3AF]">Instant assistance from our dedicated support specialists.</p>
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">24/7 Live Chat</h3>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF]">Instant assistance from our dedicated support specialists.</p>
               <button
                 type="button"
                 className="inline-block rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs px-4 py-2 mt-2 transition-all cursor-pointer"
@@ -83,26 +83,26 @@ export default function HelpCenterPage(): React.JSX.Element {
               </button>
             </div>
 
-            <div className="rounded-3xl border border-[#27272A] bg-[#121216] p-6 text-center space-y-3">
+            <div className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-[#121216] p-6 text-center space-y-3">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-400 border border-blue-500/20">
                 <Mail className="h-6 w-6" />
               </div>
-              <h3 className="font-bold text-white text-base">Email Support</h3>
-              <p className="text-xs text-[#9CA3AF]">Send a support ticket with an average response time of 2 hours.</p>
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Email Support</h3>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF]">Send a support ticket with an average response time of 2 hours.</p>
               <Link
                 href="/contact"
-                className="inline-block rounded-xl bg-[#18181B] hover:bg-[#202025] text-white border border-[#27272A] font-bold text-xs px-4 py-2 mt-2 transition-all"
+                className="inline-block rounded-xl bg-slate-100 dark:bg-[#18181B] hover:bg-[#202025] text-white border border-slate-200 dark:border-[#27272A] font-bold text-xs px-4 py-2 mt-2 transition-all"
               >
                 Submit Ticket
               </Link>
             </div>
 
-            <div className="rounded-3xl border border-[#27272A] bg-[#121216] p-6 text-center space-y-3">
+            <div className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-[#121216] p-6 text-center space-y-3">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
                 <Phone className="h-6 w-6" />
               </div>
-              <h3 className="font-bold text-white text-base">Phone Hotline</h3>
-              <p className="text-xs text-[#9CA3AF]">Toll-free customer hotline available Monday – Saturday.</p>
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Phone Hotline</h3>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF]">Toll-free customer hotline available Monday – Saturday.</p>
               <span className="inline-block font-mono font-bold text-xs text-amber-400 mt-2">
                 +1 (800) 555-0199
               </span>
@@ -110,8 +110,8 @@ export default function HelpCenterPage(): React.JSX.Element {
           </div>
 
           {/* Searchable FAQ Accordion */}
-          <div className="rounded-3xl border border-[#27272A] bg-[#121216] p-6 sm:p-8 space-y-4">
-            <h2 className="text-xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+          <div className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-[#121216] p-6 sm:p-8 space-y-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Frequently Asked Questions</h2>
 
             <div className="divide-y divide-[#1E1E24]">
               {filteredFaqs.map((faq, idx) => {
@@ -130,7 +130,7 @@ export default function HelpCenterPage(): React.JSX.Element {
                       />
                     </button>
                     {isOpen && (
-                      <p className="mt-2 text-xs text-[#9CA3AF] leading-relaxed animate-in fade-in-0 duration-150">
+                      <p className="mt-2 text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed animate-in fade-in-0 duration-150">
                         {faq.a}
                       </p>
                     )}

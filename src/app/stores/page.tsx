@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function StoresDirectoryPage(): React.JSX.Element {
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-10 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-10 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Header */}
           <div className="border-b border-[#1E1E24] pb-8">
@@ -21,10 +21,10 @@ export default function StoresDirectoryPage(): React.JSX.Element {
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
               <span>KYC Verified Seller Network</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Verified Marketplace Stores
             </h1>
-            <p className="mt-2 text-sm text-[#9CA3AF] max-w-2xl leading-relaxed">
+            <p className="mt-2 text-sm text-slate-600 dark:text-[#9CA3AF] max-w-2xl leading-relaxed">
               Shop directly from certified multi-vendor stores. Each merchant undergoes stringent identity, business license, and fulfillment quality vetting.
             </p>
           </div>
@@ -34,7 +34,7 @@ export default function StoresDirectoryPage(): React.JSX.Element {
             {MOCK_SELLERS.map((seller) => (
               <div
                 key={seller.id}
-                className="rounded-3xl border border-[#27272A] bg-gradient-to-b from-[#121216] to-[#0D0D10] p-6 shadow-xl flex flex-col justify-between hover:border-amber-400/40 transition-all group"
+                className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-gradient-to-b from-[#121216] to-[#0D0D10] p-6 shadow-xl flex flex-col justify-between hover:border-amber-400/40 transition-all group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -45,7 +45,7 @@ export default function StoresDirectoryPage(): React.JSX.Element {
                     <div className="flex items-center gap-1 text-amber-400 text-xs font-bold">
                       <Star className="h-3.5 w-3.5 fill-current" />
                       <span>{seller.rating.average.toFixed(1)}</span>
-                      <span className="text-[#71717A] text-[10px]">({seller.rating.count})</span>
+                      <span className="text-slate-500 dark:text-[#71717A] text-[10px]">({seller.rating.count})</span>
                     </div>
                   </div>
 
@@ -54,14 +54,14 @@ export default function StoresDirectoryPage(): React.JSX.Element {
                       <Store className="h-6 w-6 text-amber-400" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-white group-hover:text-amber-400 transition-colors">
+                      <h2 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-amber-400 transition-colors">
                         {seller.name}
                       </h2>
-                      <span className="text-xs text-[#71717A] font-mono">Store ID: {seller.id}</span>
+                      <span className="text-xs text-slate-500 dark:text-[#71717A] font-mono">Store ID: {seller.id}</span>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-[#1E1E24] space-y-2 text-xs text-[#9CA3AF]">
+                  <div className="mt-4 pt-4 border-t border-[#1E1E24] space-y-2 text-xs text-slate-600 dark:text-[#9CA3AF]">
                     <div className="flex items-center justify-between">
                       <span>Fulfillment Mode:</span>
                       <span className="font-semibold text-white flex items-center gap-1">
@@ -78,7 +78,7 @@ export default function StoresDirectoryPage(): React.JSX.Element {
                 <div className="mt-6 pt-4 border-t border-[#1E1E24]">
                   <Link
                     href={`/store/${seller.slug}`}
-                    className="flex items-center justify-center gap-2 w-full rounded-xl bg-[#18181B] hover:bg-amber-400 hover:text-slate-950 text-white font-bold text-xs py-2.5 border border-[#27272A] transition-all"
+                    className="flex items-center justify-center gap-2 w-full rounded-xl bg-slate-100 dark:bg-[#18181B] hover:bg-amber-400 hover:text-slate-950 text-white font-bold text-xs py-2.5 border border-slate-200 dark:border-[#27272A] transition-all"
                   >
                     <span>Visit Official Storefront</span>
                     <ArrowRight className="h-3.5 w-3.5" />

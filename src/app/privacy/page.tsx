@@ -7,45 +7,45 @@ import { Lock, ShieldCheck, CheckCircle2 } from 'lucide-react';
 export default function PrivacyPolicyPage(): React.JSX.Element {
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-12 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-12 px-4 sm:px-8">
         <div className="max-w-4xl mx-auto space-y-12">
           {/* Header */}
-          <div className="space-y-4 border-b border-[#1F1F24] pb-8">
+          <div className="space-y-4 border-b border-slate-200 dark:border-[#1F1F24] pb-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/10 border border-amber-400/20 px-3.5 py-1 text-xs font-bold text-amber-300">
               <Lock className="h-4 w-4 text-amber-400" />
               <span>Data Protection & Privacy Architecture</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Privacy Policy
             </h1>
-            <p className="text-xs text-[#71717A]">
+            <p className="text-xs text-slate-500 dark:text-[#71717A]">
               Effective Date: October 2026 • Compliant with GDPR (EU/UK), CCPA/CPRA (California), and global privacy frameworks.
             </p>
           </div>
 
           {/* Core Commitments */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-5 space-y-2">
+            <div className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-5 space-y-2">
               <ShieldCheck className="h-5 w-5 text-emerald-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Never Sold</h3>
-              <p className="text-xs text-[#9CA3AF]">We do not sell, rent, or broker your personal information to third-party data brokers.</p>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Never Sold</h3>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF]">We do not sell, rent, or broker your personal information to third-party data brokers.</p>
             </div>
-            <div className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-5 space-y-2">
+            <div className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-5 space-y-2">
               <Lock className="h-5 w-5 text-amber-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Encrypted At Rest</h3>
-              <p className="text-xs text-[#9CA3AF]">AES-256 bit encryption on databases and TLS 1.3 transit encryption across all API requests.</p>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Encrypted At Rest</h3>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF]">AES-256 bit encryption on databases and TLS 1.3 transit encryption across all API requests.</p>
             </div>
-            <div className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-5 space-y-2">
+            <div className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-5 space-y-2">
               <CheckCircle2 className="h-5 w-5 text-blue-400" />
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Complete User Control</h3>
-              <p className="text-xs text-[#9CA3AF]">Export or permanently delete your account data anytime directly from your settings.</p>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Complete User Control</h3>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF]">Export or permanently delete your account data anytime directly from your settings.</p>
             </div>
           </div>
 
           {/* Policy Text */}
           <div className="space-y-10 text-sm text-[#D4D4D8] leading-relaxed">
             <section className="space-y-3">
-              <h2 className="text-xl font-bold text-white">1. Information We Collect</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">1. Information We Collect</h2>
               <p>
                 When you interact with Aureon Marketplace, we collect information necessary to provide seamless commerce
                 services, process financial transactions, and deliver shipments safely to your door:
@@ -59,7 +59,7 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-xl font-bold text-white">2. How We Share Data With Independent Vendors</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">2. How We Share Data With Independent Vendors</h2>
               <p>
                 When you purchase merchandise from independent marketplace sellers, Aureon provides the seller only with the
                 necessary fulfillment information (your delivery name, address, and purchased SKU line items). Sellers do not have
@@ -68,7 +68,7 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-xl font-bold text-white">3. Your Data Protection Rights (GDPR & CCPA)</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">3. Your Data Protection Rights (GDPR & CCPA)</h2>
               <p>
                 Regardless of your geographic location, Aureon affords all registered users universal data dignity rights:
               </p>
@@ -81,7 +81,7 @@ export default function PrivacyPolicyPage(): React.JSX.Element {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-xl font-bold text-white">4. Contact Our Data Protection Officer</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">4. Contact Our Data Protection Officer</h2>
               <p>
                 For privacy inquiries or to submit a formal Data Subject Request (DSR), contact our Data Protection Office at{' '}
                 <a href="mailto:privacy@aureon.market" className="text-amber-400 underline font-semibold">

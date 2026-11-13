@@ -22,3 +22,4 @@ export default function AccountRegisterPage(): React.JSX.Element {
     </AppShell>
   );
 }
+

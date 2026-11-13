@@ -45,7 +45,7 @@ const PILLARS = [
 export default function AboutUsPage(): React.JSX.Element {
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-12 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-12 px-4 sm:px-8">
         <div className="max-w-6xl mx-auto space-y-16">
           {/* Hero Section */}
           <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -53,10 +53,10 @@ export default function AboutUsPage(): React.JSX.Element {
               <Award className="h-4 w-4 text-amber-400" />
               <span>The Next Generation Multi-Vendor Platform</span>
             </div>
-            <h1 className="text-3xl sm:text-6xl font-black text-white tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
               Building the Future of Global Verified Commerce
             </h1>
-            <p className="text-sm sm:text-base text-[#9CA3AF] leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-[#9CA3AF] leading-relaxed">
               Aureon was founded to bridge the gap between premium global buyers and world-class independent
               merchants. We combine institutional security, high-velocity logistics, and editorial discovery into
               a seamless marketplace.
@@ -68,22 +68,22 @@ export default function AboutUsPage(): React.JSX.Element {
             {STATS.map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 text-center space-y-1 hover:border-amber-400/40 transition-colors"
+                className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 text-center space-y-1 hover:border-amber-400/40 transition-colors"
               >
                 <div className="text-3xl sm:text-4xl font-black text-amber-400">{stat.value}</div>
-                <div className="text-xs font-bold text-white uppercase tracking-wider">{stat.label}</div>
-                <div className="text-[11px] text-[#71717A]">{stat.sub}</div>
+                <div className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">{stat.label}</div>
+                <div className="text-[11px] text-slate-500 dark:text-[#71717A]">{stat.sub}</div>
               </div>
             ))}
           </div>
 
           {/* Mission & Story */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4 text-sm text-[#9CA3AF] leading-relaxed">
+            <div className="space-y-4 text-sm text-slate-600 dark:text-[#9CA3AF] leading-relaxed">
               <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-widest">
                 <span>Our Heritage</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                 Reinventing the Marketplace for Discerning Clients
               </h2>
               <p>
@@ -105,15 +105,15 @@ export default function AboutUsPage(): React.JSX.Element {
                 </Link>
                 <Link
                   href="/seller/register"
-                  className="rounded-xl bg-[#141417] border border-[#27272A] px-5 py-2.5 text-xs font-bold text-white hover:border-amber-400/50 transition-colors"
+                  className="rounded-xl bg-[#141417] border border-slate-200 dark:border-[#27272A] px-5 py-2.5 text-xs font-bold text-slate-900 dark:text-white hover:border-amber-400/50 transition-colors"
                 >
                   Become a Merchant Partner
                 </Link>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 sm:p-8 space-y-6">
-              <h3 className="text-base font-bold text-white">Why Global Brands & Buyers Choose Aureon</h3>
+            <div className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 sm:p-8 space-y-6">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Why Global Brands & Buyers Choose Aureon</h3>
               <div className="space-y-3.5 text-xs text-[#D4D4D8]">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
@@ -143,20 +143,20 @@ export default function AboutUsPage(): React.JSX.Element {
           {/* 4 Pillars */}
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-2xl sm:text-3xl font-black text-white">Our Platform Principles</h2>
-              <p className="text-xs text-[#9CA3AF] mt-1">Engineered from the ground up for trust and scale</p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Our Platform Principles</h2>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF] mt-1">Engineered from the ground up for trust and scale</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {PILLARS.map((p) => {
                 const IconComponent = p.icon;
                 return (
-                  <div key={p.title} className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 space-y-3">
+                  <div key={p.title} className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 space-y-3">
                     <div className="size-10 rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/20 flex items-center justify-center">
                       <IconComponent className="h-5 w-5" />
                     </div>
-                    <h3 className="text-sm font-bold text-white">{p.title}</h3>
-                    <p className="text-xs text-[#9CA3AF] leading-relaxed">{p.desc}</p>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">{p.title}</h3>
+                    <p className="text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed">{p.desc}</p>
                   </div>
                 );
               })}

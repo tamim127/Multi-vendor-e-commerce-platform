@@ -18,7 +18,7 @@ export default function OrderTrackingPage(): React.JSX.Element {
 
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-12 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-12 px-4 sm:px-8">
         <div className="max-w-4xl mx-auto space-y-10">
           {/* Header */}
           <div className="text-center space-y-3">
@@ -26,10 +26,10 @@ export default function OrderTrackingPage(): React.JSX.Element {
               <Truck className="h-4 w-4 text-amber-400" />
               <span>Real-Time Logistics Engine</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Track Your Shipment
             </h1>
-            <p className="text-xs sm:text-sm text-[#9CA3AF] max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-[#9CA3AF] max-w-md mx-auto">
               Enter your Order Number and Customer Email address to inspect package transit checkpoints and estimated delivery.
             </p>
           </div>
@@ -37,7 +37,7 @@ export default function OrderTrackingPage(): React.JSX.Element {
           {/* Tracking Form */}
           <form
             onSubmit={handleTrack}
-            className="rounded-3xl border border-[#27272A] bg-[#121216] p-6 sm:p-8 shadow-2xl space-y-4"
+            className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-[#121216] p-6 sm:p-8 shadow-2xl space-y-4"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -50,7 +50,7 @@ export default function OrderTrackingPage(): React.JSX.Element {
                   placeholder="e.g. #ORD-7842"
                   value={orderId}
                   onChange={(e) => setOrderId(e.target.value)}
-                  className="w-full rounded-xl border border-[#27272A] bg-[#18181B] px-4 py-3 text-sm text-white placeholder-[#71717A] focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                  className="w-full rounded-xl border border-slate-200 dark:border-[#27272A] bg-slate-100 dark:bg-[#18181B] px-4 py-3 text-sm text-white placeholder-[#71717A] focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
                 />
               </div>
 
@@ -64,7 +64,7 @@ export default function OrderTrackingPage(): React.JSX.Element {
                   placeholder="e.g. rahim@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-[#27272A] bg-[#18181B] px-4 py-3 text-sm text-white placeholder-[#71717A] focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                  className="w-full rounded-xl border border-slate-200 dark:border-[#27272A] bg-slate-100 dark:bg-[#18181B] px-4 py-3 text-sm text-white placeholder-[#71717A] focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
                 />
               </div>
             </div>
@@ -80,16 +80,16 @@ export default function OrderTrackingPage(): React.JSX.Element {
 
           {/* Tracking Results View */}
           {searched && (
-            <div className="rounded-3xl border border-[#27272A] bg-[#121216] p-6 sm:p-8 shadow-2xl space-y-8 animate-in fade-in-0 duration-200">
+            <div className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-[#121216] p-6 sm:p-8 shadow-2xl space-y-8 animate-in fade-in-0 duration-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1E1E24] pb-6">
                 <div>
                   <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
                     Package Dispatched
                   </span>
-                  <h3 className="text-xl font-bold text-white mt-0.5">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
                     Order {orderId || '#ORD-7842'}
                   </h3>
-                  <span className="text-xs text-[#71717A] font-mono">
+                  <span className="text-xs text-slate-500 dark:text-[#71717A] font-mono">
                     Tracking ID: AUREON-EXP-98234710
                   </span>
                 </div>
@@ -107,8 +107,8 @@ export default function OrderTrackingPage(): React.JSX.Element {
                     ✓
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-white block">Order Confirmed</span>
-                    <span className="text-[10px] text-[#71717A]">Yesterday, 10:24 AM</span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">Order Confirmed</span>
+                    <span className="text-[10px] text-slate-500 dark:text-[#71717A]">Yesterday, 10:24 AM</span>
                   </div>
                 </div>
 
@@ -117,8 +117,8 @@ export default function OrderTrackingPage(): React.JSX.Element {
                     ✓
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-white block">Package Packed</span>
-                    <span className="text-[10px] text-[#71717A]">Yesterday, 4:15 PM</span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">Package Packed</span>
+                    <span className="text-[10px] text-slate-500 dark:text-[#71717A]">Yesterday, 4:15 PM</span>
                   </div>
                 </div>
 
@@ -133,12 +133,12 @@ export default function OrderTrackingPage(): React.JSX.Element {
                 </div>
 
                 <div className="flex items-center gap-3 opacity-50">
-                  <div className="h-8 w-8 rounded-full bg-[#18181B] text-[#71717A] border border-[#27272A] flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-[#18181B] text-slate-500 dark:text-[#71717A] border border-slate-200 dark:border-[#27272A] flex items-center justify-center font-bold text-xs shrink-0">
                     4
                   </div>
                   <div>
                     <span className="text-xs font-bold text-[#A1A1AA] block">Delivered</span>
-                    <span className="text-[10px] text-[#71717A]">Pending arrival</span>
+                    <span className="text-[10px] text-slate-500 dark:text-[#71717A]">Pending arrival</span>
                   </div>
                 </div>
               </div>

@@ -72,7 +72,7 @@ export default function CareersPage(): React.JSX.Element {
 
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-12 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-12 px-4 sm:px-8">
         <div className="max-w-6xl mx-auto space-y-16">
           {/* Header */}
           <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -80,10 +80,10 @@ export default function CareersPage(): React.JSX.Element {
               <Briefcase className="h-4 w-4 text-amber-400" />
               <span>We Are Actively Hiring</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
               Build the Next Generation of Global Commerce
             </h1>
-            <p className="text-sm sm:text-base text-[#9CA3AF] leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-[#9CA3AF] leading-relaxed">
               Join a team of passionate engineers, designers, and operators creating the world’s most trusted,
               elegant multi-vendor marketplace ecosystem.
             </p>
@@ -94,12 +94,12 @@ export default function CareersPage(): React.JSX.Element {
             {PERKS.map((perk) => {
               const IconComp = perk.icon;
               return (
-                <div key={perk.title} className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 space-y-3">
+                <div key={perk.title} className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 space-y-3">
                   <div className="size-10 rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/20 flex items-center justify-center">
                     <IconComp className="h-5 w-5" />
                   </div>
-                  <h3 className="text-sm font-bold text-white">{perk.title}</h3>
-                  <p className="text-xs text-[#9CA3AF] leading-relaxed">{perk.desc}</p>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">{perk.title}</h3>
+                  <p className="text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed">{perk.desc}</p>
                 </div>
               );
             })}
@@ -109,8 +109,8 @@ export default function CareersPage(): React.JSX.Element {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-white">Open Positions ({filteredJobs.length})</h2>
-                <p className="text-xs text-[#9CA3AF] mt-0.5">Explore our high-impact opportunities worldwide</p>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Open Positions ({filteredJobs.length})</h2>
+                <p className="text-xs text-slate-600 dark:text-[#9CA3AF] mt-0.5">Explore our high-impact opportunities worldwide</p>
               </div>
 
               {/* Department Filter Pills */}
@@ -122,7 +122,7 @@ export default function CareersPage(): React.JSX.Element {
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
                       selectedDept === dept
                         ? 'bg-amber-400 text-slate-950 font-bold'
-                        : 'bg-[#141417] text-[#A1A1AA] hover:text-white border border-[#27272A]'
+                        : 'bg-[#141417] text-[#A1A1AA] hover:text-white border border-slate-200 dark:border-[#27272A]'
                     }`}
                   >
                     {dept}
@@ -135,29 +135,29 @@ export default function CareersPage(): React.JSX.Element {
               {filteredJobs.map((job) => (
                 <div
                   key={job.id}
-                  className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-amber-400/50 transition-colors"
+                  className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-amber-400/50 transition-colors"
                 >
                   <div className="space-y-1.5 max-w-2xl">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full">
                         {job.dept}
                       </span>
-                      <span className="text-xs text-[#71717A] flex items-center gap-1">
+                      <span className="text-xs text-slate-500 dark:text-[#71717A] flex items-center gap-1">
                         <MapPin className="h-3.5 w-3.5" />
                         {job.location}
                       </span>
-                      <span className="text-xs text-[#71717A] flex items-center gap-1">
+                      <span className="text-xs text-slate-500 dark:text-[#71717A] flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" />
                         {job.type}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-white">{job.title}</h3>
-                    <p className="text-xs text-[#9CA3AF] leading-relaxed">{job.desc}</p>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">{job.title}</h3>
+                    <p className="text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed">{job.desc}</p>
                   </div>
 
                   <a
                     href="mailto:careers@aureon.market?subject=Application%20for%20Job"
-                    className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#141417] border border-[#27272A] hover:bg-amber-400 hover:text-slate-950 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-sm"
+                    className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#141417] border border-slate-200 dark:border-[#27272A] hover:bg-amber-400 hover:text-slate-950 px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white transition-all shadow-sm"
                   >
                     Apply Now
                     <ArrowRight className="h-4 w-4" />

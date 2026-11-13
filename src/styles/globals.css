@@ -118,3 +118,31 @@ body {
   padding: 0;
   min-height: 100%;
 }
+
+/* Global design system helper utilities */
+.theme-canvas {
+  background-color: var(--color-bg-canvas);
+  color: var(--color-fg-primary);
+}
+
+.theme-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-fg-primary);
+}
+
+.theme-card-subtle {
+  background-color: var(--color-bg-surface-muted);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-fg-primary);
+}
+
+.theme-gold-gradient {
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%);
+}
+
+.theme-gold-text {
+  background: linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F59E0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

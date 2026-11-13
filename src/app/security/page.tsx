@@ -37,7 +37,7 @@ const SECURITY_PILLARS = [
 export default function PlatformSecurityPage(): React.JSX.Element {
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-12 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-12 px-4 sm:px-8">
         <div className="max-w-5xl mx-auto space-y-16">
           {/* Header */}
           <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -45,10 +45,10 @@ export default function PlatformSecurityPage(): React.JSX.Element {
               <ShieldCheck className="h-4 w-4 text-amber-400" />
               <span>Institutional Trust & Infrastructure</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
               Platform Security Architecture
             </h1>
-            <p className="text-sm sm:text-base text-[#9CA3AF] leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-[#9CA3AF] leading-relaxed">
               Discover how Aureon safeguards billions in cross-border commerce, shields buyer identity, and
               enforces rigorous zero-trust protocols across every checkout.
             </p>
@@ -59,20 +59,20 @@ export default function PlatformSecurityPage(): React.JSX.Element {
             {SECURITY_PILLARS.map((p) => {
               const IconComp = p.icon;
               return (
-                <div key={p.title} className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 sm:p-8 space-y-3">
+                <div key={p.title} className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 sm:p-8 space-y-3">
                   <div className="size-12 rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/20 flex items-center justify-center">
                     <IconComp className="h-6 w-6" />
                   </div>
-                  <h3 className="text-base font-bold text-white">{p.title}</h3>
-                  <p className="text-xs text-[#9CA3AF] leading-relaxed">{p.desc}</p>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">{p.title}</h3>
+                  <p className="text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed">{p.desc}</p>
                 </div>
               );
             })}
           </div>
 
           {/* Defense in Depth Architecture */}
-          <div className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 sm:p-8 space-y-6">
-            <h2 className="text-xl font-bold text-white">Defense-in-Depth Implementation</h2>
+          <div className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 sm:p-8 space-y-6">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Defense-in-Depth Implementation</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-[#D4D4D8]">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
@@ -94,20 +94,20 @@ export default function PlatformSecurityPage(): React.JSX.Element {
           </div>
 
           {/* Responsible Disclosure & Bug Bounty */}
-          <div className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Bug className="h-5 w-5 text-amber-400" />
                 Responsible Vulnerability Disclosure & Bug Bounty
               </h3>
-              <p className="text-xs text-[#9CA3AF] max-w-lg leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF] max-w-lg leading-relaxed">
                 We welcome reports from ethical security researchers. Aureon awards competitive bounties for
                 qualifying security disclosures submitted through our coordinated disclosure program.
               </p>
             </div>
             <a
               href="mailto:security@aureon.market?subject=Vulnerability%20Disclosure"
-              className="rounded-xl bg-[#141417] border border-[#27272A] hover:border-amber-400/60 px-5 py-2.5 text-xs font-bold text-white transition-colors shrink-0"
+              className="rounded-xl bg-[#141417] border border-slate-200 dark:border-[#27272A] hover:border-amber-400/60 px-5 py-2.5 text-xs font-bold text-slate-900 dark:text-white transition-colors shrink-0"
             >
               Report Security Issue
             </a>

@@ -82,28 +82,28 @@ export function AccountLayout({
 
   return (
     <AuthGuard>
-      <div className="py-8 bg-[#F6F8FB] min-h-[calc(100vh-200px)]">
+      <div className="py-8 bg-slate-50 dark:bg-[#070708] min-h-[calc(100vh-200px)] text-slate-900 dark:text-white transition-colors">
         <Container size="standard">
           {/* Header Bar */}
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 pb-5">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-[#1E1E22] pb-5">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 {title || t('account.title')}
               </h1>
-              {subtitle && <p className="text-sm text-slate-500 mt-1 leading-relaxed">{subtitle}</p>}
+              {subtitle && <p className="text-sm text-slate-500 dark:text-[#9CA3AF] mt-1 leading-relaxed">{subtitle}</p>}
             </div>
             {customer && (
-              <div className="flex items-center gap-2.5 self-start sm:self-auto rounded-full bg-white border border-slate-200/80 px-3.5 py-1.5 shadow-2xs">
-                <div className="flex size-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 font-extrabold text-xs uppercase">
+              <div className="flex items-center gap-2.5 self-start sm:self-auto rounded-full bg-white dark:bg-[#18181B] border border-slate-200 dark:border-[#27272A] px-3.5 py-1.5 shadow-2xs">
+                <div className="flex size-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-xs uppercase">
                   {customer.firstName.charAt(0)}
                   {customer.lastName.charAt(0)}
                 </div>
-                <span className="text-xs font-bold text-slate-800 truncate max-w-40">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-40">
                   {customer.firstName} {customer.lastName}
                 </span>
                 {customer.emailVerified && (
                   <ShieldCheck
-                    className="size-3.5 text-emerald-600 shrink-0"
+                    className="size-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"
                     aria-label="Verified Customer"
                   />
                 )}
@@ -116,7 +116,7 @@ export function AccountLayout({
             <aside className="lg:col-span-3">
               <nav
                 aria-label="Account navigation"
-                className="rounded-3xl border border-slate-100 bg-white p-3 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-1.5"
+                className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-white dark:bg-[#0F0F12] p-3 shadow-xs space-y-1.5 transition-colors"
               >
                 {navItems.map((item) => {
                   const Icon = item.icon;
@@ -131,21 +131,21 @@ export function AccountLayout({
                       className={cn(
                         'flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all duration-150 cursor-pointer',
                         isActive
-                          ? 'bg-slate-100 text-slate-900 shadow-2xs font-extrabold'
-                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                          ? 'bg-amber-400/10 text-amber-600 dark:text-amber-400 border border-amber-400/20 font-extrabold'
+                          : 'text-slate-600 dark:text-[#9CA3AF] hover:bg-slate-100 dark:hover:bg-[#18181B] hover:text-slate-900 dark:hover:text-white'
                       )}
                     >
-                      <Icon className="size-4.5 shrink-0 text-slate-500" />
+                      <Icon className={cn('size-4.5 shrink-0', isActive ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-[#71717A]')} />
                       <span>{item.label}</span>
                     </Link>
                   );
                 })}
 
-                <div className="border-t border-slate-100 pt-1.5 my-1">
+                <div className="border-t border-slate-200 dark:border-[#27272A] pt-1.5 my-1">
                   <button
                     type="button"
                     onClick={() => logout()}
-                    className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors cursor-pointer"
                   >
                     <LogOut className="size-4.5 shrink-0 rtl:rotate-180" />
                     <span>{t('auth.logout')}</span>

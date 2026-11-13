@@ -38,3 +38,4 @@ export default function CategoryCatchAllPage(): React.JSX.Element {
     </AppShell>
   );
 }
+

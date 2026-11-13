@@ -598,7 +598,10 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
     <div
       ref={containerRef}
       onMouseLeave={handleMouseLeave}
-      className={cn('relative w-full z-50 bg-[#0B0B0C] border-b border-[#1A1A1E]', className)}
+      className={cn(
+        'relative w-full z-50 bg-white dark:bg-[#0B0B0C] border-b border-slate-200 dark:border-[#1A1A1E] transition-colors',
+        className
+      )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <div className="flex items-center gap-2 py-2 overflow-x-auto no-scrollbar">
@@ -617,21 +620,21 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                 'flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all select-none',
                 isAllCategoriesOpen
                   ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/20'
-                  : 'bg-[#18181B] text-white border border-[#27272A] hover:border-amber-400/50 hover:text-amber-400'
+                  : 'bg-slate-100 text-slate-800 border border-slate-200 hover:border-amber-400/50 hover:text-amber-500 dark:bg-[#18181B] dark:text-white dark:border-[#27272A] dark:hover:border-amber-400/50 dark:hover:text-amber-400'
               )}
             >
-              <Grid className={cn('h-3.5 w-3.5', isAllCategoriesOpen ? 'text-slate-950' : 'text-amber-400')} />
+              <Grid className={cn('h-3.5 w-3.5', isAllCategoriesOpen ? 'text-slate-950' : 'text-amber-500 dark:text-amber-400')} />
               <span>All Categories</span>
               <ChevronDown
                 className={cn(
                   'h-3 w-3 transition-transform duration-200',
-                  isAllCategoriesOpen ? 'rotate-180 text-slate-950' : 'text-[#A1A1AA]'
+                  isAllCategoriesOpen ? 'rotate-180 text-slate-950' : 'text-slate-500 dark:text-[#A1A1AA]'
                 )}
               />
             </Link>
           </div>
 
-          <div className="h-4 w-px bg-[#26262B] shrink-0" />
+          <div className="h-4 w-px bg-slate-200 dark:bg-[#26262B] shrink-0" />
 
           {/* 2. Today's Deals (Hot Link) */}
           <Link
@@ -641,11 +644,11 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
               setActiveMenuId(null);
               setIsAllCategoriesOpen(false);
             }}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-amber-400 hover:text-amber-300 shrink-0 transition-colors group"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 shrink-0 transition-colors group"
           >
-            <Flame className="h-3.5 w-3.5 text-amber-400 group-hover:scale-110 transition-transform animate-pulse" />
+            <Flame className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400 group-hover:scale-110 transition-transform animate-pulse" />
             <span>Today&apos;s Deals</span>
-            <span className="rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider ml-0.5">
+            <span className="rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider ml-0.5">
               HOT
             </span>
           </Link>
@@ -671,10 +674,10 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                   className={cn(
                     'flex items-center gap-1 px-3 py-2 rounded-full text-xs font-semibold transition-all select-none',
                     isHovered
-                      ? 'bg-[#1F1F24] text-white'
+                      ? 'bg-slate-100 text-slate-900 dark:bg-[#1F1F24] dark:text-white'
                       : isCurrentPage
-                      ? 'text-white font-bold'
-                      : 'text-[#9CA3AF] hover:text-white hover:bg-[#18181B]'
+                      ? 'text-slate-900 dark:text-white font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-[#9CA3AF] dark:hover:text-white dark:hover:bg-[#18181B]'
                   )}
                 >
                   <span>{cat.label}</span>
@@ -682,7 +685,7 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                     <ChevronDown
                       className={cn(
                         'h-3 w-3 opacity-60 transition-transform duration-200',
-                        isHovered && 'rotate-180 text-amber-400 opacity-100'
+                        isHovered && 'rotate-180 text-amber-500 dark:text-amber-400 opacity-100'
                       )}
                     />
                   )}
@@ -700,7 +703,7 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
         <div
           onMouseEnter={clearTimer}
           onMouseLeave={handleMouseLeave}
-          className="absolute left-0 right-0 top-full z-50 bg-[#0E0E12]/98 backdrop-blur-2xl border-b border-[#27272A] shadow-2xl animate-in fade-in-0 slide-in-from-top-2 duration-150"
+          className="absolute left-0 right-0 top-full z-50 bg-white/98 dark:bg-[#0E0E12]/98 backdrop-blur-2xl border-b border-slate-200 dark:border-[#27272A] shadow-2xl animate-in fade-in-0 slide-in-from-top-2 duration-150 transition-colors"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
             <div className="grid grid-cols-12 gap-8">
@@ -711,10 +714,10 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                     <Link
                       href={col.href}
                       onClick={() => setActiveMenuId(null)}
-                      className="group flex items-center gap-1 text-xs font-bold text-white uppercase tracking-wider hover:text-amber-400 transition-colors"
+                      className="group flex items-center gap-1 text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
                     >
                       <span>{col.title}</span>
-                      <ArrowRight className="h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-amber-400" />
+                      <ArrowRight className="h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-amber-500 dark:text-amber-400" />
                     </Link>
 
                     <ul className="space-y-2 text-xs">
@@ -723,16 +726,16 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                           <Link
                             href={item.href}
                             onClick={() => setActiveMenuId(null)}
-                            className="flex items-center justify-between text-[#9CA3AF] hover:text-white hover:translate-x-1 transition-all py-0.5"
+                            className="flex items-center justify-between text-slate-600 hover:text-slate-950 dark:text-[#9CA3AF] dark:hover:text-white hover:translate-x-1 transition-all py-0.5"
                           >
                             <span>{item.label}</span>
                             {item.isHot && (
-                              <span className="rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30 px-1.5 py-0.2 text-[9px] font-bold uppercase">
+                              <span className="rounded-full bg-rose-500/15 text-rose-500 dark:text-rose-400 border border-rose-500/30 px-1.5 py-0.2 text-[9px] font-bold uppercase">
                                 HOT
                               </span>
                             )}
                             {item.isNew && (
-                              <span className="rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-bold uppercase">
+                              <span className="rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-bold uppercase">
                                 NEW
                               </span>
                             )}
@@ -746,22 +749,22 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
 
               {/* Featured Promo & Spotlight (4 Columns) */}
               {activeCategory.featured && (
-                <div className="col-span-12 lg:col-span-4 border-t lg:border-t-0 lg:border-l border-[#27272A] lg:pl-8 flex flex-col justify-between">
-                  <div className="rounded-2xl border border-[#27272A] bg-gradient-to-b from-[#18181D] to-[#121216] p-5 relative overflow-hidden group">
+                <div className="col-span-12 lg:col-span-4 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-[#27272A] lg:pl-8 flex flex-col justify-between">
+                  <div className="rounded-2xl border border-slate-200 dark:border-[#27272A] bg-slate-50 dark:bg-gradient-to-b dark:from-[#18181D] dark:to-[#121216] p-5 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
                     <div className="flex items-center justify-between mb-3">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 text-[10px] font-bold">
-                        <Sparkles className="h-3 w-3 text-amber-400" />
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-400/40 px-2.5 py-0.5 text-[10px] font-bold">
+                        <Sparkles className="h-3 w-3 text-amber-500 dark:text-amber-400" />
                         {activeCategory.featured.badge}
                       </span>
                       {activeCategory.featured.price && (
                         <div className="text-right">
-                          <span className="text-sm font-black text-white">
+                          <span className="text-sm font-bold text-slate-900 dark:text-white">
                             {activeCategory.featured.price}
                           </span>
                           {activeCategory.featured.originalPrice && (
-                            <span className="text-[10px] text-[#71717A] line-through ml-1.5 font-mono">
+                            <span className="text-[10px] text-slate-400 dark:text-[#71717A] line-through ml-1.5 font-mono">
                               {activeCategory.featured.originalPrice}
                             </span>
                           )}
@@ -769,14 +772,14 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                       )}
                     </div>
 
-                    <h4 className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors">
                       {activeCategory.featured.title}
                     </h4>
-                    <p className="mt-1 text-xs text-[#9CA3AF] leading-relaxed line-clamp-2">
+                    <p className="mt-1 text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed line-clamp-2">
                       {activeCategory.featured.subtitle}
                     </p>
 
-                    <div className="relative h-36 w-full mt-3 rounded-xl overflow-hidden bg-black/40">
+                    <div className="relative h-36 w-full mt-3 rounded-xl overflow-hidden bg-slate-100 dark:bg-black/40">
                       {/* Product preview */}
                       {activeCategory.featured.image.startsWith('http') ||
                       activeCategory.featured.image.startsWith('/') ? (
@@ -802,7 +805,7 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                   {/* Popular Brand Chips */}
                   {activeCategory.popularBrands && (
                     <div className="mt-4">
-                      <span className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider block mb-2">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-[#71717A] uppercase tracking-wider block mb-2">
                         Top Brands in {activeCategory.label}
                       </span>
                       <div className="flex flex-wrap gap-1.5">
@@ -811,7 +814,7 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                             key={i}
                             href={b.href}
                             onClick={() => setActiveMenuId(null)}
-                            className="rounded-lg bg-[#18181B] border border-[#27272A] px-2.5 py-1 text-[11px] text-[#A1A1AA] hover:text-white hover:border-amber-400/50 transition-colors"
+                            className="rounded-lg bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-950 hover:border-amber-400 dark:bg-[#18181B] dark:border-[#27272A] dark:text-[#A1A1AA] dark:hover:text-white dark:hover:border-amber-400/50 transition-colors px-2.5 py-1 text-[11px]"
                           >
                             {b.name}
                           </Link>
@@ -824,25 +827,25 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
             </div>
 
             {/* Bottom Quick Strip */}
-            <div className="mt-6 pt-4 border-t border-[#1F1F24] flex flex-col sm:flex-row items-center justify-between text-xs text-[#71717A] gap-3">
+            <div className="mt-6 pt-4 border-t border-slate-200 dark:border-[#1F1F24] flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-[#71717A] gap-3">
               <div className="flex items-center gap-4">
                 <Link
                   href={activeCategory.href}
                   onClick={() => setActiveMenuId(null)}
-                  className="font-bold text-amber-400 hover:underline flex items-center gap-1"
+                  className="font-bold text-amber-500 dark:text-amber-400 hover:underline flex items-center gap-1"
                 >
                   <span>View All {activeCategory.label} Products</span>
                   <ArrowRight className="h-3 w-3" />
                 </Link>
                 <span>•</span>
-                <span className="flex items-center gap-1 text-[#9CA3AF]">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="flex items-center gap-1 text-slate-600 dark:text-[#9CA3AF]">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
                   100% Genuine Certified Sellers
                 </span>
               </div>
 
               <div className="flex items-center gap-2 text-[11px]">
-                <Tag className="h-3 w-3 text-amber-400" />
+                <Tag className="h-3 w-3 text-amber-500 dark:text-amber-400" />
                 <span>Express 2-Day Shipping Available</span>
               </div>
             </div>
@@ -857,13 +860,13 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
         <div
           onMouseEnter={clearTimer}
           onMouseLeave={handleMouseLeave}
-          className="absolute left-0 right-0 top-full z-50 bg-[#0E0E12]/98 backdrop-blur-2xl border-b border-[#27272A] shadow-2xl animate-in fade-in-0 slide-in-from-top-2 duration-150"
+          className="absolute left-0 right-0 top-full z-50 bg-white/98 dark:bg-[#0E0E12]/98 backdrop-blur-2xl border-b border-slate-200 dark:border-[#27272A] shadow-2xl animate-in fade-in-0 slide-in-from-top-2 duration-150 transition-colors"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
             <div className="grid grid-cols-12 gap-6 min-h-[360px]">
               {/* Left Sidebar: Fast Category Switcher (3 Cols) */}
-              <div className="col-span-12 lg:col-span-3 border-r border-[#27272A] pr-4 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A] px-3 pb-2 block">
+              <div className="col-span-12 lg:col-span-3 border-r border-slate-200 dark:border-[#27272A] pr-4 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#71717A] px-3 pb-2 block">
                   Select Department
                 </span>
                 {MEGA_NAV_CATEGORIES.map((cat, idx) => {
@@ -881,18 +884,18 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                       className={cn(
                         'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer',
                         isSelected
-                          ? 'bg-amber-400/15 text-amber-300 border border-amber-400/30'
-                          : 'text-[#9CA3AF] hover:text-white hover:bg-[#18181B]'
+                          ? 'bg-amber-400/20 text-amber-900 dark:text-amber-300 border border-amber-400/40 font-bold'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-[#9CA3AF] dark:hover:text-white dark:hover:bg-[#18181B]'
                       )}
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon className={cn('h-4 w-4', isSelected ? 'text-amber-400' : 'text-[#71717A]')} />
+                        <Icon className={cn('h-4 w-4', isSelected ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-[#71717A]')} />
                         <span>{cat.label}</span>
                       </div>
                       <ArrowRight
                         className={cn(
                           'h-3 w-3 transition-transform',
-                          isSelected ? 'opacity-100 translate-x-0 text-amber-400' : 'opacity-0 -translate-x-1'
+                          isSelected ? 'opacity-100 translate-x-0 text-amber-500 dark:text-amber-400' : 'opacity-0 -translate-x-1'
                         )}
                       />
                     </button>
@@ -907,7 +910,7 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                     <Link
                       href={col.href}
                       onClick={() => setIsAllCategoriesOpen(false)}
-                      className="text-xs font-bold text-white uppercase tracking-wider hover:text-amber-400 transition-colors block border-b border-[#27272A] pb-1.5"
+                      className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:text-amber-500 dark:hover:text-amber-400 transition-colors block border-b border-slate-200 dark:border-[#27272A] pb-1.5"
                     >
                       {col.title}
                     </Link>
@@ -917,7 +920,7 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
                           <Link
                             href={item.href}
                             onClick={() => setIsAllCategoriesOpen(false)}
-                            className="text-[#9CA3AF] hover:text-white transition-colors block py-0.5 hover:translate-x-1 duration-150"
+                            className="text-slate-600 hover:text-slate-950 dark:text-[#9CA3AF] dark:hover:text-white transition-colors block py-0.5 hover:translate-x-1 duration-150"
                           >
                             {item.label}
                           </Link>
@@ -929,16 +932,16 @@ export function MegaNavBar({ className }: MegaNavBarProps): React.JSX.Element {
               </div>
 
               {/* Right Section: Highlight Card & Action (3 Cols) */}
-              <div className="col-span-12 lg:col-span-3 border-l border-[#27272A] pl-6 flex flex-col justify-between">
+              <div className="col-span-12 lg:col-span-3 border-l border-slate-200 dark:border-[#27272A] pl-6 flex flex-col justify-between">
                 {currentAllCategory.featured ? (
-                  <div className="rounded-2xl border border-[#27272A] bg-gradient-to-b from-[#18181D] to-[#121216] p-4 relative overflow-hidden group">
-                    <span className="inline-block rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 px-2 py-0.5 text-[10px] font-bold mb-2">
+                  <div className="rounded-2xl border border-slate-200 dark:border-[#27272A] bg-slate-50 dark:bg-gradient-to-b dark:from-[#18181D] dark:to-[#121216] p-4 relative overflow-hidden group">
+                    <span className="inline-block rounded-full bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-400/40 px-2 py-0.5 text-[10px] font-bold mb-2">
                       {currentAllCategory.featured.badge}
                     </span>
-                    <h5 className="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">
+                    <h5 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors">
                       {currentAllCategory.featured.title}
                     </h5>
-                    <p className="mt-1 text-[11px] text-[#9CA3AF] line-clamp-2">
+                    <p className="mt-1 text-[11px] text-slate-600 dark:text-[#9CA3AF] line-clamp-2">
                       {currentAllCategory.featured.subtitle}
                     </p>
 

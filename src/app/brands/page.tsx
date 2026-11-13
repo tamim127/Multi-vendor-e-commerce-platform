@@ -30,7 +30,7 @@ const BRANDS = [
 export default function BrandsDirectoryPage(): React.JSX.Element {
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-10 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-10 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Header */}
           <div className="border-b border-[#1E1E24] pb-8">
@@ -38,10 +38,10 @@ export default function BrandsDirectoryPage(): React.JSX.Element {
               <Award className="h-3.5 w-3.5 text-amber-400" />
               <span>Certified Brand Storefronts</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Official Marketplace Brands
             </h1>
-            <p className="mt-2 text-sm text-[#9CA3AF] max-w-2xl leading-relaxed">
+            <p className="mt-2 text-sm text-slate-600 dark:text-[#9CA3AF] max-w-2xl leading-relaxed">
               Explore authentic manufacturer stores. Every brand listed here is certified under our Strict Brand Authenticity Agreement with zero counterfeit tolerance.
             </p>
           </div>
@@ -52,20 +52,20 @@ export default function BrandsDirectoryPage(): React.JSX.Element {
               <Link
                 key={brand.slug}
                 href={`/products?q=${encodeURIComponent(brand.slug)}`}
-                className="rounded-3xl border border-[#27272A] bg-gradient-to-b from-[#121216] to-[#0D0D10] p-6 shadow-xl hover:border-amber-400/50 hover:scale-[1.01] transition-all flex flex-col justify-between group"
+                className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-gradient-to-b from-[#121216] to-[#0D0D10] p-6 shadow-xl hover:border-amber-400/50 hover:scale-[1.01] transition-all flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 text-[10px] font-bold">
                       {brand.badge}
                     </span>
-                    <span className="font-mono text-xs text-[#71717A]">{brand.count}</span>
+                    <span className="font-mono text-xs text-slate-500 dark:text-[#71717A]">{brand.count}</span>
                   </div>
 
-                  <h3 className="text-xl font-black text-white group-hover:text-amber-400 transition-colors">
+                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-amber-400 transition-colors">
                     {brand.name}
                   </h3>
-                  <p className="text-xs text-[#9CA3AF] mt-1">{brand.category}</p>
+                  <p className="text-xs text-slate-600 dark:text-[#9CA3AF] mt-1">{brand.category}</p>
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-[#1E1E24] flex items-center justify-between text-xs font-bold text-amber-400">

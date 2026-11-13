@@ -40,7 +40,7 @@ const ARTICLES = [
 export default function PressNewsPage(): React.JSX.Element {
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-12 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-12 px-4 sm:px-8">
         <div className="max-w-5xl mx-auto space-y-16">
           {/* Header */}
           <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -48,22 +48,22 @@ export default function PressNewsPage(): React.JSX.Element {
               <Newspaper className="h-4 w-4 text-amber-400" />
               <span>Aureon Global Newsroom</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
               News, Releases & Media Center
             </h1>
-            <p className="text-sm sm:text-base text-[#9CA3AF] leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-[#9CA3AF] leading-relaxed">
               Official press announcements, corporate updates, and media resources for journalists and industry analysts.
             </p>
           </div>
 
           {/* Media Kit Card */}
-          <div className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="space-y-1">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-amber-400" />
                 Aureon Official Press & Media Kit
               </h2>
-              <p className="text-xs text-[#9CA3AF] max-w-lg leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF] max-w-lg leading-relaxed">
                 Download high-resolution vectors of our brand identity, executive headshots, platform screenshots, and company fact sheet.
               </p>
             </div>
@@ -78,34 +78,34 @@ export default function PressNewsPage(): React.JSX.Element {
 
           {/* Press Releases List */}
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Recent Announcements</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Recent Announcements</h2>
             <div className="space-y-4">
               {ARTICLES.map((art) => (
                 <div
                   key={art.title}
-                  className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 space-y-2.5 hover:border-amber-400/50 transition-colors"
+                  className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 space-y-2.5 hover:border-amber-400/50 transition-colors"
                 >
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <span className="font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider">
                       {art.tag}
                     </span>
-                    <span className="text-[#71717A] flex items-center gap-1">
+                    <span className="text-slate-500 dark:text-[#71717A] flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5" />
                       {art.date}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-white">{art.title}</h3>
-                  <p className="text-xs text-[#9CA3AF] leading-relaxed">{art.desc}</p>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">{art.title}</h3>
+                  <p className="text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed">{art.desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Media Contact Box */}
-          <div className="rounded-2xl bg-[#0F0F12] border border-[#27272A] p-6 text-center space-y-3">
+          <div className="rounded-2xl bg-white dark:bg-white dark:bg-[#0F0F12] border border-slate-200 dark:border-slate-200 dark:border-[#27272A] shadow-xs transition-colors p-6 text-center space-y-3">
             <Mail className="h-6 w-6 text-amber-400 mx-auto" />
-            <h3 className="text-base font-bold text-white">Press & Media Inquiries</h3>
-            <p className="text-xs text-[#9CA3AF] max-w-md mx-auto">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Press & Media Inquiries</h3>
+            <p className="text-xs text-slate-600 dark:text-[#9CA3AF] max-w-md mx-auto">
               Members of the media can direct interview requests and inquiries to{' '}
               <a href="mailto:press@aureon.market" className="text-amber-400 underline font-semibold">
                 press@aureon.market

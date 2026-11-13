@@ -19,3 +19,4 @@ export default function AccountLoginPage(): React.JSX.Element {
     </AppShell>
   );
 }
+

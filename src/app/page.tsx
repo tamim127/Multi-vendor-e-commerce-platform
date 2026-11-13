@@ -1,21 +1,5 @@
 'use client';
 
-/**
- * ==============================================================================
- * AUREON GLOBAL MULTI-VENDOR MARKETPLACE — HOMEPAGE
- * ==============================================================================
- * Ultra-premium, world-class e-commerce experience inspired by the Aureon design:
- * - Dark luxury topbar and intelligent search header
- * - Smooth category mega-nav with dropdowns
- * - Cinematic dark & warm gold hero showcase with interactive carousel
- * - Clean category discovery cards with soft shadows
- * - Dual promo grid: Flash Deals with live countdown & New Arrivals interior banner
- * - 5-column trending products with discount badges, wishlist toggle & quick add-to-cart
- * - Trusted brands strip with worldwide guarantees
- * - 3-column value cards: Aureon Prime, AI Shopping Assistant, and Mobile App
- * - Full dark luxury footer with newsletter subscription & localization
- */
-
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -23,10 +7,6 @@ import {
   Zap,
   Star,
   Heart,
-  ShoppingCart,
-  User,
-  Search,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ArrowRight,
@@ -35,17 +15,18 @@ import {
   Truck,
   ShieldCheck,
   Headphones,
+  RotateCcw,
   Sparkles,
   Bot,
   Crown,
   Smartphone,
+  Store,
+  CheckCircle2,
 } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
-import { MegaNavBar } from '@/components/layout/header/mega-nav-bar';
+import { AppShell } from '@/components/layout/shell/app-shell';
 import { useCart } from '@/features/cart';
 import { useWishlist } from '@/features/wishlist';
-import { useAuth } from '@/features/auth';
 import { useAIAssistant } from '@/features/ai';
 import { MOCK_PRODUCTS } from '@/domains/catalog/fixtures';
 import type { Product } from '@/domains/catalog/types/product';
@@ -101,53 +82,53 @@ const HERO_SLIDES: HeroSlide[] = [
   },
 ];
 
-// Clean category discovery cards
+// Featured Category Discovery Cards
 const CATEGORY_CARDS = [
   {
-    id: 'cat-electronics',
-    name: 'Electronics',
-    discount: 'Up to 60% Off',
+    id: 'cat-laptops',
+    name: 'Computers & Laptops',
     slug: 'computers-laptops',
-    image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=400&q=80',
+    discount: 'Up to 60% Off',
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=300&q=80',
+  },
+  {
+    id: 'cat-audio',
+    name: 'Audio & Headphones',
+    slug: 'audio-headphones',
+    discount: 'Up to 50% Off',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=80',
+  },
+  {
+    id: 'cat-monitors',
+    name: 'Curved Displays',
+    slug: 'monitors-displays',
+    discount: 'Up to 45% Off',
+    image: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=300&q=80',
   },
   {
     id: 'cat-fashion',
-    name: 'Fashion',
+    name: 'Luxury Fashion',
+    slug: 'mens-clothing',
     discount: 'Up to 50% Off',
-    slug: 'fashion',
-    image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=400&q=80',
+    image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=300&q=80',
   },
   {
-    id: 'cat-home-living',
+    id: 'cat-home',
     name: 'Home & Living',
-    discount: 'Up to 60% Off',
     slug: 'office-furniture',
-    image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80',
+    discount: 'Up to 60% Off',
+    image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=300&q=80',
   },
   {
-    id: 'cat-beauty-health',
+    id: 'cat-beauty',
     name: 'Beauty & Health',
+    slug: 'beauty-wellness',
     discount: 'Up to 50% Off',
-    slug: 'beauty',
-    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'cat-sports',
-    name: 'Sports',
-    discount: 'Up to 50% Off',
-    slug: 'mens-footwear',
-    image: 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'cat-toys-games',
-    name: 'Toys & Games',
-    discount: 'Up to 50% Off',
-    slug: 'toys-games',
-    image: 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?auto=format&fit=crop&w=400&q=80',
+    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80',
   },
 ];
 
-// 5 Curated Trending Products exactly matching the design
+// Curated Trending Products Data
 interface CuratedTrendingProduct {
   id: string;
   slug: string;
@@ -163,40 +144,40 @@ interface CuratedTrendingProduct {
 
 const TRENDING_PRODUCTS: CuratedTrendingProduct[] = [
   {
-    id: 'prod-sony-xm5',
+    id: 'prod-sony-wh1000xm5',
     slug: 'sony-wh-1000xm5-wireless-headphones',
-    title: 'Sony WH-1000XM5',
-    category: 'Wireless Headphones',
+    title: 'Sony WH-1000XM5 Wireless Headphones',
+    category: 'Noise Cancelling',
     badge: '-35%',
     rating: 4.8,
     reviews: '12.5k',
     price: 349.0,
-    originalPrice: 539.0,
+    originalPrice: 399.0,
     image: '/assets/mock/products/sony-xm5-hero.webp',
   },
   {
-    id: 'prod-apple-watch-10',
+    id: 'prod-apple-watch-s10',
     slug: 'apple-watch-series-10',
-    title: 'Apple Watch Series 10',
-    category: 'GPS 42mm',
+    title: 'Apple Watch Series 10 GPS 42mm',
+    category: 'Smartwatch',
     badge: '-40%',
     rating: 4.7,
     reviews: '8.2k',
     price: 399.0,
-    originalPrice: 669.0,
+    originalPrice: 469.0,
     image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=500&q=80',
   },
   {
-    id: 'prod-macbook-pro-16',
+    id: 'prod-macbook-air-m3',
     slug: 'apple-macbook-pro-16-m3-max',
-    title: 'MacBook Air M3',
-    category: '13-inch',
+    title: 'MacBook Air M3 13-inch',
+    category: 'Ultra-thin Laptop',
     badge: '-25%',
     rating: 4.9,
     reviews: '6.1k',
     price: 1099.0,
     originalPrice: 1469.0,
-    image: '/assets/mock/products/mbp16-hero.webp',
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=500&q=80',
   },
   {
     id: 'prod-nike-pegasus',
@@ -224,18 +205,51 @@ const TRENDING_PRODUCTS: CuratedTrendingProduct[] = [
   },
 ];
 
+// Featured Merchants
+const FEATURED_MERCHANTS = [
+  {
+    id: 'seller-official-flagship',
+    slug: 'official-flagship-store',
+    name: 'Official Flagship Store',
+    category: 'Direct Brand Flagship',
+    rating: '4.9',
+    orders: '14.2k',
+    badge: 'Direct Brand',
+  },
+  {
+    id: 'seller-tech-direct',
+    slug: 'tech-direct-express',
+    name: 'TechDirect Express',
+    category: 'Consumer Electronics & Computing',
+    rating: '4.8',
+    orders: '8.9k',
+    badge: 'Top Rated',
+  },
+  {
+    id: 'seller-global-ware',
+    slug: 'global-ware-imports',
+    name: 'GlobalWare Imports',
+    category: 'International Lifestyle & Living',
+    rating: '4.6',
+    orders: '4.2k',
+    badge: 'Authorized',
+  },
+  {
+    id: 'seller-apex-outlet',
+    slug: 'apex-outlet-deals',
+    name: 'Apex Outlet Deals',
+    category: 'Clearance & Certified Refurbished',
+    rating: '4.5',
+    orders: '3.1k',
+    badge: 'Verified Deal',
+  },
+];
+
 export default function HomePage(): React.JSX.Element {
   const router = useRouter();
-  const { addItem, itemCount, openDrawer } = useCart();
-  const { isInWishlist, toggleWishlist, itemCount: wishlistCount } = useWishlist();
-  const { customer, isAuthenticated } = useAuth();
+  const { addItem } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const { toggleOpen: openAIAssistant } = useAIAssistant();
-
-  // Search input & category filter state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSearchCategory, setSelectedSearchCategory] = useState('All Categories');
-  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   // Hero Carousel State
   const [slideIndex, setSlideIndex] = useState(0);
@@ -260,51 +274,28 @@ export default function HomePage(): React.JSX.Element {
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // Countdown timer tick
+  // Countdown timer effect
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
         if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
         if (prev.days > 0) return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
-        return { days: 2, hours: 14, minutes: 37, seconds: 25 };
+        return prev;
       });
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Carousel auto-advance
+  // Carousel autoplay effect
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
       setSlideIndex((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 7000);
+    }, 6000);
     return () => clearInterval(interval);
   }, [isPaused]);
-
-  // Search submission handler
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    const params = new URLSearchParams();
-    if (q) params.set('q', q);
-    if (selectedSearchCategory !== 'All Categories') {
-      const catMap: Record<string, string> = {
-        Electronics: 'computers-laptops',
-        Fashion: 'fashion',
-        'Home & Living': 'office-furniture',
-        'Beauty & Health': 'beauty',
-        Sports: 'mens-footwear',
-        'Toys & Games': 'toys-games',
-      };
-      if (catMap[selectedSearchCategory]) {
-        params.set('category', catMap[selectedSearchCategory]);
-      }
-    }
-    const queryStr = params.toString();
-    router.push(queryStr ? `/products?${queryStr}` : '/products');
-  };
 
   // Add to cart from trending cards
   const handleAddToCart = (product: CuratedTrendingProduct) => {
@@ -344,1052 +335,652 @@ export default function HomePage(): React.JSX.Element {
   const activeSlide = HERO_SLIDES[slideIndex] ?? HERO_SLIDES[0]!;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#1E2022] font-sans antialiased">
-      {/* Toast Notification */}
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-amber-400/30 bg-[#0B0B0C]/95 text-white px-5 py-3.5 shadow-2xl backdrop-blur-md text-sm font-medium animate-in fade-in slide-in-from-bottom-4 duration-200"
-        >
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-slate-950 font-bold">
-            <Check className="h-3.5 w-3.5" />
-          </div>
-          <span>{toast}</span>
-        </div>
-      )}
-
-      {/* ==================================================================== */}
-      {/* 1. TOP UTILITY ANNOUNCEMENT BAR (Dark Charcoal Aureon Style) */}
-      {/* ==================================================================== */}
-      <div className="bg-[#0B0B0C] border-b border-[#1E1E22] text-xs text-[#9CA3AF] py-2 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Left Announcement */}
-          <div className="flex items-center gap-2">
-            <span className="text-amber-400 font-bold">⚡</span>
-            <span className="font-medium text-white/90">
-              Free Shipping on orders over $50
-            </span>
-            <span className="text-[#4B5563]">•</span>
-            <span className="hidden sm:inline text-[#9CA3AF]">30 Days Free Return</span>
-          </div>
-
-          {/* Right Utility Links */}
-          <div className="flex items-center gap-4 sm:gap-6 text-[11px]">
-            <Link href="/help" className="hover:text-white transition-colors">
-              Help
-            </Link>
-            <Link href="/account/orders" className="hover:text-white transition-colors">
-              Track Order
-            </Link>
-            <Link href="/seller" className="hover:text-white transition-colors">
-              Seller Center
-            </Link>
-            <div className="h-3 w-px bg-[#26262B]" />
-            <div className="flex items-center gap-1 cursor-pointer hover:text-white">
-              <span>🇺🇸</span>
-              <span>English</span>
-              <ChevronDown className="h-3 w-3" />
-            </div>
-            <div className="flex items-center gap-1 cursor-pointer hover:text-white">
-              <span>USD</span>
-              <ChevronDown className="h-3 w-3" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ==================================================================== */}
-      {/* 2. MAIN HEADER (Brand Logo, Search Bar, Header Actions) */}
-      {/* ==================================================================== */}
-      <header className="sticky top-0 z-40 bg-[#0B0B0C] border-b border-[#1A1A1E] px-4 sm:px-8 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 lg:gap-8">
-          {/* Aureon Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-              <span className="text-slate-950 font-black text-lg tracking-tighter">▲</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-black tracking-tight text-white leading-none">
-                Aureon
-              </span>
-              <span className="text-[9px] tracking-wider text-[#9CA3AF] uppercase font-semibold mt-0.5">
-                Marketplace
-              </span>
-            </div>
-          </Link>
-
-          {/* Intelligent Search Input with Interactive Category Selector */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden md:flex flex-1 max-w-2xl items-center rounded-full bg-[#18181B] border border-[#27272A] p-1.5 focus-within:border-amber-400/80 focus-within:ring-2 focus-within:ring-amber-400/20 transition-all shadow-inner relative"
+    <AppShell>
+      <div className="bg-canvas text-fg-primary min-h-screen transition-colors duration-200">
+        {/* Toast Notification */}
+        {toast && (
+          <div
+            role="status"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-amber-400/40 bg-slate-900/95 text-white dark:bg-[#0B0B0C]/95 px-5 py-3.5 shadow-2xl backdrop-blur-md text-sm font-medium animate-in fade-in slide-in-from-bottom-4 duration-200"
           >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for products, brands and more..."
-              className="flex-1 bg-transparent px-4 py-1.5 text-xs sm:text-sm text-white placeholder-[#71717A] focus:outline-none"
-            />
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-slate-950 font-bold">
+              <Check className="h-3.5 w-3.5" />
+            </div>
+            <span>{toast}</span>
+          </div>
+        )}
 
-            {/* Clear Query button */}
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="text-[#71717A] hover:text-white px-2 py-1 text-xs cursor-pointer"
-              >
-                ✕
-              </button>
-            )}
+        {/* ==================================================================== */}
+        {/* 1. HERO PROMOTIONAL CAROUSEL (Cinematic Dark & Warm Gold Experience) */}
+        {/* ==================================================================== */}
+        <section
+          aria-label="Promotional Carousel"
+          className="px-4 sm:px-8 py-6"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div className="max-w-7xl mx-auto space-y-4">
+            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#0C0C0E] via-[#16130E] to-[#0A0A0C] border border-[#27272A] shadow-2xl p-6 sm:p-12 lg:p-16">
+              {/* Ambient Lighting Background Accents */}
+              <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 right-10 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Interactive Category Dropdown Pill */}
-            <div className="relative hidden lg:block">
-              <button
-                type="button"
-                onClick={() => setIsCategoryPickerOpen(!isCategoryPickerOpen)}
-                className="flex items-center gap-1.5 text-xs text-[#A1A1AA] border-l border-[#27272A] px-3.5 py-1 cursor-pointer hover:text-white select-none transition-colors"
-              >
-                <span className="font-medium">{selectedSearchCategory}</span>
-                <ChevronDown
-                  className={cn(
-                    'h-3 w-3 transition-transform duration-200',
-                    isCategoryPickerOpen && 'rotate-180 text-amber-400'
-                  )}
-                />
-              </button>
-
-              {isCategoryPickerOpen && (
-                <div
-                  onMouseLeave={() => setIsCategoryPickerOpen(false)}
-                  className="absolute right-0 top-full mt-3 w-48 rounded-2xl border border-[#27272A] bg-[#121216]/98 backdrop-blur-xl p-1.5 shadow-2xl z-50 animate-in fade-in-0 duration-150"
-                >
-                  <div className="px-2.5 py-1 text-[10px] font-bold text-[#71717A] uppercase tracking-wider border-b border-[#27272A] mb-1">
-                    Filter by Department
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+                {/* Left Column: Headlines & Call to Actions */}
+                <div className="lg:col-span-7 space-y-6 text-left">
+                  {/* Sale Badge */}
+                  <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/15 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                    <span>{activeSlide.badge}</span>
                   </div>
-                  {[
-                    'All Categories',
-                    'Electronics',
-                    'Fashion',
-                    'Home & Living',
-                    'Beauty & Health',
-                    'Sports',
-                    'Toys & Games',
-                  ].map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => {
-                        setSelectedSearchCategory(cat);
-                        setIsCategoryPickerOpen(false);
-                      }}
-                      className={cn(
-                        'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer',
-                        selectedSearchCategory === cat
-                          ? 'bg-amber-400 text-slate-950 font-bold'
-                          : 'text-[#A1A1AA] hover:text-white hover:bg-[#18181B]'
-                      )}
+
+                  {/* Main Dynamic Headline */}
+                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1]">
+                    <span>{activeSlide.titleLight}</span>
+                    <br />
+                    <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
+                      {activeSlide.titleGold}
+                    </span>
+                  </h1>
+
+                  {/* Subtitle */}
+                  <p className="text-sm sm:text-base text-[#9CA3AF] max-w-xl leading-relaxed">
+                    {activeSlide.subtitle}
+                  </p>
+
+                  {/* Verified Marketplace Guarantee Tag */}
+                  <div className="inline-flex items-center gap-2 text-xs text-amber-400 font-semibold bg-amber-400/10 border border-amber-400/20 px-3 py-1 rounded-full">
+                    <ShieldCheck className="h-4 w-4" />
+                    <span>Verified Marketplace Guarantee</span>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap items-center gap-4 pt-1">
+                    <Link
+                      href={activeSlide.ctaHref}
+                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-bold px-7 py-3 text-sm shadow-lg shadow-amber-500/25 hover:brightness-110 hover:-translate-y-0.5 transition-all"
                     >
-                      <span>{cat}</span>
-                      {selectedSearchCategory === cat && <Check className="h-3.5 w-3.5 text-slate-950" />}
+                      <span>{activeSlide.ctaText}</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/products/${activeSlide.featuredSlug}`)}
+                      className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 text-sm border border-white/10 backdrop-blur-md transition-all cursor-pointer"
+                    >
+                      <Play className="h-3.5 w-3.5 fill-white" />
+                      <span>Watch Video</span>
                     </button>
+                  </div>
+                </div>
+
+                {/* Right Column: 3D Pedestal Product Showcase */}
+                <div className="lg:col-span-5 flex justify-center items-center relative">
+                  <div className="relative w-full max-w-md aspect-square rounded-2xl flex items-center justify-center p-4">
+                    {/* Glowing Pedestal Disc */}
+                    <div className="absolute bottom-4 w-64 h-16 bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-amber-500/20 rounded-full blur-xl" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={activeSlide.image}
+                      alt={activeSlide.titleLight}
+                      className="relative z-10 max-h-80 w-auto object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.8)] hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Slider Navigation Arrows */}
+              <button
+                type="button"
+                onClick={() =>
+                  setSlideIndex((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1))
+                }
+                aria-label="Previous slide"
+                className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 border border-white/15 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all backdrop-blur-md cursor-pointer"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSlideIndex((prev) => (prev + 1) % HERO_SLIDES.length)}
+                aria-label="Next slide"
+                className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 border border-white/15 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all backdrop-blur-md cursor-pointer"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+
+              {/* Carousel Dots */}
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                {HERO_SLIDES.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSlideIndex(idx)}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    className={`h-2 rounded-full transition-all cursor-pointer ${
+                      idx === slideIndex ? 'w-8 bg-amber-400' : 'w-2 bg-white/30 hover:bg-white/60'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Value Proposition Trust Ribbon */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-1">
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface border border-border-default shadow-xs">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400/15 text-amber-500 dark:text-amber-400 border border-amber-400/30 shrink-0">
+                  <Truck className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-fg-primary">Free Express Shipping</h4>
+                  <p className="text-[11px] text-fg-secondary">Orders over $50</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface border border-border-default shadow-xs">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400/15 text-amber-500 dark:text-amber-400 border border-amber-400/30 shrink-0">
+                  <ShieldCheck className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-fg-primary">100% Authentic Guarantee</h4>
+                  <p className="text-[11px] text-fg-secondary">KYC-verified merchants</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface border border-border-default shadow-xs">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400/15 text-amber-500 dark:text-amber-400 border border-amber-400/30 shrink-0">
+                  <RotateCcw className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-fg-primary">30-Day Hassle-Free Returns</h4>
+                  <p className="text-[11px] text-fg-secondary">Instant escrow refunds</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface border border-border-default shadow-xs">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400/15 text-amber-500 dark:text-amber-400 border border-amber-400/30 shrink-0">
+                  <Headphones className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-fg-primary">24/7 Verified Support</h4>
+                  <p className="text-[11px] text-fg-secondary">Always here to help</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ==================================================================== */}
+        {/* 2. BROWSE BY CATEGORY DISCOVERY CARDS */}
+        {/* ==================================================================== */}
+        <section className="px-4 sm:px-8 py-6">
+          <div className="max-w-7xl mx-auto space-y-4 relative">
+            <div className="flex items-center justify-between border-b border-border-default pb-3">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-fg-primary tracking-tight">
+                  Browse by Category
+                </h2>
+                <p className="text-xs text-fg-secondary mt-0.5">Explore curated departments and top collections</p>
+              </div>
+
+              <Link
+                href="/categories"
+                className="text-xs font-bold text-amber-500 dark:text-amber-400 hover:underline flex items-center gap-1"
+              >
+                <span>All Categories</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
+              {CATEGORY_CARDS.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/products?category=${cat.slug}`}
+                  className="group relative rounded-2xl bg-surface border border-border-default p-4 flex flex-col items-center text-center shadow-xs hover:shadow-md hover:-translate-y-1 transition-all"
+                >
+                  <div className="w-20 h-20 rounded-xl overflow-hidden mb-3 bg-surface-muted flex items-center justify-center p-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="h-full w-full object-cover rounded-lg group-hover:scale-105 transition-transform"
+                    />
+                  </div>
+                  <h3 className="font-bold text-xs sm:text-sm text-fg-primary group-hover:text-amber-500 transition-colors">
+                    {cat.name}
+                  </h3>
+                  <span className="text-[11px] text-fg-muted font-medium mt-0.5">
+                    {cat.discount}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ==================================================================== */}
+        {/* 3. DUAL PROMO GRID: FLASH DEALS & NEW ARRIVALS */}
+        {/* ==================================================================== */}
+        <section className="px-4 sm:px-8 py-6">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left Promo Card: Flash Deal */}
+            <div className="lg:col-span-5 rounded-3xl bg-[#0F0F12] border border-[#27272A] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-xl text-white">
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs tracking-wide">
+                    <span>Flash Deal</span>
+                    <Zap className="h-3.5 w-3.5 fill-amber-400" />
+                  </div>
+                  <span className="text-xs text-[#A1A1AA]">Ends In:</span>
+                </div>
+
+                {/* Section Heading */}
+                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  Flash Deals & Daily Steals
+                </h2>
+
+                {/* Countdown Digits */}
+                <div className="flex items-center gap-2">
+                  {[
+                    { val: String(countdown.days).padStart(2, '0'), label: 'Days' },
+                    { val: String(countdown.hours).padStart(2, '0'), label: 'Hours' },
+                    { val: String(countdown.minutes).padStart(2, '0'), label: 'Mins' },
+                    { val: String(countdown.seconds).padStart(2, '0'), label: 'Secs' },
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-[#1F1F24] border border-[#2E2E35] text-center"
+                    >
+                      <span className="text-base font-bold text-white leading-none">
+                        {item.val}
+                      </span>
+                      <span className="text-[8px] text-[#9CA3AF] uppercase font-semibold mt-1">
+                        {item.label}
+                      </span>
+                    </div>
                   ))}
                 </div>
-              )}
-            </div>
 
-            {/* Search Submit Button */}
-            <button
-              type="submit"
-              aria-label="Search"
-              className="h-9 w-9 rounded-full bg-white hover:bg-amber-400 text-slate-950 flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-md hover:scale-105 active:scale-95"
-            >
-              <Search className="h-4 w-4" />
-            </button>
-          </form>
-
-          {/* User Account, Wishlist, Cart Actions */}
-          <div className="flex items-center gap-4 sm:gap-6 text-white text-xs font-semibold shrink-0">
-            {/* Account Action with Hover Flyout Menu */}
-            <div
-              className="relative"
-              onMouseEnter={() => setIsAccountMenuOpen(true)}
-              onMouseLeave={() => setIsAccountMenuOpen(false)}
-            >
-              <Link
-                href={isAuthenticated ? '/account' : '/login'}
-                className="flex items-center gap-2 hover:text-amber-400 transition-colors py-1"
-              >
-                <div className="h-8 w-8 rounded-full bg-[#1F1F23] border border-[#27272A] flex items-center justify-center text-white">
-                  <User className="h-4 w-4" />
-                </div>
-                <div className="hidden sm:flex flex-col text-left">
-                  <span className="text-[10px] text-[#A1A1AA] font-normal leading-tight">
-                    {isAuthenticated ? 'Hello,' : 'Sign In'}
-                  </span>
-                  <span className="flex items-center gap-0.5 font-bold">
-                    {isAuthenticated ? customer?.firstName || 'Account' : 'Account'}
-                    <ChevronDown
-                      className={cn(
-                        'h-3 w-3 opacity-60 transition-transform duration-200',
-                        isAccountMenuOpen && 'rotate-180 opacity-100 text-amber-400'
-                      )}
-                    />
-                  </span>
-                </div>
-              </Link>
-
-              {isAccountMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl border border-[#27272A] bg-[#121216]/98 backdrop-blur-xl p-2.5 shadow-2xl z-50 animate-in fade-in-0 duration-150">
-                  <div className="px-3 py-2 border-b border-[#27272A] mb-1.5">
-                    <p className="text-xs font-bold text-white">
-                      {isAuthenticated ? `Welcome back, ${customer?.firstName}!` : 'Welcome to Aureon!'}
-                    </p>
-                    <p className="text-[11px] text-[#71717A] mt-0.5">
-                      {isAuthenticated ? customer?.email : 'Sign in for personalized recommendations'}
-                    </p>
-                  </div>
-
-                  {!isAuthenticated ? (
-                    <div className="p-1 mb-1 border-b border-[#27272A]">
-                      <Link
-                        href="/login"
-                        onClick={() => setIsAccountMenuOpen(false)}
-                        className="flex items-center justify-center w-full py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-bold text-xs mb-1.5 shadow-sm transition-all"
-                      >
-                        Sign In
-                      </Link>
-                      <Link
-                        href="/register"
-                        onClick={() => setIsAccountMenuOpen(false)}
-                        className="flex items-center justify-center w-full py-2 rounded-xl bg-[#18181B] hover:bg-[#202025] text-white font-semibold text-xs border border-[#27272A] transition-all"
-                      >
-                        Create Account
-                      </Link>
-                    </div>
-                  ) : null}
-
-                  <div className="py-1 space-y-0.5 text-xs">
-                    <Link
-                      href="/account"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#A1A1AA] hover:text-white hover:bg-[#18181B] transition-colors"
-                    >
-                      <User className="h-3.5 w-3.5 text-amber-400" />
-                      <span>My Account Profile</span>
-                    </Link>
-                    <Link
-                      href="/account/orders"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#A1A1AA] hover:text-white hover:bg-[#18181B] transition-colors"
-                    >
-                      <Truck className="h-3.5 w-3.5 text-amber-400" />
-                      <span>Orders & Shipment Tracking</span>
-                    </Link>
-                    <Link
-                      href="/wishlist"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#A1A1AA] hover:text-white hover:bg-[#18181B] transition-colors"
-                    >
-                      <Heart className="h-3.5 w-3.5 text-rose-400" />
-                      <span>Saved Wishlist ({wishlistCount})</span>
-                    </Link>
-                  </div>
-
-                  <div className="border-t border-[#27272A] pt-1.5 mt-1 space-y-0.5 text-xs">
-                    <Link
-                      href="/seller"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-400/10 transition-colors font-semibold"
-                    >
-                      <Crown className="h-3.5 w-3.5 text-amber-400" />
-                      <span>Seller Central Portal</span>
-                    </Link>
-                    <Link
-                      href="/admin"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#A1A1AA] hover:text-white hover:bg-[#18181B] transition-colors"
-                    >
-                      <ShieldCheck className="h-3.5 w-3.5 text-blue-400" />
-                      <span>Platform Admin</span>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Wishlist Action */}
-            <Link
-              href="/wishlist"
-              className="relative flex items-center gap-1.5 hover:text-amber-400 transition-colors py-1"
-            >
-              <div className="relative">
-                <Heart className="h-5 w-5" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white rounded-full h-4 min-w-[16px] px-1 text-[9px] font-bold flex items-center justify-center leading-none">
-                    {wishlistCount}
-                  </span>
-                )}
-              </div>
-              <span className="hidden sm:inline">Wishlist</span>
-            </Link>
-
-            {/* Cart Action */}
-            <button
-              type="button"
-              onClick={openDrawer}
-              aria-label="Open Cart"
-              className="relative flex items-center gap-1.5 hover:text-amber-400 transition-colors cursor-pointer py-1"
-            >
-              <div className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {itemCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-amber-500 text-slate-950 rounded-full h-4 min-w-[16px] px-1 text-[9px] font-bold flex items-center justify-center leading-none">
-                    {itemCount}
-                  </span>
-                )}
-              </div>
-              <span className="hidden sm:inline">Cart</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* ==================================================================== */}
-      {/* 3. CATEGORY NAVIGATION BAR WITH CLICKABLE NAV & HOVER MEGA MENU */}
-      {/* ==================================================================== */}
-      <MegaNavBar />
-
-      {/* ==================================================================== */}
-      {/* 4. HERO SECTION (Cinematic Dark & Warm Gold Experience) */}
-      {/* ==================================================================== */}
-      <section
-        className="px-4 sm:px-8 py-6"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
-        <div className="max-w-7xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#0C0C0E] via-[#16130E] to-[#0A0A0C] border border-[#27272A] shadow-2xl p-6 sm:p-12 lg:p-16">
-            {/* Ambient Lighting Background Accents */}
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 right-10 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
-              {/* Left Column: Headlines & Call to Actions */}
-              <div className="lg:col-span-7 space-y-6 text-left">
-                {/* Sale Badge */}
-                <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/15 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-                  <span>{activeSlide.badge}</span>
+                <div className="pt-2">
+                  <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                    Up to <span className="text-amber-400">70% OFF</span>
+                  </h3>
+                  <p className="text-xs text-[#9CA3AF] font-medium mt-1">Limited Time Only</p>
                 </div>
 
-                {/* Main Dynamic Headline */}
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
-                  <span>{activeSlide.titleLight}</span>
-                  <br />
-                  <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
-                    {activeSlide.titleGold}
-                  </span>
-                </h1>
-
-                {/* Subtitle */}
-                <p className="text-sm sm:text-base text-[#9CA3AF] max-w-xl leading-relaxed">
-                  {activeSlide.subtitle}
-                </p>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-4 pt-2">
+                <div className="pt-2">
                   <Link
-                    href={activeSlide.ctaHref}
-                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-bold px-7 py-3 text-sm shadow-lg shadow-amber-500/25 hover:brightness-110 hover:-translate-y-0.5 transition-all"
+                    href="/products?deals=true"
+                    className="inline-flex items-center gap-2 rounded-full bg-amber-400 text-slate-950 px-6 py-2.5 font-bold text-xs hover:bg-amber-300 shadow-md shadow-amber-400/20 transition-all"
                   >
-                    <span>{activeSlide.ctaText}</span>
-                    <ArrowRight className="h-4 w-4" />
+                    <span>Shop Now</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
+                </div>
+              </div>
 
+              {/* PlayStation 5 console product image */}
+              <div className="relative mt-4 flex justify-end">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=600&q=80"
+                  alt="Flash Deal Console"
+                  className="max-h-48 object-contain rounded-xl opacity-90 drop-shadow-xl"
+                />
+              </div>
+            </div>
+
+            {/* Right Promo Card: New Arrivals */}
+            <div className="lg:col-span-7 rounded-3xl bg-surface border border-border-default p-6 sm:p-10 flex flex-col justify-between relative overflow-hidden shadow-xs">
+              <div className="relative z-10 max-w-sm space-y-3">
+                <span className="text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-wider">
+                  New Arrivals
+                </span>
+                <h3 className="text-2xl sm:text-4xl font-bold text-fg-primary tracking-tight leading-tight">
+                  Smart Choices.
+                  <br />
+                  Better Living.
+                </h3>
+                <p className="text-xs sm:text-sm text-fg-secondary leading-relaxed">
+                  Discover our latest collection with premium quality craftsmanship.
+                </p>
+                <div className="pt-3">
+                  <Link
+                    href="/products?category=office-furniture"
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-950 px-6 py-2.5 font-bold text-xs hover:bg-amber-400 hover:text-slate-950 transition-colors"
+                  >
+                    <span>Explore Collection</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Living room furniture aesthetic photo */}
+              <div className="relative mt-4 flex justify-end">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=650&q=80"
+                  alt="Modern Living Armchair"
+                  className="max-h-60 object-contain rounded-2xl drop-shadow-md"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ==================================================================== */}
+        {/* 4. TRENDING MARKETPLACE SELECTIONS (5-Column Grid) */}
+        {/* ==================================================================== */}
+        <section className="px-4 sm:px-8 py-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Section Header with Filter Tabs */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-default pb-4">
+              <div>
+                <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider">
+                  <span className="h-0.5 w-5 bg-amber-500 inline-block" />
+                  <span>Trending Marketplace Selections</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-fg-primary tracking-tight mt-1">
+                  Most popular items this week
+                </h2>
+              </div>
+
+              {/* Filter Tabs & Arrows */}
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                {[
+                  { key: 'popular', label: 'Popular' },
+                  { key: 'best', label: 'Best Selling' },
+                  { key: 'rated', label: 'Top Rated' },
+                  { key: 'new', label: 'New Arrivals' },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setTrendingTab(tab.key as any)}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                      trendingTab === tab.key
+                        ? 'bg-amber-400 text-slate-950 font-bold shadow-xs'
+                        : 'bg-surface border border-border-default text-fg-secondary hover:border-amber-400/50'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 5-Column Product Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {TRENDING_PRODUCTS.map((prod) => {
+                const inWish = isInWishlist(prod.id);
+                return (
+                  <article
+                    key={prod.id}
+                    className="group rounded-2xl bg-surface border border-border-default p-4 flex flex-col justify-between shadow-xs hover:shadow-lg transition-all"
+                  >
+                    {/* Card Top: Discount Pill & Wishlist Button */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="rounded-full bg-rose-500 text-white font-bold text-[10px] px-2 py-0.5">
+                          {prod.badge}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleWishlist(prod)}
+                          aria-label="Toggle Wishlist"
+                          className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                            inWish
+                              ? 'bg-rose-50 text-rose-500'
+                              : 'bg-surface-muted text-fg-muted hover:text-rose-500'
+                          }`}
+                        >
+                          <Heart className={`h-4 w-4 ${inWish ? 'fill-rose-500' : ''}`} />
+                        </button>
+                      </div>
+
+                      {/* Product Image */}
+                      <Link
+                        href={`/products/${prod.slug}`}
+                        className="block aspect-square w-full rounded-xl overflow-hidden bg-surface-muted p-3 flex items-center justify-center mb-3"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={prod.image}
+                          alt={prod.title}
+                          className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </Link>
+
+                      {/* Product Meta */}
+                      <div className="space-y-1">
+                        <Link
+                          href={`/products/${prod.slug}`}
+                          className="font-bold text-xs sm:text-sm text-fg-primary hover:text-amber-500 line-clamp-1 transition-colors"
+                        >
+                          {prod.title}
+                        </Link>
+                        <div className="text-[11px] text-fg-muted font-medium">{prod.category}</div>
+
+                        {/* Ratings */}
+                        <div className="flex items-center gap-1 pt-1 text-xs">
+                          <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                          <span className="font-bold text-fg-primary">{prod.rating}</span>
+                          <span className="text-fg-muted text-[10px]">({prod.reviews})</span>
+                        </div>
+
+                        {/* Pricing */}
+                        <div className="flex items-baseline gap-2 pt-1">
+                          <span className="font-bold text-sm sm:text-base text-fg-primary">
+                            ${prod.price.toFixed(2)}
+                          </span>
+                          <span className="text-xs text-fg-muted line-through font-medium">
+                            ${prod.originalPrice.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <div className="pt-4">
+                      <button
+                        type="button"
+                        onClick={() => handleAddToCart(prod)}
+                        className="w-full rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-950 hover:bg-amber-400 hover:text-slate-950 font-bold text-xs py-2.5 transition-colors cursor-pointer shadow-xs"
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ==================================================================== */}
+        {/* 5. FEATURED BRAND STORES & MERCHANTS */}
+        {/* ==================================================================== */}
+        <section className="px-4 sm:px-8 py-6">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <div className="flex items-center justify-between border-b border-border-default pb-3">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-fg-primary tracking-tight">
+                  Featured Brand Stores & Merchants
+                </h2>
+                <p className="text-xs text-fg-secondary mt-0.5">
+                  KYC-verified independent sellers and authorized flagship distributors
+                </p>
+              </div>
+
+              <Link
+                href="/stores"
+                className="text-xs font-bold text-amber-500 dark:text-amber-400 hover:underline flex items-center gap-1"
+              >
+                <span>View All Stores</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {FEATURED_MERCHANTS.map((m) => (
+                <div
+                  key={m.id}
+                  className="rounded-2xl bg-surface border border-border-default p-5 flex flex-col justify-between shadow-xs hover:border-amber-400/50 hover:shadow-md transition-all group"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold">
+                        <CheckCircle2 className="h-3 w-3" />
+                        {m.badge}
+                      </span>
+                      <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
+                        <Star className="h-3.5 w-3.5 fill-current" />
+                        <span>{m.rating}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="size-11 rounded-xl bg-surface-muted flex items-center justify-center text-amber-500 font-bold border border-border-subtle group-hover:scale-105 transition-transform">
+                        <Store className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-fg-primary group-hover:text-amber-500 transition-colors">
+                          {m.name}
+                        </h3>
+                        <p className="text-[11px] text-fg-muted">{m.category}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-3 border-t border-border-subtle flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-fg-muted">{m.orders} items fulfilled</span>
+                    <Link
+                      href={`/store/${m.slug}`}
+                      className="text-xs font-bold text-amber-500 dark:text-amber-400 hover:underline flex items-center gap-1"
+                    >
+                      <span>Visit Storefront</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ==================================================================== */}
+        {/* 6. PLATFORM TRUST & AI-CURATED RECOMMENDATIONS */}
+        {/* ==================================================================== */}
+        <section className="px-4 sm:px-8 py-8">
+          <div className="max-w-7xl mx-auto space-y-8">
+            <div className="text-center space-y-1">
+              <span className="text-xs font-bold text-amber-500 uppercase tracking-wider block">
+                AI-Curated Recommendations For You
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-fg-primary tracking-tight">
+                Why Millions Trust Our Global Multi-Vendor Platform
+              </h2>
+            </div>
+
+            {/* 3-Column Value Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Aureon Prime */}
+              <div className="rounded-3xl bg-surface border border-border-default p-6 sm:p-8 flex flex-col justify-between shadow-xs">
+                <div className="space-y-4">
+                  <div className="size-12 rounded-2xl bg-amber-400/15 text-amber-500 dark:text-amber-400 border border-amber-400/30 flex items-center justify-center">
+                    <Crown className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-fg-primary">Exclusive Member Benefits</h3>
+                  <p className="text-xs text-fg-secondary leading-relaxed">
+                    Get more with Aureon Prime. Enjoy free 1-2 day express shipping, early access to flash deals,
+                    and VIP concierge support.
+                  </p>
+                </div>
+
+                <div className="pt-6">
+                  <Link
+                    href="/prime"
+                    className="inline-flex items-center gap-2 rounded-full bg-amber-400 text-slate-950 font-bold px-5 py-2.5 text-xs hover:bg-amber-300 shadow-md shadow-amber-400/20 transition-all"
+                  >
+                    <span>Join Prime</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Shop Smarter with AI */}
+              <div className="rounded-3xl bg-surface border border-border-default p-6 sm:p-8 flex flex-col justify-between shadow-xs">
+                <div className="space-y-4">
+                  <div className="size-12 rounded-2xl bg-blue-500/15 text-blue-500 dark:text-blue-400 border border-blue-500/30 flex items-center justify-center">
+                    <Bot className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-fg-primary">Shop Smarter with AI</h3>
+                  <p className="text-xs text-fg-secondary leading-relaxed">
+                    Personalized recommendations, multi-vendor cart optimization, and instant product comparisons
+                    powered by state-of-the-art AI.
+                  </p>
+                </div>
+
+                <div className="pt-6">
                   <button
                     type="button"
-                    onClick={() => router.push(`/products/${activeSlide.featuredSlug}`)}
-                    className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 text-sm border border-white/10 backdrop-blur-md transition-all cursor-pointer"
+                    onClick={openAIAssistant}
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold px-5 py-2.5 text-xs hover:bg-amber-400 hover:text-slate-950 transition-all cursor-pointer"
                   >
-                    <Play className="h-3.5 w-3.5 fill-white" />
-                    <span>Watch Video</span>
+                    <span>Try AI Shopping</span>
+                    <Sparkles className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
 
-              {/* Right Column: 3D Pedestal Product Showcase */}
-              <div className="lg:col-span-5 flex justify-center items-center relative">
-                <div className="relative w-full max-w-md aspect-square rounded-2xl flex items-center justify-center p-4">
-                  {/* Glowing Pedestal Disc */}
-                  <div className="absolute bottom-4 w-64 h-16 bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-amber-500/20 rounded-full blur-xl" />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={activeSlide.image}
-                    alt={activeSlide.titleLight}
-                    className="relative z-10 max-h-80 w-auto object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.8)] hover:scale-105 transition-transform duration-500"
-                  />
+              {/* Mobile App */}
+              <div className="rounded-3xl bg-surface border border-border-default p-6 sm:p-8 flex flex-col justify-between shadow-xs">
+                <div className="space-y-4">
+                  <div className="size-12 rounded-2xl bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                    <Smartphone className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-fg-primary">Download Our Mobile App</h3>
+                  <p className="text-xs text-fg-secondary leading-relaxed">
+                    Track shipments in real-time, receive instant price drop alerts, and checkout with Apple Pay &
+                    Google Pay anywhere, anytime.
+                  </p>
                 </div>
-              </div>
-            </div>
 
-            {/* Slider Navigation Arrows */}
-            <button
-              type="button"
-              onClick={() =>
-                setSlideIndex((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1))
-              }
-              aria-label="Previous Slide"
-              className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 border border-white/15 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all backdrop-blur-md cursor-pointer"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSlideIndex((prev) => (prev + 1) % HERO_SLIDES.length)}
-              aria-label="Next Slide"
-              className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 border border-white/15 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all backdrop-blur-md cursor-pointer"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-
-            {/* Carousel Dots */}
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2">
-              {HERO_SLIDES.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setSlideIndex(idx)}
-                  aria-label={`Go to slide ${idx + 1}`}
-                  className={`h-2 rounded-full transition-all cursor-pointer ${
-                    idx === slideIndex ? 'w-8 bg-amber-400' : 'w-2 bg-white/30 hover:bg-white/60'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================================================================== */}
-      {/* 5. CATEGORY DISCOVERY CARDS (6 Crisp White Rounded Cards) */}
-      {/* ==================================================================== */}
-      <section className="px-4 sm:px-8 py-4">
-        <div className="max-w-7xl mx-auto relative">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
-            {CATEGORY_CARDS.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/products?category=${cat.slug}`}
-                className="group relative rounded-2xl bg-white border border-[#E5E7EB] p-4 flex flex-col items-center text-center shadow-xs hover:shadow-md hover:-translate-y-1 transition-all"
-              >
-                <div className="w-20 h-20 rounded-xl overflow-hidden mb-3 bg-[#F9FAFB] flex items-center justify-center p-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="h-full w-full object-cover rounded-lg group-hover:scale-105 transition-transform"
-                  />
-                </div>
-                <h3 className="font-bold text-xs sm:text-sm text-[#111827] group-hover:text-amber-600 transition-colors">
-                  {cat.name}
-                </h3>
-                <span className="text-[11px] text-[#6B7280] font-medium mt-0.5">
-                  {cat.discount}
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          {/* Right Navigation Arrow Pill */}
-          <Link
-            href="/products"
-            aria-label="View more categories"
-            className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white border border-[#D1D5DB] shadow-md items-center justify-center text-[#374151] hover:bg-amber-400 hover:text-black transition-colors"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
-
-      {/* ==================================================================== */}
-      {/* 6. DUAL PROMO GRID (Flash Deal Left + New Arrivals Living Room Right) */}
-      {/* ==================================================================== */}
-      <section className="px-4 sm:px-8 py-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Promo Card: Flash Deal (Dark Gaming Theme) */}
-          <div className="lg:col-span-5 rounded-3xl bg-[#0F0F12] border border-[#27272A] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-xl text-white">
-            <div className="relative z-10 space-y-4">
-              <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs tracking-wide">
-                <span>Flash Deal</span>
-                <Zap className="h-3.5 w-3.5 fill-amber-400" />
-              </div>
-
-              {/* Countdown Digits */}
-              <div className="flex items-center gap-2">
-                {[
-                  { val: String(countdown.days).padStart(2, '0'), label: 'Days' },
-                  { val: String(countdown.hours).padStart(2, '0'), label: 'Hours' },
-                  { val: String(countdown.minutes).padStart(2, '0'), label: 'Mins' },
-                  { val: String(countdown.seconds).padStart(2, '0'), label: 'Secs' },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-[#1F1F24] border border-[#2E2E35] text-center"
+                <div className="pt-6">
+                  <Link
+                    href="/help"
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-100 text-slate-800 dark:bg-white/10 dark:text-white border border-border-default font-bold px-5 py-2.5 text-xs hover:border-amber-400 transition-all"
                   >
-                    <span className="text-base font-black text-white leading-none">
-                      {item.val}
-                    </span>
-                    <span className="text-[8px] text-[#9CA3AF] uppercase font-semibold mt-1">
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-2">
-                <h3 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
-                  Up to <span className="text-amber-400">70% OFF</span>
-                </h3>
-                <p className="text-xs text-[#9CA3AF] font-medium mt-1">Limited Time Only</p>
-              </div>
-
-              <div className="pt-2">
-                <Link
-                  href="/products?deals=true"
-                  className="inline-flex items-center gap-2 rounded-full bg-amber-400 text-slate-950 px-6 py-2.5 font-bold text-xs hover:bg-amber-300 shadow-md shadow-amber-400/20 transition-all"
-                >
-                  <span>Shop Now</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </div>
-
-            {/* PlayStation 5 console product image */}
-            <div className="relative mt-4 flex justify-end">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=600&q=80"
-                alt="Flash Deal Console"
-                className="max-h-48 object-contain rounded-xl opacity-90 drop-shadow-xl"
-              />
-            </div>
-          </div>
-
-          {/* Right Promo Card: New Arrivals (Warm Interior Furniture Theme) */}
-          <div className="lg:col-span-7 rounded-3xl bg-[#EFECE6] border border-[#E2DDD5] p-6 sm:p-10 flex flex-col justify-between relative overflow-hidden shadow-md">
-            <div className="relative z-10 max-w-sm space-y-3">
-              <span className="text-xs font-bold text-[#6B7280] uppercase tracking-wider">
-                New Arrivals
-              </span>
-              <h3 className="text-2xl sm:text-4xl font-black text-[#111827] tracking-tight leading-tight">
-                Smart Choices.
-                <br />
-                Better Living.
-              </h3>
-              <p className="text-xs sm:text-sm text-[#4B5563] leading-relaxed">
-                Discover our latest collection with premium quality craftsmanship.
-              </p>
-              <div className="pt-3">
-                <Link
-                  href="/products?category=office-furniture"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#111827] text-white px-6 py-2.5 font-bold text-xs hover:bg-black transition-colors"
-                >
-                  <span>Explore Collection</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Living room furniture aesthetic photo */}
-            <div className="relative mt-4 flex justify-end">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=650&q=80"
-                alt="Modern Living Armchair"
-                className="max-h-60 object-contain rounded-2xl drop-shadow-md"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================================================================== */}
-      {/* 7. TRENDING PRODUCTS (5-Column Grid with Badges & Add to Cart) */}
-      {/* ==================================================================== */}
-      <section className="px-4 sm:px-8 py-8">
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Section Header with Filter Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E7EB] pb-4">
-            <div>
-              <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider">
-                <span className="h-0.5 w-5 bg-amber-500 inline-block" />
-                <span>Trending Products</span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-black text-[#111827] tracking-tight mt-1">
-                Most popular items this week
-              </h2>
-            </div>
-
-            {/* Filter Tabs & Arrows */}
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              {[
-                { key: 'popular', label: 'Popular' },
-                { key: 'best', label: 'Best Selling' },
-                { key: 'rated', label: 'Top Rated' },
-                { key: 'new', label: 'New Arrivals' },
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setTrendingTab(tab.key as any)}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                    trendingTab === tab.key
-                      ? 'bg-[#111827] text-white shadow-xs'
-                      : 'bg-white border border-[#E5E7EB] text-[#4B5563] hover:border-slate-400'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-
-              <div className="flex items-center gap-1 pl-2">
-                <button
-                  type="button"
-                  aria-label="Previous Page"
-                  className="h-8 w-8 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#6B7280] hover:text-black hover:border-black cursor-pointer"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next Page"
-                  className="h-8 w-8 rounded-full border border-[#E5E7EB] bg-white flex items-center justify-center text-[#6B7280] hover:text-black hover:border-black cursor-pointer"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 5-Column Product Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {TRENDING_PRODUCTS.map((prod) => {
-              const inWish = isInWishlist(prod.id);
-              return (
-                <div
-                  key={prod.id}
-                  className="group rounded-2xl bg-white border border-[#E5E7EB] p-4 flex flex-col justify-between shadow-xs hover:shadow-lg transition-all"
-                >
-                  {/* Card Top: Discount Pill & Wishlist Button */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="rounded-full bg-rose-500 text-white font-black text-[10px] px-2 py-0.5">
-                        {prod.badge}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleToggleWishlist(prod)}
-                        aria-label="Toggle Wishlist"
-                        className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-                          inWish
-                            ? 'bg-rose-50 text-rose-500'
-                            : 'bg-[#F3F4F6] text-[#9CA3AF] hover:text-rose-500'
-                        }`}
-                      >
-                        <Heart className={`h-4 w-4 ${inWish ? 'fill-rose-500' : ''}`} />
-                      </button>
-                    </div>
-
-                    {/* Product Image */}
-                    <Link
-                      href={`/products/${prod.slug}`}
-                      className="block aspect-square w-full rounded-xl overflow-hidden bg-[#F9FAFB] p-3 flex items-center justify-center mb-3"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={prod.image}
-                        alt={prod.title}
-                        className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </Link>
-
-                    {/* Product Meta */}
-                    <div className="space-y-1">
-                      <Link
-                        href={`/products/${prod.slug}`}
-                        className="font-bold text-xs sm:text-sm text-[#111827] hover:text-amber-600 line-clamp-1"
-                      >
-                        {prod.title}
-                      </Link>
-                      <div className="text-[11px] text-[#6B7280] font-medium">{prod.category}</div>
-
-                      {/* Ratings */}
-                      <div className="flex items-center gap-1 pt-1 text-xs">
-                        <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                        <span className="font-bold text-[#111827]">{prod.rating}</span>
-                        <span className="text-[#9CA3AF] text-[10px]">({prod.reviews})</span>
-                      </div>
-
-                      {/* Pricing */}
-                      <div className="flex items-baseline gap-2 pt-1">
-                        <span className="font-black text-sm sm:text-base text-[#111827]">
-                          ${prod.price.toFixed(2)}
-                        </span>
-                        <span className="text-xs text-[#9CA3AF] line-through font-medium">
-                          ${prod.originalPrice.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Add to Cart Button */}
-                  <div className="pt-4">
-                    <button
-                      type="button"
-                      onClick={() => handleAddToCart(prod)}
-                      className="w-full rounded-full bg-[#111827] hover:bg-amber-400 hover:text-slate-950 text-white font-bold text-xs py-2.5 transition-colors cursor-pointer"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
+                    <span>Get Mobile App</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ==================================================================== */}
-      {/* 8. TRUSTED BRANDS & WORLDWIDE SERVICE STRIP */}
-      {/* ==================================================================== */}
-      <section className="px-4 sm:px-8 py-6">
-        <div className="max-w-7xl mx-auto rounded-3xl bg-white border border-[#E5E7EB] p-6 sm:p-8 shadow-xs">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Left Brand Showcase */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider">
-                <span className="h-0.5 w-5 bg-amber-500 inline-block" />
-                <span>Trusted by Millions Worldwide</span>
               </div>
-              <p className="text-xs text-[#6B7280]">Join over 10M+ happy global customers</p>
+            </div>
 
-              {/* Brand Logos Row */}
-              <div className="flex flex-wrap items-center gap-6 sm:gap-8 pt-1 text-[#4B5563] font-bold text-sm">
-                <span className="tracking-tighter text-lg font-black text-black"> Apple</span>
+            {/* Global Trusted Brands Bar */}
+            <div className="rounded-2xl bg-surface border border-border-default p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="text-left space-y-0.5">
+                <span className="text-xs font-bold text-fg-primary">Official Partner Brands</span>
+                <p className="text-[11px] text-fg-muted">Over 1,200 direct brand partnerships worldwide</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-6 text-xs font-bold text-fg-secondary">
+                <span className="text-sm font-black text-fg-primary"> Apple</span>
                 <span className="tracking-wider uppercase font-black">Samsung</span>
                 <span className="tracking-tight italic uppercase font-black">Nike</span>
                 <span className="tracking-wider font-extrabold">adidas</span>
                 <span className="tracking-widest font-black uppercase">SONY</span>
                 <span className="tracking-wider font-black">DELL</span>
-                <span className="tracking-tight font-black bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-sm text-xs">
-                  mi
-                </span>
-              </div>
-            </div>
-
-            {/* Right Worldwide Service Guarantees */}
-            <div className="lg:col-span-5 grid grid-cols-3 gap-4 border-t lg:border-t-0 lg:border-l border-[#E5E7EB] pt-6 lg:pt-0 lg:pl-8 text-left">
-              <div className="space-y-1">
-                <Truck className="h-5 w-5 text-[#111827]" />
-                <div className="text-xs font-bold text-[#111827]">Free Shipping</div>
-                <div className="text-[10px] text-[#6B7280]">Worldwide</div>
-              </div>
-
-              <div className="space-y-1">
-                <ShieldCheck className="h-5 w-5 text-[#111827]" />
-                <div className="text-xs font-bold text-[#111827]">Secure Payment</div>
-                <div className="text-[10px] text-[#6B7280]">100% Secure</div>
-              </div>
-
-              <div className="space-y-1">
-                <Headphones className="h-5 w-5 text-[#111827]" />
-                <div className="text-xs font-bold text-[#111827]">24/7 Support</div>
-                <div className="text-[10px] text-[#6B7280]">Always Here</div>
+                <span className="font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded text-[10px]">mi</span>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ==================================================================== */}
-      {/* 9. THREE-COLUMN FEATURE CARDS (Aureon Prime, AI, App Download) */}
-      {/* ==================================================================== */}
-      <section className="px-4 sm:px-8 py-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: Exclusive Member Benefits (Gold Crown) */}
-          <div className="rounded-3xl bg-[#141416] border border-[#27272A] p-6 flex flex-col justify-between text-white shadow-xl relative overflow-hidden">
-            <div className="space-y-3 relative z-10">
-              <h3 className="font-black text-lg text-white">Exclusive Member Benefits</h3>
-              <p className="text-xs text-[#9CA3AF]">Get more with Aureon Prime</p>
-
-              <div className="space-y-2 pt-2 text-xs font-medium">
-                <div className="flex items-center gap-2 text-amber-300">
-                  <Check className="h-3.5 w-3.5" />
-                  <span>Free Shipping</span>
-                </div>
-                <div className="flex items-center gap-2 text-amber-300">
-                  <Check className="h-3.5 w-3.5" />
-                  <span>Exclusive Deals</span>
-                </div>
-                <div className="flex items-center gap-2 text-amber-300">
-                  <Check className="h-3.5 w-3.5" />
-                  <span>Early Access</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-end justify-between pt-6 relative z-10">
-              <Link
-                href="/account/settings"
-                className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 text-slate-950 font-bold text-xs px-5 py-2.5 hover:bg-amber-300 transition-colors"
-              >
-                <span>Join Prime</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-              <Crown className="h-14 w-14 text-amber-400/80 drop-shadow-lg" />
-            </div>
-          </div>
-
-          {/* Card 2: Shop Smarter with AI (Robot Assistant) */}
-          <div className="rounded-3xl bg-[#1E1B2E] border border-[#352D4F] p-6 flex flex-col justify-between text-white shadow-xl relative overflow-hidden">
-            <div className="space-y-3 relative z-10">
-              <h3 className="font-black text-lg text-white">Shop Smarter with AI</h3>
-              <p className="text-xs text-[#A5B4FC]">
-                Get personalized recommendations powered by AI.
-              </p>
-            </div>
-
-            <div className="flex items-end justify-between pt-8 relative z-10">
-              <button
-                type="button"
-                onClick={openAIAssistant}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white text-slate-950 font-bold text-xs px-5 py-2.5 hover:bg-amber-400 transition-colors cursor-pointer"
-              >
-                <span>Try AI Shopping</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-              <Bot className="h-14 w-14 text-purple-300 drop-shadow-lg" />
-            </div>
-          </div>
-
-          {/* Card 3: Download Our App (Mobile Phone) */}
-          <div className="rounded-3xl bg-[#101014] border border-[#27272A] p-6 flex flex-col justify-between text-white shadow-xl relative overflow-hidden">
-            <div className="space-y-3 relative z-10">
-              <h3 className="font-black text-lg text-white">Download Our App</h3>
-              <p className="text-xs text-[#9CA3AF]">Shop anytime, anywhere.</p>
-            </div>
-
-            <div className="flex items-end justify-between pt-8 relative z-10">
-              <div className="space-y-2">
-                <div className="rounded-lg bg-black/60 border border-white/20 px-3 py-1.5 text-[10px] font-bold cursor-pointer hover:border-amber-400">
-                  Download on the App Store
-                </div>
-                <div className="rounded-lg bg-black/60 border border-white/20 px-3 py-1.5 text-[10px] font-bold cursor-pointer hover:border-amber-400">
-                  GET IT ON Google Play
-                </div>
-              </div>
-              <Smartphone className="h-14 w-14 text-slate-300 drop-shadow-lg" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================================================================== */}
-      {/* 10. WORLD-CLASS DARK LUXURY FOOTER */}
-      {/* ==================================================================== */}
-      <footer className="bg-[#0B0B0C] border-t border-[#1F1F24] text-white pt-16 pb-12 px-4 sm:px-8 mt-12">
-        <div className="max-w-7xl mx-auto space-y-12">
-          {/* Main Footer Links Columns */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-            {/* Brand Column */}
-            <div className="space-y-4 lg:col-span-1">
-              <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-amber-400 flex items-center justify-center font-black text-slate-950 text-sm">
-                  ▲
-                </div>
-                <span className="text-xl font-black text-white tracking-tight">Aureon</span>
-              </div>
-              <p className="text-xs text-[#9CA3AF] leading-relaxed">
-                Shop Better. Live Smarter. Global multi-vendor marketplace connecting verified sellers
-                with millions of customers worldwide.
-              </p>
-              <div className="flex items-center gap-3 pt-2 text-[#9CA3AF]">
-                <span className="h-8 w-8 rounded-full bg-[#18181B] border border-[#27272A] flex items-center justify-center hover:text-white cursor-pointer text-xs">
-                  f
-                </span>
-                <span className="h-8 w-8 rounded-full bg-[#18181B] border border-[#27272A] flex items-center justify-center hover:text-white cursor-pointer text-xs">
-                  𝕏
-                </span>
-                <span className="h-8 w-8 rounded-full bg-[#18181B] border border-[#27272A] flex items-center justify-center hover:text-white cursor-pointer text-xs">
-                  ▶
-                </span>
-                <span className="h-8 w-8 rounded-full bg-[#18181B] border border-[#27272A] flex items-center justify-center hover:text-white cursor-pointer text-xs">
-                  in
-                </span>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-xs uppercase tracking-wider text-white">Quick Links</h4>
-              <ul className="space-y-2 text-xs text-[#9CA3AF]">
-                <li>
-                  <Link href="/" className="hover:text-amber-400">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products" className="hover:text-amber-400">
-                    Products
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products" className="hover:text-amber-400">
-                    Categories
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products?deals=true" className="hover:text-amber-400">
-                    Flash Sale
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/help" className="hover:text-amber-400">
-                    Contact Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Customer Service */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-xs uppercase tracking-wider text-white">
-                Customer Service
-              </h4>
-              <ul className="space-y-2 text-xs text-[#9CA3AF]">
-                <li>
-                  <Link href="/help" className="hover:text-amber-400">
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/account/orders" className="hover:text-amber-400">
-                    Track Order
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/help" className="hover:text-amber-400">
-                    Returns & Refunds
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/help" className="hover:text-amber-400">
-                    Shipping Info
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/help" className="hover:text-amber-400">
-                    FAQ
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* About Aureon */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-xs uppercase tracking-wider text-white">About Aureon</h4>
-              <ul className="space-y-2 text-xs text-[#9CA3AF]">
-                <li>
-                  <Link href="/about" className="hover:text-amber-400">
-                    Our Story
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/careers" className="hover:text-amber-400">
-                    Careers
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/news" className="hover:text-amber-400">
-                    Press & News
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/affiliate" className="hover:text-amber-400">
-                    Affiliate Program
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/seller/register" className="hover:text-amber-400">
-                    Become a Seller
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Stay Connected (Newsletter) */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-xs uppercase tracking-wider text-white">
-                Stay Connected
-              </h4>
-              <p className="text-xs text-[#9CA3AF]">
-                Subscribe to our newsletter for updates and exclusive offers.
-              </p>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  triggerToast('Thank you for subscribing to our newsletter!');
-                }}
-                className="flex items-center rounded-xl bg-[#18181B] border border-[#27272A] p-1 focus-within:border-amber-400"
-              >
-                <input
-                  type="email"
-                  required
-                  placeholder="Enter your email"
-                  className="bg-transparent px-3 py-1.5 text-xs text-white placeholder-[#71717A] focus:outline-none flex-1"
-                />
-                <button
-                  type="submit"
-                  aria-label="Subscribe"
-                  className="h-8 w-8 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center hover:bg-amber-300 shrink-0 cursor-pointer"
-                >
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </form>
-            </div>
-          </div>
-
-          {/* Bottom Copyright and Localization Bar */}
-          <div className="border-t border-[#1F1F24] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9CA3AF]">
-            <div>© 2026 Aureon. All rights reserved.</div>
-
-            <div className="flex items-center gap-4 text-[11px]">
-              <Link href="/privacy" className="hover:text-white">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="hover:text-white">
-                Terms of Service
-              </Link>
-              <Link href="/cookies" className="hover:text-white">
-                Cookie Settings
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-4 text-[11px]">
-              <div className="flex items-center gap-1 cursor-pointer hover:text-white">
-                <span>🌐</span>
-                <span>English</span>
-                <ChevronDown className="h-3 w-3" />
-              </div>
-              <div className="flex items-center gap-1 cursor-pointer hover:text-white">
-                <span>USD</span>
-                <ChevronDown className="h-3 w-3" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+        </section>
+      </div>
+    </AppShell>
   );
 }

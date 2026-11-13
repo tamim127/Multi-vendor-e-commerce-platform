@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function PrimeMembershipPage(): React.JSX.Element {
   return (
     <AppShell>
-      <div className="bg-[#070708] text-white min-h-screen py-12 px-4 sm:px-8">
+      <div className="bg-slate-50 dark:bg-slate-50 dark:bg-[#070708] text-slate-900 dark:text-white min-h-screen transition-colors py-12 px-4 sm:px-8">
         <div className="max-w-6xl mx-auto space-y-12">
           {/* Hero Section */}
           <div className="relative rounded-3xl border border-amber-500/30 bg-gradient-to-r from-[#17130B] via-[#211A0E] to-[#120E08] p-8 sm:p-14 shadow-2xl overflow-hidden">
@@ -23,7 +23,7 @@ export default function PrimeMembershipPage(): React.JSX.Element {
                 <span>Aureon Prime VIP</span>
               </div>
 
-              <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-[1.1]">
+              <h1 className="text-4xl sm:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.1]">
                 Everything you love about shopping, <span className="text-amber-400">elevated.</span>
               </h1>
 
@@ -38,39 +38,39 @@ export default function PrimeMembershipPage(): React.JSX.Element {
                 >
                   Start 30-Day Free Trial
                 </button>
-                <span className="text-xs text-[#9CA3AF]">Then $12.99/month. Cancel anytime.</span>
+                <span className="text-xs text-slate-600 dark:text-[#9CA3AF]">Then $12.99/month. Cancel anytime.</span>
               </div>
             </div>
           </div>
 
           {/* Core Perks Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-3xl border border-[#27272A] bg-[#121216] p-6 space-y-4">
+            <div className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-[#121216] p-6 space-y-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-400 border border-amber-400/20">
                 <Truck className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">Free Express Shipping</h3>
-              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Free Express Shipping</h3>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed">
                 Unlimited 1-2 business day delivery on over 2 million Prime-eligible items with zero minimum order requirement.
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#27272A] bg-[#121216] p-6 space-y-4">
+            <div className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-[#121216] p-6 space-y-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-400 border border-amber-400/20">
                 <Zap className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">30-Minute Early Access</h3>
-              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">30-Minute Early Access</h3>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed">
                 Be the first to claim high-demand flash deals, limited inventory drops, and Black Friday promotional events.
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#27272A] bg-[#121216] p-6 space-y-4">
+            <div className="rounded-3xl border border-slate-200 dark:border-[#27272A] bg-[#121216] p-6 space-y-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-400 border border-amber-400/20">
                 <ShieldCheck className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">VIP Concierge & Returns</h3>
-              <p className="text-xs text-[#9CA3AF] leading-relaxed">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">VIP Concierge & Returns</h3>
+              <p className="text-xs text-slate-600 dark:text-[#9CA3AF] leading-relaxed">
                 Dedicated priority customer care phone line and hassle-free instant refunds with prepaid pickup at your doorstep.
               </p>
             </div>

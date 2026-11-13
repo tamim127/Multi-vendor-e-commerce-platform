@@ -60,25 +60,25 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
   return (
     <div
       className={cn(
-        'hidden lg:flex flex-col w-full bg-[#0B0B0C] border-b border-[#1A1A1E]',
+        'hidden lg:flex flex-col w-full bg-white dark:bg-[#0B0B0C] border-b border-slate-200 dark:border-[#1A1A1E] transition-colors',
         className
       )}
     >
       {/* 1. Top Utility Row */}
-      <div className="border-b border-[#1E1E22] bg-[#0B0B0C] py-2 text-xs text-[#9CA3AF]">
+      <div className="border-b border-slate-200 dark:border-[#1E1E22] bg-slate-50 dark:bg-[#0B0B0C] py-2 text-xs text-slate-600 dark:text-[#9CA3AF] transition-colors">
         <Container size="standard" className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <span className="font-medium text-white/90 flex items-center gap-1.5">
-              <span className="text-amber-400 font-bold">⚡</span>
+            <span className="font-medium text-slate-800 dark:text-white/90 flex items-center gap-1.5">
+              <span className="text-amber-500 dark:text-amber-400 font-bold">⚡</span>
               Global Multi-Vendor Trade Platform
             </span>
-            <div className="h-3 w-px bg-[#26262B]" />
+            <div className="h-3 w-px bg-slate-200 dark:bg-[#26262B]" />
             <div className="flex items-center gap-4">
               {topUtilityLinks.map((link) => (
                 <a
                   key={link.id}
                   href={link.href}
-                  className="text-[#9CA3AF] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded-xs"
+                  className="text-slate-600 hover:text-slate-900 dark:text-[#9CA3AF] dark:hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded-xs"
                 >
                   {link.label}
                 </a>
@@ -89,14 +89,14 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
           <div className="flex items-center gap-4">
             <LanguageSelector />
 
-            <div className="h-3 w-px bg-[#26262B]" />
+            <div className="h-3 w-px bg-slate-200 dark:bg-[#26262B]" />
 
             {/* Theme Toggle Button */}
             <button
               type="button"
               onClick={toggleTheme}
               aria-label={`Toggle color theme. Current theme is ${resolvedTheme}`}
-              className="flex items-center gap-1.5 text-[#9CA3AF] hover:text-white transition-colors cursor-pointer rounded-xs p-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400"
+              className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 dark:text-[#9CA3AF] dark:hover:text-white transition-colors cursor-pointer rounded-xs p-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 font-medium"
             >
               {resolvedTheme === 'dark' ? (
                 <>
@@ -105,7 +105,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
                 </>
               ) : (
                 <>
-                  <Moon className="size-3.5 text-amber-400" />
+                  <Moon className="size-3.5 text-amber-500" />
                   <span>Dark</span>
                 </>
               )}
@@ -115,7 +115,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
       </div>
 
       {/* 2. Main Brand & Search Row */}
-      <div className="py-3.5 bg-[#0B0B0C]">
+      <div className="py-3.5 bg-white dark:bg-[#0B0B0C] transition-colors">
         <Container size="standard" className="flex items-center justify-between gap-8">
           {/* Aureon Brand Logo */}
           <Link
@@ -123,14 +123,14 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
             aria-label="Marketplace Homepage"
             className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-md p-1 select-none shrink-0 group"
           >
-            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-slate-950 font-bold text-xl shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
               ▲
             </div>
             <div className="flex flex-col text-left">
-              <span className="font-black text-xl tracking-tight text-white leading-none">
+              <span className="font-bold text-xl tracking-tight text-slate-900 dark:text-white leading-none">
                 Aureon
               </span>
-              <span className="text-[10px] uppercase font-extrabold tracking-widest text-amber-400 leading-none mt-1">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-amber-500 dark:text-amber-400 leading-none mt-1">
                 MARKETPLACE
               </span>
             </div>
@@ -144,7 +144,7 @@ export function DesktopHeader({ className }: DesktopHeaderProps): React.JSX.Elem
           {/* Action Hub */}
           <div className="flex items-center gap-3 shrink-0">
             <SellerAction />
-            <div className="h-5 w-px bg-[#26262B]" />
+            <div className="h-5 w-px bg-slate-200 dark:bg-[#26262B]" />
             <AccountAction userName={customer?.firstName} />
             <WishlistAction count={wishlistCount} />
             <CartAction

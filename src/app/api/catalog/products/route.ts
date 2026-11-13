@@ -1,15 +1,27 @@
 import { NextResponse } from 'next/server';
-import { getCatalogProducts } from '@/features/catalog-discovery/repository';
+import { queryRealCatalog } from '@/server/catalog/catalog-service';
+import { checkRateLimit } from '@/server/security/rate-limiter';
+import { applySecurityHeaders } from '@/server/security/headers';
 import type { CatalogQueryParams, CatalogSortOption } from '@/domains/catalog/types/query';
 import type { CurrencyCode } from '@/domains/catalog/types/pricing';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request): Promise<NextResponse> {
+  // 1. Rate Limiting (120 req / min)
+  const rate = checkRateLimit(request, { maxRequests: 120, windowSeconds: 60, prefix: 'catalog_products' });
+  if (!rate.isAllowed) {
+    const errorResponse = NextResponse.json(
+      { success: false, error: 'Too Many Requests', retryAfter: rate.resetSeconds },
+      { status: 429 }
+    );
+    return applySecurityHeaders(errorResponse);
+  }
+
   try {
     const { searchParams } = new URL(request.url);
-
     const brands = searchParams.getAll('brand');
+
     const query: CatalogQueryParams = {
       query: searchParams.get('q') || searchParams.get('query') || undefined,
       categorySlug: searchParams.get('category') || undefined,
@@ -23,9 +35,9 @@ export async function GET(request: Request): Promise<NextResponse> {
       currency: (searchParams.get('currency') as CurrencyCode) || 'USD',
     };
 
-    const result = await getCatalogProducts(query);
+    const result = await queryRealCatalog(query);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: result.products,
       meta: {
@@ -36,11 +48,19 @@ export async function GET(request: Request): Promise<NextResponse> {
         facets: result.facets,
       },
     });
+
+    response.headers.set('X-RateLimit-Limit', String(rate.limit));
+    response.headers.set('X-RateLimit-Remaining', String(rate.remaining));
+    response.headers.set('X-RateLimit-Reset', String(rate.resetSeconds));
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+
+    return applySecurityHeaders(response);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { success: false, error: 'Failed to fetch catalog products', details: message },
       { status: 500 }
     );
+    return applySecurityHeaders(errorResponse);
   }
 }

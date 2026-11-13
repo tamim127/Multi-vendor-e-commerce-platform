@@ -5,7 +5,7 @@ import { GET as getCategories } from '@/app/api/catalog/categories/route';
 import { GET as getBrands } from '@/app/api/catalog/brands/route';
 import { GET as getSearch } from '@/app/api/catalog/search/route';
 import { POST as postCart, GET as getCart } from '@/app/api/cart/route';
-import { POST as postWishlist, GET as getWishlist } from '@/app/api/wishlist/route';
+import { POST as postWishlist } from '@/app/api/wishlist/route';
 import { POST as validateCheckout } from '@/app/api/checkout/validate/route';
 import { POST as placeOrder } from '@/app/api/checkout/place-order/route';
 import { GET as getOrders } from '@/app/api/orders/route';

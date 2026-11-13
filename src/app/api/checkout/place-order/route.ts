@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { createMoney } from '@/domains/catalog/utils/money';
 import { groupCartBySeller } from '@/domains/cart/utils/calculations';
 import type { CustomerOrder } from '@/domains/customer/types/order';
+import { checkRateLimit } from '@/server/security/rate-limiter';
+import { applySecurityHeaders } from '@/server/security/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,12 +27,21 @@ const PlaceOrderSchema = z.object({
 });
 
 export async function POST(request: Request): Promise<NextResponse> {
+  const rate = checkRateLimit(request, { maxRequests: 30, windowSeconds: 60, prefix: 'checkout_place' });
+  if (!rate.isAllowed) {
+    const errorRes = NextResponse.json(
+      { success: false, error: 'Too Many Requests', retryAfter: rate.resetSeconds },
+      { status: 429 }
+    );
+    return applySecurityHeaders(errorRes);
+  }
+
   try {
     const body = await request.json().catch(() => ({}));
     const parsed = PlaceOrderSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
+      const errRes = NextResponse.json(
         {
           success: false,
           error: 'Invalid order placement request',
@@ -38,6 +49,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         },
         { status: 400 }
       );
+      return applySecurityHeaders(errRes);
     }
 
     const { contact, shipping, deliveryMethod, items, paymentMethod } = parsed.data;
@@ -107,7 +119,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       vendorPackages,
     };
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
         order: orderRecord,
@@ -116,11 +128,18 @@ export async function POST(request: Request): Promise<NextResponse> {
         message: 'Order created successfully and routed to respective multi-vendor merchants.',
       },
     }, { status: 201 });
+
+    response.headers.set('X-RateLimit-Limit', String(rate.limit));
+    response.headers.set('X-RateLimit-Remaining', String(rate.remaining));
+    response.headers.set('X-RateLimit-Reset', String(rate.resetSeconds));
+
+    return applySecurityHeaders(response);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
+    const errRes = NextResponse.json(
       { success: false, error: 'Order processing failed', details: message },
       { status: 500 }
     );
+    return applySecurityHeaders(errRes);
   }
 }

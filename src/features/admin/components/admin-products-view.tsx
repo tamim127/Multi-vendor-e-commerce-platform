@@ -25,6 +25,8 @@ export function AdminProductsView(): React.JSX.Element {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | ProductModerationStatus>('all');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const PAGE_SIZE = 25;
 
   const canModerate = hasPermission('catalog:moderate');
 
@@ -146,7 +148,9 @@ export function AdminProductsView(): React.JSX.Element {
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((prod) => {
+                filteredProducts
+                  .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+                  .map((prod) => {
                   const imageUrl =
                     prod.media?.[0]?.url ||
                     'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=160&q=80';
@@ -244,6 +248,40 @@ export function AdminProductsView(): React.JSX.Element {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {filteredProducts.length > PAGE_SIZE && (
+          <div className="flex items-center justify-between border-t border-slate-100 dark:border-[#1E1E24] px-5 py-3.5 bg-slate-50/50 dark:bg-[#141418]">
+            <div className="text-xs text-slate-500 dark:text-slate-400">
+              Showing <span className="font-bold text-slate-900 dark:text-white">{(page - 1) * PAGE_SIZE + 1}</span> to{' '}
+              <span className="font-bold text-slate-900 dark:text-white">
+                {Math.min(page * PAGE_SIZE, filteredProducts.length)}
+              </span>{' '}
+              of <span className="font-bold text-slate-900 dark:text-white">{filteredProducts.length}</span> products
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="rounded-lg border border-slate-200 dark:border-[#27272A] px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1E1E24] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 px-2">
+                Page {page} of {Math.ceil(filteredProducts.length / PAGE_SIZE)}
+              </span>
+              <button
+                type="button"
+                disabled={page >= Math.ceil(filteredProducts.length / PAGE_SIZE)}
+                onClick={() => setPage((p) => p + 1)}
+                className="rounded-lg border border-slate-200 dark:border-[#27272A] px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1E1E24] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

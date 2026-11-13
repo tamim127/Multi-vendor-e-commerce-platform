@@ -43,3 +43,4 @@ export async function getSystemHealth(): Promise<HealthCheckResult> {
     database: dbHealth,
   };
 }
+

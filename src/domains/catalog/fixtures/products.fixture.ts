@@ -13,7 +13,7 @@ import { MOCK_VARIANTS } from './variants.fixture';
 
 const brandMap = new Map(MOCK_BRANDS.map((b) => [b.id, b]));
 
-export const MOCK_PRODUCTS: Product[] = [
+const CORE_PRODUCTS: Product[] = [
   // =========================================================
   // 1. MACBOOK PRO 16" (Multi-variant: Color x Storage, Level 4 Category)
   // =========================================================
@@ -735,4 +735,16 @@ export const MOCK_PRODUCTS: Product[] = [
     createdAt: '2026-02-15T00:00:00Z',
     updatedAt: '2026-03-25T00:00:00Z',
   },
+];
+
+import { CATALOG_PRODUCTS_1000 } from '@/server/catalog/products-1000';
+
+const coreProductIds = new Set(CORE_PRODUCTS.map((p) => p.id));
+const coreProductSlugs = new Set(CORE_PRODUCTS.map((p) => p.slug));
+
+export const MOCK_PRODUCTS: Product[] = [
+  ...CORE_PRODUCTS,
+  ...CATALOG_PRODUCTS_1000.filter(
+    (p) => !coreProductIds.has(p.id) && !coreProductSlugs.has(p.slug)
+  ),
 ];

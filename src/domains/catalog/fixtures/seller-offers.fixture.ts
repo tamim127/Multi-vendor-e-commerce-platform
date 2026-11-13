@@ -15,7 +15,7 @@ const techDirectSeller = MOCK_SELLERS[1]!;
 const globalWareSeller = MOCK_SELLERS[2]!;
 const apexOutletSeller = MOCK_SELLERS[3]!;
 
-export const MOCK_SELLER_OFFERS: SellerOffer[] = [
+const CORE_OFFERS: SellerOffer[] = [
   // =========================================================
   // MACBOOK PRO 16" — SPACE BLACK 512GB (3 Competing Sellers)
   // =========================================================
@@ -350,4 +350,13 @@ export const MOCK_SELLER_OFFERS: SellerOffer[] = [
     isBuyBoxWinner: false,
     returnPolicyDays: 30,
   },
+];
+
+import { CATALOG_OFFERS_1000 } from '@/server/catalog/products-1000';
+
+const coreOfferIds = new Set(CORE_OFFERS.map((o) => o.offerId));
+
+export const MOCK_SELLER_OFFERS: SellerOffer[] = [
+  ...CORE_OFFERS,
+  ...CATALOG_OFFERS_1000.filter((o) => !coreOfferIds.has(o.offerId)),
 ];

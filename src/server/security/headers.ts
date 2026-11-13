@@ -33,3 +33,4 @@ export function applySecurityHeaders(response: NextResponse): NextResponse {
   }
   return response;
 }
+

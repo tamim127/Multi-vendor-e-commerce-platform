@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -142,68 +142,40 @@ interface CuratedTrendingProduct {
   image: string;
 }
 
-const TRENDING_PRODUCTS: CuratedTrendingProduct[] = [
-  {
-    id: 'prod-sony-wh1000xm5',
-    slug: 'sony-wh-1000xm5-wireless-headphones',
-    title: 'Sony WH-1000XM5 Wireless Headphones',
-    category: 'Noise Cancelling',
-    badge: '-35%',
-    rating: 4.8,
-    reviews: '12.5k',
-    price: 349.0,
-    originalPrice: 399.0,
-    image: '/assets/mock/products/sony-xm5-hero.webp',
-  },
-  {
-    id: 'prod-apple-watch-s10',
-    slug: 'apple-watch-series-10',
-    title: 'Apple Watch Series 10 GPS 42mm',
-    category: 'Smartwatch',
-    badge: '-40%',
-    rating: 4.7,
-    reviews: '8.2k',
-    price: 399.0,
-    originalPrice: 469.0,
-    image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=500&q=80',
-  },
-  {
-    id: 'prod-macbook-air-m3',
-    slug: 'apple-macbook-pro-16-m3-max',
-    title: 'MacBook Air M3 13-inch',
-    category: 'Ultra-thin Laptop',
-    badge: '-25%',
-    rating: 4.9,
-    reviews: '6.1k',
-    price: 1099.0,
-    originalPrice: 1469.0,
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=500&q=80',
-  },
-  {
-    id: 'prod-nike-pegasus',
-    slug: 'nike-air-zoom-pegasus-41',
-    title: 'Nike Air Zoom Pegasus 41',
-    category: 'Running Shoes',
-    badge: '-30%',
-    rating: 4.7,
-    reviews: '4.3k',
-    price: 125.0,
-    originalPrice: 179.0,
-    image: '/assets/mock/products/nike-alphafly-3-hero.webp',
-  },
-  {
-    id: 'prod-airpods-pro-2',
-    slug: 'airpods-pro-2nd-gen',
-    title: 'AirPods Pro (2nd Gen)',
-    category: 'Wireless Earbuds',
-    badge: '-20%',
-    rating: 4.8,
-    reviews: '9.7k',
-    price: 249.0,
-    originalPrice: 309.0,
-    image: 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=500&q=80',
-  },
-];
+function getTrendingProductsForTab(tab: 'popular' | 'best' | 'rated' | 'new'): CuratedTrendingProduct[] {
+  let pool = [...MOCK_PRODUCTS];
+  if (tab === 'best') {
+    pool = pool.filter((p) => p.badges.some((b) => b.type === 'best_seller'));
+  } else if (tab === 'rated') {
+    pool = pool.filter((p) => p.ratingSummary.average >= 4.7);
+  } else if (tab === 'new') {
+    pool = pool.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } else {
+    // popular
+    pool = pool.sort((a, b) => b.ratingSummary.count - a.ratingSummary.count);
+  }
+
+  return pool.slice(0, 5).map((p) => {
+    const price = (p.offerSummary?.lowestPrice?.amountMinor || 19900) / 100;
+    const highestPriceMinor = p.offerSummary?.highestPrice?.amountMinor || (p.offerSummary?.lowestPrice?.amountMinor || 19900) * 1.25;
+    const originalPrice = Math.round(highestPriceMinor / 100);
+    const discountPercent = originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 20;
+    const reviewCount = p.ratingSummary.count >= 1000 ? `${(p.ratingSummary.count / 1000).toFixed(1)}k` : `${p.ratingSummary.count}`;
+    const img = p.media[0]?.url || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=500&q=80';
+    return {
+      id: p.id,
+      slug: p.slug,
+      title: p.title.en,
+      category: p.categoryBreadcrumbs[p.categoryBreadcrumbs.length - 1]?.name.en || p.brand.name,
+      badge: `-${discountPercent}%`,
+      rating: p.ratingSummary.average,
+      reviews: reviewCount,
+      price,
+      originalPrice,
+      image: img,
+    };
+  });
+}
 
 // Featured Merchants
 const FEATURED_MERCHANTS = [
@@ -257,6 +229,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Trending filter tabs
   const [trendingTab, setTrendingTab] = useState<'popular' | 'best' | 'rated' | 'new'>('popular');
+  const visibleTrendingProducts = useMemo(() => getTrendingProductsForTab(trendingTab), [trendingTab]);
 
   // Live Flash Deal countdown
   const [countdown, setCountdown] = useState({
@@ -714,7 +687,7 @@ export default function HomePage(): React.JSX.Element {
 
             {/* 5-Column Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {TRENDING_PRODUCTS.map((prod) => {
+              {visibleTrendingProducts.map((prod) => {
                 const inWish = isInWishlist(prod.id);
                 return (
                   <article

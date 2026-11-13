@@ -42,6 +42,38 @@ const baseSellers = [
   { id: 'seller-swiss-chronos', name: 'Geneva Haute Horlogerie', slug: 'geneva-haute-horlogerie', tier: 'flagship', verified: true },
 ];
 
+const baseCategories = [
+  { id: 'cat-electronics', slug: 'electronics', name: { en: 'Electronics' }, level: 0, path: '/electronics', parentId: null },
+  { id: 'cat-computers-laptops', slug: 'computers-laptops', name: { en: 'Computers & Laptops' }, level: 1, path: '/electronics/computers-laptops', parentId: 'cat-electronics' },
+  { id: 'cat-laptops', slug: 'laptops', name: { en: 'Laptops' }, level: 2, path: '/electronics/computers-laptops/laptops', parentId: 'cat-computers-laptops' },
+  { id: 'cat-ultraportable-laptops', slug: 'ultraportable-laptops', name: { en: 'Ultraportable Laptops' }, level: 3, path: '/electronics/computers-laptops/laptops/ultraportable-laptops', parentId: 'cat-laptops' },
+  { id: 'cat-workstation-ultrabooks', slug: 'workstation-ultrabooks', name: { en: 'Workstation Ultrabooks' }, level: 4, path: '/electronics/computers-laptops/laptops/ultraportable-laptops/workstation-ultrabooks', parentId: 'cat-ultraportable-laptops' },
+  { id: 'cat-audio-headphones', slug: 'audio-headphones', name: { en: 'Audio & Headphones' }, level: 1, path: '/electronics/audio-headphones', parentId: 'cat-electronics' },
+  { id: 'cat-wireless-headphones', slug: 'wireless-headphones', name: { en: 'Wireless Headphones' }, level: 2, path: '/electronics/audio-headphones/wireless-headphones', parentId: 'cat-audio-headphones' },
+  { id: 'cat-noise-cancelling', slug: 'noise-cancelling-headphones', name: { en: 'Noise Cancelling Headphones' }, level: 3, path: '/electronics/audio-headphones/wireless-headphones/noise-cancelling-headphones', parentId: 'cat-wireless-headphones' },
+  { id: 'cat-mobile-accessories', slug: 'mobile-accessories', name: { en: 'Mobile Accessories' }, level: 1, path: '/electronics/mobile-accessories', parentId: 'cat-electronics' },
+  { id: 'cat-power-banks', slug: 'power-banks', name: { en: 'Power Banks & Portable Chargers' }, level: 2, path: '/electronics/mobile-accessories/power-banks', parentId: 'cat-mobile-accessories' },
+  { id: 'cat-monitors-displays', slug: 'monitors-displays', name: { en: 'Monitors & Displays' }, level: 1, path: '/electronics/monitors-displays', parentId: 'cat-electronics' },
+  { id: 'cat-curved-gaming-monitors', slug: 'curved-gaming-monitors', name: { en: 'Curved Gaming Monitors' }, level: 2, path: '/electronics/monitors-displays/curved-gaming-monitors', parentId: 'cat-monitors-displays' },
+  { id: 'cat-fashion', slug: 'fashion', name: { en: 'Fashion' }, level: 0, path: '/fashion', parentId: null },
+  { id: 'cat-mens-footwear', slug: 'mens-footwear', name: { en: "Men's Footwear" }, level: 1, path: '/fashion/mens-footwear', parentId: 'cat-fashion' },
+  { id: 'cat-athletic-shoes', slug: 'athletic-shoes', name: { en: 'Athletic Shoes' }, level: 2, path: '/fashion/mens-footwear/athletic-shoes', parentId: 'cat-mens-footwear' },
+  { id: 'cat-marathon-running', slug: 'marathon-running-shoes', name: { en: 'Marathon & Road Running' }, level: 3, path: '/fashion/mens-footwear/athletic-shoes/marathon-running-shoes', parentId: 'cat-athletic-shoes' },
+  { id: 'cat-home-living', slug: 'home-living', name: { en: 'Home & Living' }, level: 0, path: '/home-living', parentId: null },
+  { id: 'cat-office-furniture', slug: 'office-furniture', name: { en: 'Office Furniture' }, level: 1, path: '/home-living/office-furniture', parentId: 'cat-home-living' },
+  { id: 'cat-ergonomic-seating', slug: 'ergonomic-seating', name: { en: 'Ergonomic Office Chairs' }, level: 2, path: '/home-living/office-furniture/ergonomic-seating', parentId: 'cat-office-furniture' },
+];
+
+const categoryAliasMap = {
+  'cat-luxury-watches': 'cat-fashion',
+  'cat-coffee-espresso': 'cat-home-living',
+  'cat-mens-outerwear': 'cat-fashion',
+  'cat-mens-fashion': 'cat-fashion',
+  'cat-beauty-wellness': 'cat-fashion',
+  'cat-appliances': 'cat-home-living',
+  'cat-sports-outdoors': 'cat-athletic-shoes',
+};
+
 const blueprints = [
   // Laptops & Workstations
   {
@@ -500,12 +532,29 @@ for (const bp of blueprints) {
                 status: 'featured',
                 isFeatured: true,
               },
-              categoryId: bp.cat,
-              categoryPath: `/catalog/${bp.cat}`,
-              categoryBreadcrumbs: [
-                { id: bp.cat, slug: bp.cat, name: { en: 'Category' }, level: 1, path: `/catalog/${bp.cat}` },
-              ],
-              categoryIds: [bp.cat],
+              ...(() => {
+                const actualCatId = categoryAliasMap[bp.cat] || bp.cat;
+                const catObj = baseCategories.find((c) => c.id === actualCatId) || baseCategories[0];
+                const breadcrumbs = [];
+                let curr = catObj;
+                while (curr) {
+                  breadcrumbs.unshift({
+                    id: curr.id,
+                    slug: curr.slug,
+                    name: curr.name,
+                    level: curr.level,
+                    path: curr.path,
+                  });
+                  curr = curr.parentId ? baseCategories.find((c) => c.id === curr.parentId) : null;
+                }
+                const categoryIds = breadcrumbs.map((b) => b.id);
+                return {
+                  categoryId: catObj.id,
+                  categoryPath: catObj.path,
+                  categoryBreadcrumbs: breadcrumbs,
+                  categoryIds,
+                };
+              })(),
               media: [
                 {
                   id: `med-${id}-1`,

@@ -77,3 +77,4 @@ export async function verifyPassword(
 export function generateSecureToken(bytes = 32): string {
   return crypto.randomBytes(bytes).toString('hex');
 }
+

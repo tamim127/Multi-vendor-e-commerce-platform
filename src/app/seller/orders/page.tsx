@@ -1,22 +1,19 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
-import { AppShell } from '@/components/layout/shell/app-shell';
 import { SellerLayout, SellerOrdersView } from '@/features/seller';
 
 export const metadata: Metadata = {
-  title: 'Seller Orders | Marketplace Seller Central',
-  description: 'Manage and fulfill seller packages, assign carriers, and track customer delivery.',
+  title: 'Order Fulfillment | Marketplace Seller Central',
+  description: 'Manage customer orders, track package fulfillment, and dispatch shipments.',
 };
 
 export default function SellerOrdersPage(): React.JSX.Element {
   return (
-    <AppShell>
-      <SellerLayout
-        title="Fulfillment & Order Packages"
-        subtitle="Process pending packages, assign carrier tracking, and update shipment statuses."
-      >
-        <SellerOrdersView />
-      </SellerLayout>
-    </AppShell>
+    <SellerLayout
+      title="Orders & Shipments"
+      subtitle="Fulfill customer orders, assign tracking numbers, and manage split packages."
+    >
+      <SellerOrdersView />
+    </SellerLayout>
   );
 }

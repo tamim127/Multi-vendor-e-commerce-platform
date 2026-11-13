@@ -1,6 +1,5 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
-import { AppShell } from '@/components/layout/shell/app-shell';
 import { SellerLayout, SellerOrderDetailView } from '@/features/seller';
 
 interface PageProps {
@@ -21,13 +20,11 @@ export default async function SellerOrderDetailPage({
   const { orderId } = await params;
 
   return (
-    <AppShell>
-      <SellerLayout
-        title={`Package ${orderId}`}
-        subtitle="Inspect fulfillment details, line items, and customer destination."
-      >
-        <SellerOrderDetailView orderId={orderId} />
-      </SellerLayout>
-    </AppShell>
+    <SellerLayout
+      title={`Package ${orderId}`}
+      subtitle="Inspect fulfillment details, line items, and customer destination."
+    >
+      <SellerOrderDetailView orderId={orderId} />
+    </SellerLayout>
   );
 }

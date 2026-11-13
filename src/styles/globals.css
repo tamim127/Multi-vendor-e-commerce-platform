@@ -4,6 +4,8 @@
 @import './tokens/components.css';
 @import './typography/typography.css';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Colors */
   --color-canvas: var(--color-bg-canvas);

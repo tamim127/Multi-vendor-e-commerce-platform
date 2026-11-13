@@ -1,6 +1,5 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
-import { AppShell } from '@/components/layout/shell/app-shell';
 import { AdminLayout, AdminGuard, AdminReturnsView } from '@/features/admin';
 
 export const metadata: Metadata = {
@@ -11,15 +10,13 @@ export const metadata: Metadata = {
 
 export default function AdminReturnsPage(): React.JSX.Element {
   return (
-    <AppShell>
-      <AdminGuard requiredPermission="refunds:read">
-        <AdminLayout
-          title="Physical Return Requests"
-          subtitle="Supervise physical package returns, inspection checkpoints, and restock authorization."
-        >
-          <AdminReturnsView />
-        </AdminLayout>
-      </AdminGuard>
-    </AppShell>
+    <AdminGuard requiredPermission="refunds:read">
+      <AdminLayout
+        title="Physical Return Requests"
+        subtitle="Supervise physical package returns, inspection checkpoints, and restock authorization."
+      >
+        <AdminReturnsView />
+      </AdminLayout>
+    </AdminGuard>
   );
 }

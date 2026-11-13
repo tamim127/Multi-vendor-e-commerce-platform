@@ -1,6 +1,5 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
-import { AppShell } from '@/components/layout/shell/app-shell';
 import { SellerLayout, SellerProductsView } from '@/features/seller';
 
 export const metadata: Metadata = {
@@ -11,13 +10,11 @@ export const metadata: Metadata = {
 
 export default function SellerProductsPage(): React.JSX.Element {
   return (
-    <AppShell>
-      <SellerLayout
-        title="Products & Commercial Offers"
-        subtitle="List and adjust prices, conditions, and stock for marketplace products."
-      >
-        <SellerProductsView />
-      </SellerLayout>
-    </AppShell>
+    <SellerLayout
+      title="Products & Commercial Offers"
+      subtitle="List and adjust prices, conditions, and stock for marketplace products."
+    >
+      <SellerProductsView />
+    </SellerLayout>
   );
 }

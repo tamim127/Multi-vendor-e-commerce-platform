@@ -1,6 +1,5 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
-import { AppShell } from '@/components/layout/shell/app-shell';
 import { AdminLayout, AdminGuard, AdminReviewsView } from '@/features/admin';
 
 export const metadata: Metadata = {
@@ -10,15 +9,13 @@ export const metadata: Metadata = {
 
 export default function AdminReviewsPage(): React.JSX.Element {
   return (
-    <AppShell>
-      <AdminGuard requiredPermission="reviews:read">
-        <AdminLayout
-          title="Review & Content Moderation"
-          subtitle="Triage flagged customer reviews, investigate reported spam, and moderate published feedback."
-        >
-          <AdminReviewsView />
-        </AdminLayout>
-      </AdminGuard>
-    </AppShell>
+    <AdminGuard requiredPermission="reviews:read">
+      <AdminLayout
+        title="Review & Content Moderation"
+        subtitle="Triage flagged customer reviews, investigate reported spam, and moderate published feedback."
+      >
+        <AdminReviewsView />
+      </AdminLayout>
+    </AdminGuard>
   );
 }

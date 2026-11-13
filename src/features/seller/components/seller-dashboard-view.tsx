@@ -44,34 +44,35 @@ export function SellerDashboardView(): React.JSX.Element {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      {/* 1. Top Greeting Header (matching Image 2) */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+    <div className="space-y-6">
+      {/* 1. Top Greeting Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#121215] p-5 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-[#27272A] shadow-xs">
         <div className="flex items-center gap-3.5">
           <div className="relative">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 font-extrabold text-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black text-lg shadow-sm">
               {sellerProfile?.name ? sellerProfile.name.charAt(0) : 'S'}
             </div>
-            <div className="absolute -top-1 -right-1 size-3.5 bg-emerald-500 rounded-full border-2 border-white" />
+            <div className="absolute -top-1 -right-1 size-3 bg-emerald-500 rounded-full border-2 border-white dark:border-[#121215]" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Hello, {sellerProfile?.name || 'Partner'}!
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <span>Hello, {sellerProfile?.name || 'Partner'}!</span>
+              <span className="inline-block animate-wave origin-bottom-right">👋</span>
             </h1>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               Let&apos;s see what&apos;s new in your store today
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3 self-start sm:self-auto">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-xs font-semibold text-slate-700 shadow-2xs">
-            <Calendar className="size-3.5 text-slate-400" />
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-50 dark:bg-[#18181B] border border-slate-200 dark:border-[#27272A] text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-xs">
+            <Calendar className="size-3.5 text-amber-500" />
             <span>Thu, Apr 23 – Fri, Apr 24</span>
           </div>
           <button
             type="button"
-            className="flex size-9 items-center justify-center rounded-full bg-slate-50 border border-slate-200/80 text-slate-500 hover:text-slate-900 transition-colors shadow-2xs"
+            className="flex size-9 items-center justify-center rounded-xl bg-slate-50 dark:bg-[#18181B] border border-slate-200 dark:border-[#27272A] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors shadow-xs"
             aria-label="Notifications"
           >
             <Bell className="size-4" />
@@ -79,103 +80,111 @@ export function SellerDashboardView(): React.JSX.Element {
         </div>
       </div>
 
-      {/* 2. Four Stat Cards Grid (matching Image 2) */}
+      {/* 2. Four Stat Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Total products */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex items-center justify-between">
+        <div className="rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-5 shadow-xs flex items-center justify-between hover:border-amber-500/40 transition-colors">
           <div className="space-y-1">
-            <span className="text-xs font-medium text-slate-500">Total products</span>
+            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-[#9CA3AF]">
+              Total products
+            </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                 {metrics.activeListingsCount || 85}
               </span>
-              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full">
                 <TrendingUp className="size-3" />
                 +2.2%
               </span>
             </div>
           </div>
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
             <Package className="size-5" />
           </div>
         </div>
 
         {/* Card 2: Completed order */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex items-center justify-between">
+        <div className="rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-5 shadow-xs flex items-center justify-between hover:border-emerald-500/40 transition-colors">
           <div className="space-y-1">
-            <span className="text-xs font-medium text-slate-500">Completed order</span>
+            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-[#9CA3AF]">
+              Completed order
+            </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                 {metrics.totalOrdersCount || 172}
               </span>
-              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full">
                 <TrendingUp className="size-3" />
                 +10.6%
               </span>
             </div>
           </div>
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             <CheckCircle2 className="size-5" />
           </div>
         </div>
 
         {/* Card 3: Canceled order */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex items-center justify-between">
+        <div className="rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-5 shadow-xs flex items-center justify-between hover:border-rose-500/40 transition-colors">
           <div className="space-y-1">
-            <span className="text-xs font-medium text-slate-500">Canceled order</span>
+            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-[#9CA3AF]">
+              Canceled order
+            </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-slate-900 tracking-tight">5</span>
-              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
+              <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">5</span>
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-2 py-0.5 rounded-full">
                 <TrendingDown className="size-3" />
                 -10.2%
               </span>
             </div>
           </div>
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400">
             <XCircle className="size-5" />
           </div>
         </div>
 
         {/* Card 4: Top category */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex items-center justify-between">
+        <div className="rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-5 shadow-xs flex items-center justify-between hover:border-purple-500/40 transition-colors">
           <div className="space-y-1">
-            <span className="text-xs font-medium text-slate-500">Top category</span>
+            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-[#9CA3AF]">
+              Top category
+            </span>
             <div className="flex items-baseline gap-2">
-              <span className="text-xl font-extrabold text-slate-900 tracking-tight capitalize">
+              <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight capitalize">
                 Electronics
               </span>
             </div>
-            <span className="text-[11px] text-slate-400 font-medium">54% of store volume</span>
+            <span className="text-[10px] text-slate-400 font-medium">54% of store volume</span>
           </div>
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
             <ShoppingBag className="size-5" />
           </div>
         </div>
       </div>
 
-      {/* 3. Middle Section: Sales Curve Chart + Last Transaction Table (matching Image 2) */}
+      {/* 3. Middle Section: Sales Curve Chart + Last Transaction Table */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Your Sales Chart (5 cols) */}
-        <div className="lg:col-span-5 rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+        <div className="lg:col-span-5 rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-5 sm:p-6 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
                   Total Revenue
                 </span>
-                <h3 className="text-sm font-bold text-slate-800">Sales & Revenue Trends</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Sales &amp; Revenue Trends</h3>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-50 dark:bg-[#18181B] border border-slate-200 dark:border-[#27272A] text-xs font-semibold text-slate-700 dark:text-slate-300">
                 <span>{selectedMonth}</span>
                 <span className="text-[10px]">▼</span>
               </div>
             </div>
 
             <div className="mt-3 flex items-baseline gap-3">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">
+              <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 {formatMoneyMinor(metrics.totalRevenue)}
               </span>
-              <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full">
                 <TrendingUp className="size-3.5" />
                 +6.8%
               </span>
@@ -184,38 +193,38 @@ export function SellerDashboardView(): React.JSX.Element {
 
           {/* Smooth SVG Curve Line Chart */}
           <div className="mt-6 relative pt-4">
-            {/* Tooltip Pill from Image 2 */}
-            <div className="absolute top-0 right-12 z-10 flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200/80 shadow-md text-xs font-bold text-slate-800">
+            {/* Tooltip Pill */}
+            <div className="absolute top-0 right-12 z-10 flex items-center gap-2 bg-white dark:bg-[#18181B] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#27272A] shadow-md text-xs font-bold text-slate-800 dark:text-white">
               <span className="text-[10px] text-slate-400 font-medium">19 July</span>
-              <span>$3,742.76</span>
-              <span className="text-emerald-600 text-[11px]">+20.4%</span>
+              <span className="text-amber-500">$3,742.76</span>
+              <span className="text-emerald-600 dark:text-emerald-400 text-[11px]">+20.4%</span>
             </div>
 
             <svg viewBox="0 0 400 160" className="w-full h-36 overflow-visible">
               <defs>
-                <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.0" />
+                <linearGradient id="sellerSalesGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               {/* Soft area under curve */}
               <path
                 d="M 10 140 C 60 120, 90 130, 140 90 C 190 50, 230 80, 280 40 C 330 10, 360 30, 390 20 L 390 150 L 10 150 Z"
-                fill="url(#salesGrad)"
+                fill="url(#sellerSalesGrad)"
               />
               {/* Smooth line */}
               <path
                 d="M 10 140 C 60 120, 90 130, 140 90 C 190 50, 230 80, 280 40 C 330 10, 360 30, 390 20"
                 fill="none"
-                stroke="#4f46e5"
+                stroke="#F59E0B"
                 strokeWidth="3.5"
                 strokeLinecap="round"
               />
               {/* Tooltip point */}
-              <circle cx="280" cy="40" r="5" fill="#ffffff" stroke="#4f46e5" strokeWidth="3" />
+              <circle cx="280" cy="40" r="5" fill="#F59E0B" className="stroke-white dark:stroke-[#121215] stroke-2" />
             </svg>
 
-            <div className="flex justify-between text-[11px] font-medium text-slate-400 pt-2 border-t border-slate-100">
+            <div className="flex justify-between text-[11px] font-medium text-slate-400 pt-2 border-t border-slate-100 dark:border-[#1E1E24]">
               <span>$100</span>
               <span>$500</span>
               <span>$1k</span>
@@ -228,17 +237,17 @@ export function SellerDashboardView(): React.JSX.Element {
         </div>
 
         {/* Last Transaction Table (7 cols) */}
-        <div className="lg:col-span-7 rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+        <div className="lg:col-span-7 rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-5 sm:p-6 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <span className="text-sm font-bold text-slate-800">Last transaction</span>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#1E1E24]">
+              <span className="text-sm font-bold text-slate-900 dark:text-white">Last transaction</span>
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <Search className="size-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     placeholder="Search"
-                    className="pl-8 pr-3 py-1 bg-slate-50 border border-slate-200/80 rounded-full text-xs font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary w-28 sm:w-36"
+                    className="pl-8 pr-3 py-1 bg-slate-50 dark:bg-[#18181B] border border-slate-200 dark:border-[#27272A] rounded-xl text-xs font-normal text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-400 w-28 sm:w-36"
                   />
                 </div>
               </div>
@@ -247,7 +256,7 @@ export function SellerDashboardView(): React.JSX.Element {
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="text-slate-400 border-b border-slate-100">
+                  <tr className="text-slate-400 border-b border-slate-100 dark:border-[#1E1E24]">
                     <th className="pb-2 font-medium">Order ID</th>
                     <th className="pb-2 font-medium">Item</th>
                     <th className="pb-2 font-medium">Date</th>
@@ -255,15 +264,15 @@ export function SellerDashboardView(): React.JSX.Element {
                     <th className="pb-2 font-medium text-right">Platform</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-slate-100 dark:divide-[#1E1E24]">
                   {sampleTransactions.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-2.5 font-mono font-semibold text-slate-700">{tx.id}</td>
-                      <td className="py-2.5 font-medium text-slate-900 truncate max-w-40">{tx.item}</td>
-                      <td className="py-2.5 text-slate-500 font-mono text-[11px]">{tx.date}</td>
-                      <td className="py-2.5 font-bold text-slate-900">{tx.price}</td>
+                    <tr key={tx.id} className="hover:bg-slate-50/60 dark:hover:bg-[#18181D]/60 transition-colors">
+                      <td className="py-2.5 font-mono font-bold text-slate-900 dark:text-amber-400">{tx.id}</td>
+                      <td className="py-2.5 font-medium text-slate-900 dark:text-white truncate max-w-40">{tx.item}</td>
+                      <td className="py-2.5 text-slate-400 font-mono text-[11px]">{tx.date}</td>
+                      <td className="py-2.5 font-bold text-slate-900 dark:text-white">{tx.price}</td>
                       <td className="py-2.5 text-right">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-[#1E1E24] text-slate-700 dark:text-slate-300">
                           {tx.platform}
                         </span>
                       </td>
@@ -274,30 +283,30 @@ export function SellerDashboardView(): React.JSX.Element {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[#1E1E24] flex items-center justify-between text-xs">
             <span className="text-slate-400 font-medium">Showing 5 recent orders</span>
             <Link
               href="/seller/orders"
-              className="text-primary font-bold hover:underline inline-flex items-center gap-1"
+              className="text-amber-500 font-bold hover:underline inline-flex items-center gap-1"
             >
-              View full order ledger
+              <span>View full order ledger</span>
               <ArrowRight className="size-3.5" />
             </Link>
           </div>
         </div>
       </div>
 
-      {/* 4. AI Assistant Section (matching Image 2) */}
-      <div className="rounded-3xl border border-indigo-100/80 bg-linear-to-r from-indigo-50/60 via-white to-purple-50/40 p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-5">
+      {/* 4. AI Assistant Section */}
+      <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-transparent to-amber-500/5 p-6 shadow-xs space-y-5">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-xs">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400 text-slate-950 font-black shadow-xs">
             <Sparkles className="size-4.5" />
           </div>
           <div>
-            <h2 className="text-base font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
               AI Assistant bootsy
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               I analyzed the sales statistics for this month and have some recommendations for you. This month you sold 172 products on 6 different platforms.
             </p>
           </div>
@@ -305,48 +314,48 @@ export function SellerDashboardView(): React.JSX.Element {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Recommendation 1: Copywriting and SEO */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between space-y-4">
+          <div className="bg-white dark:bg-[#121215] p-5 rounded-xl border border-slate-200/80 dark:border-[#27272A] shadow-xs flex flex-col justify-between space-y-4">
             <div className="space-y-1.5">
-              <h3 className="text-xs font-bold text-slate-900">Copywriting and SEO</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Copywriting and SEO</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 I found 18 products that need to have their descriptions updated.
               </p>
             </div>
             <button
               type="button"
-              className="w-full py-2 px-3 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-full transition-all duration-200"
+              className="w-full py-2 px-3 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all duration-200 shadow-xs"
             >
               Detailed report
             </button>
           </div>
 
           {/* Recommendation 2: Advertising */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between space-y-4">
+          <div className="bg-white dark:bg-[#121215] p-5 rounded-xl border border-slate-200/80 dark:border-[#27272A] shadow-xs flex flex-col justify-between space-y-4">
             <div className="space-y-1.5">
-              <h3 className="text-xs font-bold text-slate-900">Advertising</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Advertising</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 2 methods of promotion that you don&apos;t use. This can increase sales by 17%.
               </p>
             </div>
             <button
               type="button"
-              className="w-full py-2 px-3 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-full transition-all duration-200"
+              className="w-full py-2 px-3 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all duration-200 shadow-xs"
             >
               Detailed report
             </button>
           </div>
 
           {/* Recommendation 3: Service */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-2xs flex flex-col justify-between space-y-4">
+          <div className="bg-white dark:bg-[#121215] p-5 rounded-xl border border-slate-200/80 dark:border-[#27272A] shadow-xs flex flex-col justify-between space-y-4">
             <div className="space-y-1.5">
-              <h3 className="text-xs font-bold text-slate-900">Service</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Service</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 You have received 12 product returns. Logistical problems. Please fix it now.
               </p>
             </div>
             <button
               type="button"
-              className="w-full py-2 px-3 text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-full transition-all duration-200"
+              className="w-full py-2 px-3 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all duration-200 shadow-xs"
             >
               Detailed report
             </button>

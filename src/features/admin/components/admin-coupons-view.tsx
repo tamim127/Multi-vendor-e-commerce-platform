@@ -71,14 +71,14 @@ export function AdminCouponsView(): React.JSX.Element {
       {/* Top action header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-foreground">Discount Coupons</h2>
-          <p className="text-xs text-muted-foreground">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white">Discount Coupons</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Generate and monitor promotional voucher codes across customer checkouts.
           </p>
         </div>
 
         {canWrite && (
-          <Button variant="primary" size="sm" onClick={() => setShowModal(true)}>
+          <Button variant="primary" size="sm" onClick={() => setShowModal(true)} className="rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-xs">
             <Plus className="mr-1.5 h-4 w-4" />
             Create Coupon
           </Button>
@@ -86,18 +86,18 @@ export function AdminCouponsView(): React.JSX.Element {
       </div>
 
       {/* Coupons Table */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-border bg-muted/40 font-semibold uppercase tracking-wider text-muted-foreground">
+            <thead className="border-b border-slate-100 dark:border-[#1E1E24] bg-slate-50/70 dark:bg-[#18181D] font-bold uppercase tracking-wider text-slate-400 text-[11px]">
               <tr>
-                <th className="px-4 py-3">Coupon Code</th>
-                <th className="px-4 py-3">Discount Value</th>
-                <th className="px-4 py-3">Min. Purchase</th>
-                <th className="px-4 py-3">Redemption Usage</th>
-                <th className="px-4 py-3">Active Period</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-5 py-3.5">Coupon Code</th>
+                <th className="px-5 py-3.5">Discount Value</th>
+                <th className="px-5 py-3.5">Min. Purchase</th>
+                <th className="px-5 py-3.5">Redemption Usage</th>
+                <th className="px-5 py-3.5">Active Period</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

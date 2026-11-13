@@ -29,27 +29,27 @@ export function AdminAnalyticsView(): React.JSX.Element {
   }, [dateRangeDays]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Top filter toolbar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 dark:border-[#1F1F24] pb-4">
         <div>
-          <h2 className="text-lg font-bold text-foreground">Marketplace Analytics Telemetry</h2>
-          <p className="text-xs text-muted-foreground">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white">Marketplace Analytics Telemetry</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Aggregated revenue performance, take-rate conversions, and order volume metrics.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground">Time Horizon:</span>
-          <div className="flex rounded-lg border border-border bg-card p-1">
+          <Calendar className="h-4 w-4 text-amber-500" />
+          <span className="text-xs font-semibold text-slate-400">Time Horizon:</span>
+          <div className="flex rounded-xl border border-slate-200 dark:border-[#27272A] bg-white dark:bg-[#121215] p-1 shadow-xs">
             <button
               type="button"
               onClick={() => setDateRangeDays(7)}
-              className={`rounded px-2.5 py-1 text-xs font-medium transition ${
+              className={`rounded-lg px-3 py-1 text-xs font-bold transition ${
                 dateRangeDays === 7
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-amber-400 text-slate-950 shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               7 Days
@@ -57,10 +57,10 @@ export function AdminAnalyticsView(): React.JSX.Element {
             <button
               type="button"
               onClick={() => setDateRangeDays(14)}
-              className={`rounded px-2.5 py-1 text-xs font-medium transition ${
+              className={`rounded-lg px-3 py-1 text-xs font-bold transition ${
                 dateRangeDays === 14
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-amber-400 text-slate-950 shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               14 Days
@@ -68,10 +68,10 @@ export function AdminAnalyticsView(): React.JSX.Element {
             <button
               type="button"
               onClick={() => setDateRangeDays(30)}
-              className={`rounded px-2.5 py-1 text-xs font-medium transition ${
+              className={`rounded-lg px-3 py-1 text-xs font-bold transition ${
                 dateRangeDays === 30
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-amber-400 text-slate-950 shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               30 Days

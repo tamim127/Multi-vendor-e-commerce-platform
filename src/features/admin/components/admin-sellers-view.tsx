@@ -14,7 +14,6 @@ import { useAdmin } from '../context/admin-context';
 import type { SellerStatus } from '@/domains/seller/types/seller';
 import { MOCK_SELLERS } from '@/domains/catalog/fixtures/sellers.fixture';
 import { DEMO_PENDING_APPLICATION } from '@/domains/seller/fixtures/seller.fixture';
-import { Button } from '@/components/ui/button/button';
 import { Input } from '@/components/ui/input/input';
 import {
   Search,
@@ -106,25 +105,25 @@ export function AdminSellersView(): React.JSX.Element {
     switch (status) {
       case 'approved':
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 px-2.5 py-0.5 text-xs font-bold">
             <CheckCircle2 className="h-3 w-3" /> Approved
           </span>
         );
       case 'pending':
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20 px-2.5 py-0.5 text-xs font-bold">
             <Clock className="h-3 w-3" /> Under Review
           </span>
         );
       case 'suspended':
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-semibold text-red-600 dark:text-red-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20 px-2.5 py-0.5 text-xs font-bold">
             <AlertTriangle className="h-3 w-3" /> Suspended
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/10 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:text-slate-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 dark:bg-[#1E1E24] dark:text-slate-400 dark:border-[#27272A] px-2.5 py-0.5 text-xs font-bold">
             <XCircle className="h-3 w-3" /> Declined
           </span>
         );
@@ -136,139 +135,143 @@ export function AdminSellersView(): React.JSX.Element {
       {/* Search and Filters Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
           <Input
             placeholder="Search sellers by store, legal entity, or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 text-sm"
+            className="pl-10 h-10 rounded-xl border-slate-200 dark:border-[#27272A] bg-white dark:bg-[#121215] text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-amber-400 focus:ring-amber-400 text-xs sm:text-sm shadow-xs"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground">Filter:</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | SellerStatus)}
-            className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground"
-          >
-            <option value="all">All Statuses ({sellersList.length})</option>
-            <option value="approved">Approved</option>
-            <option value="pending">Under Review</option>
-            <option value="suspended">Suspended</option>
-            <option value="rejected">Rejected</option>
-          </select>
+          <div className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-[#27272A] bg-white dark:bg-[#121215] px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-xs">
+            <Filter className="h-3.5 w-3.5 text-amber-500" />
+            <span className="text-slate-400">Status:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | SellerStatus)}
+              className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-900 dark:text-white"
+            >
+              <option value="all" className="dark:bg-[#18181B]">All Statuses ({sellersList.length})</option>
+              <option value="approved" className="dark:bg-[#18181B]">Approved</option>
+              <option value="pending" className="dark:bg-[#18181B]">Under Review</option>
+              <option value="suspended" className="dark:bg-[#18181B]">Suspended</option>
+              <option value="rejected" className="dark:bg-[#18181B]">Rejected</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Sellers Data Table */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-border bg-muted/40 font-semibold uppercase tracking-wider text-muted-foreground">
+            <thead className="border-b border-slate-100 dark:border-[#1E1E24] bg-slate-50/70 dark:bg-[#18181D] font-bold uppercase tracking-wider text-slate-400 text-[11px]">
               <tr>
-                <th className="px-4 py-3">Merchant / Store</th>
-                <th className="px-4 py-3">Legal Entity</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Rating</th>
-                <th className="px-4 py-3 text-right">Moderation Actions</th>
+                <th className="px-5 py-3.5">Merchant / Store</th>
+                <th className="px-5 py-3.5">Legal Entity</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5">Rating</th>
+                <th className="px-5 py-3.5 text-right">Moderation Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-slate-100 dark:divide-[#1E1E24]">
               {filteredSellers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={5} className="py-12 text-center text-slate-400">
                     No merchants found matching the filter criteria.
                   </td>
                 </tr>
               ) : (
                 filteredSellers.map((seller) => (
-                  <tr key={seller.id} className="transition hover:bg-accent/30">
-                    <td className="px-4 py-3">
-                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                  <tr key={seller.id} className="transition-colors hover:bg-slate-50/60 dark:hover:bg-[#18181D]/60">
+                    <td className="px-5 py-4">
+                      <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <Link
                           href={`/admin/sellers/${seller.id}`}
-                          className="hover:underline text-primary"
+                          className="hover:underline hover:text-amber-500 transition-colors"
                         >
                           {seller.name}
                         </Link>
-                        {seller.isVerified && <ShieldCheck className="h-3.5 w-3.5 text-blue-500" />}
+                        {seller.isVerified && <ShieldCheck className="h-4 w-4 text-amber-500" />}
                         {seller.isApplication && (
-                          <span className="rounded bg-amber-500/10 px-1 py-0.2 text-[10px] font-bold text-amber-600">
+                          <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-black text-amber-600 dark:text-amber-400">
                             New App
                           </span>
                         )}
                       </div>
-                      <div className="text-[11px] text-muted-foreground">{seller.email}</div>
+                      <div className="text-[11px] text-slate-400 font-mono mt-0.5">{seller.email}</div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground font-mono">
+                    <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-mono">
                       {seller.legalName || 'N/A'}
                     </td>
-                    <td className="px-4 py-3">{getStatusBadge(seller.status)}</td>
-                    <td className="px-4 py-3 text-foreground">
+                    <td className="px-5 py-4">{getStatusBadge(seller.status)}</td>
+                    <td className="px-5 py-4 text-slate-900 dark:text-white font-semibold">
                       {seller.ratingCount > 0 ? (
                         <span>
                           ★ {seller.ratingAverage.toFixed(1)}{' '}
-                          <span className="text-muted-foreground">({seller.ratingCount})</span>
+                          <span className="text-slate-400 font-normal">({seller.ratingCount})</span>
                         </span>
                       ) : (
-                        <span className="text-muted-foreground italic">New</span>
+                        <span className="text-slate-400 italic">New</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
                         <Link href={`/admin/sellers/${seller.id}`}>
-                          <Button variant="tertiary" size="sm">
-                            <Eye className="mr-1 h-3.5 w-3.5" />
-                            Details
-                          </Button>
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 rounded-xl border border-slate-200 dark:border-[#27272A] bg-slate-50 dark:bg-[#18181B] px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:border-amber-400 transition-colors"
+                          >
+                            <Eye className="h-3.5 w-3.5 text-amber-500" />
+                            <span>Details</span>
+                          </button>
                         </Link>
 
                         {canModerate && (
                           <>
                             {seller.status === 'pending' && (
                               <>
-                                <Button
-                                  variant="primary"
-                                  size="sm"
+                                <button
+                                  type="button"
                                   disabled={actionInProgress === seller.id}
                                   onClick={() => handleStatusChange(seller.id, 'approved')}
+                                  className="rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs px-3 py-1.5 shadow-xs transition-colors disabled:opacity-50"
                                 >
                                   Approve
-                                </Button>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
+                                </button>
+                                <button
+                                  type="button"
                                   disabled={actionInProgress === seller.id}
                                   onClick={() => handleStatusChange(seller.id, 'rejected')}
+                                  className="rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs px-3 py-1.5 shadow-xs transition-colors disabled:opacity-50"
                                 >
                                   Reject
-                                </Button>
+                                </button>
                               </>
                             )}
 
                             {seller.status === 'approved' && (
-                              <Button
-                                variant="tertiary"
-                                size="sm"
+                              <button
+                                type="button"
                                 disabled={actionInProgress === seller.id}
                                 onClick={() => handleStatusChange(seller.id, 'suspended')}
-                                className="text-destructive hover:bg-destructive/10"
+                                className="rounded-xl border border-rose-300 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 px-2.5 py-1.5 text-xs font-bold transition-colors disabled:opacity-50"
                               >
                                 Suspend
-                              </Button>
+                              </button>
                             )}
 
                             {seller.status === 'suspended' && (
-                              <Button
-                                variant="secondary"
-                                size="sm"
+                              <button
+                                type="button"
                                 disabled={actionInProgress === seller.id}
                                 onClick={() => handleStatusChange(seller.id, 'approved')}
+                                className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs px-2.5 py-1.5 transition-colors disabled:opacity-50"
                               >
                                 Reactivate
-                              </Button>
+                              </button>
                             )}
                           </>
                         )}

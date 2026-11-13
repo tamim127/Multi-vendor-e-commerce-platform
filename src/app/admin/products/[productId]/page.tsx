@@ -1,6 +1,5 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
-import { AppShell } from '@/components/layout/shell/app-shell';
 import { AdminLayout, AdminGuard, AdminProductDetailView } from '@/features/admin';
 
 interface PageProps {
@@ -21,12 +20,10 @@ export default async function AdminProductDetailPage({
   const { productId } = await params;
 
   return (
-    <AppShell>
-      <AdminGuard requiredPermission="catalog:read">
-        <AdminLayout>
-          <AdminProductDetailView productId={productId} />
-        </AdminLayout>
-      </AdminGuard>
-    </AppShell>
+    <AdminGuard requiredPermission="catalog:read">
+      <AdminLayout>
+        <AdminProductDetailView productId={productId} />
+      </AdminLayout>
+    </AdminGuard>
   );
 }

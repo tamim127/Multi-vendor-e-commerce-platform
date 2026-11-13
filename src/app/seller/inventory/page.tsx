@@ -1,6 +1,5 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
-import { AppShell } from '@/components/layout/shell/app-shell';
 import { SellerLayout, SellerInventoryView } from '@/features/seller';
 
 export const metadata: Metadata = {
@@ -10,13 +9,11 @@ export const metadata: Metadata = {
 
 export default function SellerInventoryPage(): React.JSX.Element {
   return (
-    <AppShell>
-      <SellerLayout
-        title="Inventory Matrix"
-        subtitle="Monitor SKU stock, warehouse locations, and trigger inventory replenishment."
-      >
-        <SellerInventoryView />
-      </SellerLayout>
-    </AppShell>
+    <SellerLayout
+      title="Inventory Matrix"
+      subtitle="Monitor SKU stock, warehouse locations, and trigger inventory replenishment."
+    >
+      <SellerInventoryView />
+    </SellerLayout>
   );
 }

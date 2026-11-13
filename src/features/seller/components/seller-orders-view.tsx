@@ -92,26 +92,26 @@ export function SellerOrdersView(): React.JSX.Element {
   return (
     <div className="space-y-6">
       {/* Search & Status Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-4 shadow-xs">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by Package ID, Order ID, or Customer Name..."
-            className="w-full rounded-xl border border-input bg-background pl-10 pr-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full rounded-xl border border-slate-200 dark:border-[#27272A] bg-slate-50 dark:bg-[#18181B] pl-10 pr-4 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
           />
         </div>
 
-        <div className="flex items-center rounded-xl border border-input bg-background p-1 text-xs">
+        <div className="flex items-center rounded-xl border border-slate-200 dark:border-[#27272A] bg-slate-50 dark:bg-[#18181B] p-1 text-xs">
           <button
             type="button"
             onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
               statusFilter === 'all'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-amber-400 text-slate-950 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             All ({packages.length})
@@ -119,10 +119,10 @@ export function SellerOrdersView(): React.JSX.Element {
           <button
             type="button"
             onClick={() => setStatusFilter('unfulfilled')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
               statusFilter === 'unfulfilled'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-amber-400 text-slate-950 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Pending
@@ -130,10 +130,10 @@ export function SellerOrdersView(): React.JSX.Element {
           <button
             type="button"
             onClick={() => setStatusFilter('shipped')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
               statusFilter === 'shipped'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-amber-400 text-slate-950 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Shipped
@@ -141,10 +141,10 @@ export function SellerOrdersView(): React.JSX.Element {
           <button
             type="button"
             onClick={() => setStatusFilter('delivered')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
               statusFilter === 'delivered'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-amber-400 text-slate-950 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Delivered

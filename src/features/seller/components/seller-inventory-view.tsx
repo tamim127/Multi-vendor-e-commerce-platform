@@ -88,26 +88,26 @@ export function SellerInventoryView(): React.JSX.Element {
   return (
     <div className="space-y-6">
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-4 shadow-xs">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search inventory by product title or SKU..."
-            className="w-full rounded-xl border border-input bg-background pl-10 pr-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full rounded-xl border border-slate-200 dark:border-[#27272A] bg-slate-50 dark:bg-[#18181B] pl-10 pr-4 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
           />
         </div>
 
-        <div className="flex items-center rounded-xl border border-input bg-background p-1 text-xs">
+        <div className="flex items-center rounded-xl border border-slate-200 dark:border-[#27272A] bg-slate-50 dark:bg-[#18181B] p-1 text-xs">
           <button
             type="button"
             onClick={() => setAlertFilter('all')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
               alertFilter === 'all'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-amber-400 text-slate-950 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             All SKUs ({inventory.length})
@@ -115,10 +115,10 @@ export function SellerInventoryView(): React.JSX.Element {
           <button
             type="button"
             onClick={() => setAlertFilter('normal')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
               alertFilter === 'normal'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-amber-400 text-slate-950 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Healthy
@@ -126,10 +126,10 @@ export function SellerInventoryView(): React.JSX.Element {
           <button
             type="button"
             onClick={() => setAlertFilter('low_stock')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
               alertFilter === 'low_stock'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-amber-400 text-slate-950 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Low Stock
@@ -137,10 +137,10 @@ export function SellerInventoryView(): React.JSX.Element {
           <button
             type="button"
             onClick={() => setAlertFilter('out_of_stock')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
               alertFilter === 'out_of_stock'
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-amber-400 text-slate-950 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Out of Stock

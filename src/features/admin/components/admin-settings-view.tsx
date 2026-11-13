@@ -79,10 +79,10 @@ export function AdminSettingsView(): React.JSX.Element {
 
       <form onSubmit={handleSave} className="space-y-8">
         {/* Platform Identity */}
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 border-b border-border pb-3">
-            <Settings className="h-5 w-5 text-primary" />
-            <h2 className="text-base font-bold text-foreground">Marketplace Identity</h2>
+        <div className="rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-[#1E1E24] pb-3">
+            <Settings className="h-5 w-5 text-amber-500" />
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Marketplace Identity</h2>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 text-xs">
@@ -112,10 +112,10 @@ export function AdminSettingsView(): React.JSX.Element {
         </div>
 
         {/* Commission & Monetization */}
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 border-b border-border pb-3">
-            <Percent className="h-5 w-5 text-primary" />
-            <h2 className="text-base font-bold text-foreground">Financial & Take-Rate Policies</h2>
+        <div className="rounded-2xl border border-slate-200/80 dark:border-[#27272A] bg-white dark:bg-[#121215] p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-[#1E1E24] pb-3">
+            <Percent className="h-5 w-5 text-amber-500" />
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Financial & Take-Rate Policies</h2>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 text-xs">

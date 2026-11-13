@@ -30,3 +30,4 @@ const missingInHi = [...contract].filter(k => !hi.has(k));
 console.log('Contract keys missing in BN:', missingInBn);
 console.log('Contract keys missing in AR:', missingInAr);
 console.log('Contract keys missing in HI:', missingInHi);
+

@@ -29,11 +29,19 @@ export function PlpPagination({
     return null;
   }
 
-  // Generate page numbers array
-  const pages: number[] = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pages.push(i);
-  }
+  // Generate smart page numbers with ellipsis
+  const visiblePages: (number | 'ellipsis')[] = React.useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (page <= 4) {
+      return [1, 2, 3, 4, 5, 'ellipsis', totalPages];
+    }
+    if (page >= totalPages - 3) {
+      return [1, 'ellipsis', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, 'ellipsis', page - 1, page, page + 1, 'ellipsis', totalPages];
+  }, [page, totalPages]);
 
   return (
     <nav
@@ -54,23 +62,33 @@ export function PlpPagination({
         <span className="hidden sm:inline">{t('plp.pagePrevious')}</span>
       </Button>
 
-      {/* Numbered Page Buttons */}
+      {/* Numbered Page Buttons with Ellipsis */}
       <div className="flex items-center gap-1">
-        {pages.map((p) => {
-          const isCurrent = p === page;
+        {visiblePages.map((item, idx) => {
+          if (item === 'ellipsis') {
+            return (
+              <span
+                key={`ellipsis-${idx}`}
+                className="flex items-center justify-center w-8 text-fg-muted font-bold select-none"
+              >
+                ...
+              </span>
+            );
+          }
+          const isCurrent = item === page;
           return (
             <Button
-              key={p}
+              key={item}
               type="button"
               variant={isCurrent ? 'primary' : 'tertiary'}
               size="sm"
-              onClick={() => onPageChange(p)}
+              onClick={() => onPageChange(item)}
               className={`min-h-[44px] min-w-[44px] font-mono text-sm ${
-                isCurrent ? 'font-bold' : ''
+                isCurrent ? 'font-bold bg-amber-400 text-slate-950 hover:bg-amber-300' : ''
               }`}
               aria-current={isCurrent ? 'page' : undefined}
             >
-              {p}
+              {item}
             </Button>
           );
         })}

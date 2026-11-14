@@ -25,7 +25,7 @@ export function getDbPool(): pg.Pool {
   const connectionString =
     process.env['DATABASE_URL'] ||
     process.env['POSTGRES_URL'] ||
-    'postgresql://postgres:postgres@localhost:5432/aureon_marketplace';
+    'postgresql://postgres@localhost:5433/aureon_marketplace';
 
   const isProduction = process.env['NODE_ENV'] === 'production';
   const ssl =

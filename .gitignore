@@ -35,3 +35,7 @@ Thumbs.db
 
 # Turbopack cache
 .turbo/
+
+# Local PostgreSQL Data
+.pgdata/
+reset_postgres_password.bat

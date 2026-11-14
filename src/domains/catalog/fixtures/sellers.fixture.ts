@@ -63,7 +63,7 @@ export const MOCK_SELLERS: SellerSummary[] = [
   },
   {
     id: 'seller-official',
-    slug: 'official-flagship-store',
+    slug: 'official-store',
     name: 'Official Flagship Store',
     logoUrl: '/assets/mock/sellers/official-flagship.png',
     rating: {

@@ -16,15 +16,29 @@ export interface AppDataLoaders {
 }
 
 export function mapRowToProduct(row: any): Product {
+  const titleEn = row.title_en || 'Marketplace Product';
   const primaryMedia = row.primary_image_url
-    ? [{ id: 'm1', type: 'image' as const, url: row.primary_image_url, isPrimary: true }]
+    ? [
+        {
+          id: 'm1',
+          type: 'image' as const,
+          url: row.primary_image_url,
+          role: 'primary' as const,
+          alt: { en: titleEn },
+          isPrimary: true,
+        },
+      ]
     : [];
   const galleryMedia = (row.gallery_images || []).map((url: string, i: number) => ({
     id: `m${i + 2}`,
     type: 'image' as const,
     url,
+    role: 'gallery' as const,
+    alt: { en: `${titleEn} view ${i + 2}` },
     isPrimary: false,
   }));
+
+  const parsedAttributes = Array.isArray(row.specifications) ? row.specifications : [];
 
   return {
     id: row.id,
@@ -53,7 +67,7 @@ export function mapRowToProduct(row: any): Product {
     categoryBreadcrumbs: [],
     categoryIds: [row.category_id],
     media: [...primaryMedia, ...galleryMedia],
-    attributes: [],
+    attributes: parsedAttributes,
     variants: [],
     badges: [],
     reviewCount: Number(row.rating_count) || 0,

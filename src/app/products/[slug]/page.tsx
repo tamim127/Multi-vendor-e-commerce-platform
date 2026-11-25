@@ -4,12 +4,11 @@ import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/shell/app-shell';
 import { CURRENCY_METADATA_REGISTRY } from '@/domains/catalog/utils/money';
 import type { Money } from '@/domains/catalog/types/pricing';
-import {
-  getProductBySlug,
-  getAllProductSlugs,
-  ProductDetailInteractiveView,
-} from '@/features/product-detail';
+import { ProductDetailInteractiveView } from '@/features/product-detail';
+import { getRealProductDetail } from '@/server/catalog/catalog-service';
 import { AIRecommendationsRow } from '@/features/ai';
+
+export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -36,14 +35,9 @@ function formatMinorToDecimalString(money: Money): string | null {
   return decimalValue.toFixed(meta.minorUnitDigits);
 }
 
-export async function generateStaticParams(): Promise<{ slug: string }[]> {
-  const slugs = await getAllProductSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const data = await getProductBySlug(slug);
+  const data = await getRealProductDetail(slug).catch(() => null);
 
   if (!data) {
     return {
@@ -71,7 +65,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductDetailPage({ params }: PageProps): Promise<React.JSX.Element> {
   const { slug } = await params;
-  const data = await getProductBySlug(slug);
+  const data = await getRealProductDetail(slug);
 
   // 404 Guard: Immediately invoke notFound() with zero product structured data
   if (!data) {

@@ -1,327 +1,477 @@
-import { CATALOG_PRODUCTS_1000, CATALOG_OFFERS_1000 } from './products-1000';
-import { MOCK_CATEGORIES, MOCK_BRANDS } from '@/domains/catalog/fixtures';
+import type pg from 'pg';
 import type { Product } from '@/domains/catalog/types/product';
 import type { CatalogQueryParams, CatalogSortOption } from '@/domains/catalog/types/query';
 import type { CatalogDiscoveryResult, CatalogDiscoveryFacetItem } from '@/features/catalog-discovery/repository';
-import { queryDb } from '@/server/db/client';
-import { mapRowToProduct, mapRowToOffer } from '@/server/dataloaders';
-import { appLogger } from '@/lib/observability/logger';
+import { dbQuery, getDbPool } from '@/server/db/client';
+import { mapRowToBrand, mapRowToCategory, mapRowToOffer, mapRowToProduct } from '@/server/dataloaders';
+import { buildCategoryTree } from '@/domains/catalog/utils/tree';
+import { createMoney } from '@/domains/catalog/utils/money';
+import { DatabaseUnavailableError } from '@/server/security/http';
 
 /**
- * Enterprise Catalog Query Service.
- * Queries PostgreSQL database with full faceted search, pagination, and multi-attribute filters.
- * Gracefully falls back to the in-memory 1,050 product catalog if database is not reachable.
+ * Resolves PostgreSQL catalog queries authoritatively.
+ * Fails closed when PostgreSQL is unavailable (never silently falls back to mock arrays).
  */
 export async function queryRealCatalog(
-  params: CatalogQueryParams = {}
+  params: CatalogQueryParams = {},
+  pool?: pg.Pool
 ): Promise<CatalogDiscoveryResult> {
+  const targetPool = pool || getDbPool();
   const page = Math.max(1, params.page || 1);
   const limit = Math.min(100, Math.max(1, params.limit || 24));
   const query = (params.query || '').trim();
   const categorySlug = params.categorySlug?.toLowerCase();
-  const brandSlugs = params.brandSlugs?.map((b) => b.toLowerCase());
+  const brandSlugs = params.brandSlugs?.map((b) => b.toLowerCase()).filter(Boolean);
   const minPriceMinor = params.minPriceMinor;
   const maxPriceMinor = params.maxPriceMinor;
   const minRating = params.minRating;
+  const inStockOnly = params.inventoryStates?.includes('in_stock');
   const sort: CatalogSortOption = params.sort || 'relevance';
 
-  try {
-    // Attempt real PostgreSQL query
-    const conditions: string[] = ['p.is_active = true'];
-    const values: any[] = [];
-    let paramIndex = 1;
+  const conditions: string[] = [`p.is_active = true`, `p.moderation_status = 'approved'`];
+  const values: any[] = [];
+  let paramIndex = 1;
 
-    if (query) {
-      conditions.push(
-        `(p.title_en ILIKE $${paramIndex} OR p.description_en ILIKE $${paramIndex} OR $${paramIndex + 1} = ANY(p.tags))`
-      );
-      values.push(`%${query}%`, query);
-      paramIndex += 2;
-    }
-
-    if (categorySlug) {
-      const targetCat = MOCK_CATEGORIES.find((c) => c.slug.toLowerCase() === categorySlug);
-      if (targetCat) {
-        conditions.push(`p.category_id = $${paramIndex}`);
-        values.push(targetCat.id);
-        paramIndex++;
-      }
-    }
-
-    if (brandSlugs && brandSlugs.length > 0) {
-      conditions.push(`b.slug = ANY($${paramIndex})`);
-      values.push(brandSlugs);
-      paramIndex++;
-    }
-
-    if (minRating !== undefined) {
-      conditions.push(`p.rating_avg >= $${paramIndex}`);
-      values.push(minRating);
-      paramIndex++;
-    }
-
-    let orderBy = 'p.rating_avg DESC, p.created_at DESC';
-    switch (sort) {
-      case 'price_asc':
-        orderBy = 'lowest_price_minor ASC NULLS LAST';
-        break;
-      case 'price_desc':
-        orderBy = 'lowest_price_minor DESC NULLS LAST';
-        break;
-      case 'rating_desc':
-        orderBy = 'p.rating_avg DESC, p.rating_count DESC';
-        break;
-      case 'bestselling':
-        orderBy = 'p.rating_count DESC';
-        break;
-      case 'newest':
-        orderBy = 'p.created_at DESC';
-        break;
-      case 'relevance':
-      default:
-        orderBy = 'p.rating_avg DESC, p.rating_count DESC';
-        break;
-    }
-
-    const whereClause = conditions.join(' AND ');
-    const countSql = `
-      SELECT COUNT(DISTINCT p.id) as total
-      FROM products p
-      LEFT JOIN brands b ON p.brand_id = b.id
-      WHERE ${whereClause};
-    `;
-
-    const countRes = await queryDb<{ total: string }>(countSql, values);
-    const total = parseInt(countRes.rows[0]?.total || '0', 10);
-
-    if (total > 0) {
-      const offset = (page - 1) * limit;
-      const dataSql = `
-        SELECT p.*, b.name as brand_name, b.slug as brand_slug,
-               o.price_minor as lowest_price_minor, o.currency as offer_currency,
-               o.is_buy_box_winner, o.id as buy_box_offer_id
-        FROM products p
-        LEFT JOIN brands b ON p.brand_id = b.id
-        LEFT JOIN LATERAL (
-          SELECT id, price_minor, currency, is_buy_box_winner
-          FROM seller_offers
-          WHERE product_id = p.id
-          ORDER BY is_buy_box_winner DESC, price_minor ASC
-          LIMIT 1
-        ) o ON true
-        WHERE ${whereClause}
-        ORDER BY ${orderBy}
-        LIMIT $${paramIndex} OFFSET $${paramIndex + 1};
-      `;
-
-      const dataRes = await queryDb<any>(dataSql, [...values, limit, offset]);
-
-      const products: Product[] = dataRes.rows.map((row) => {
-        const prod = mapRowToProduct(row);
-        if (row.lowest_price_minor !== null && row.lowest_price_minor !== undefined) {
-          prod.offerSummary = {
-            offerCount: 1,
-            lowestPrice: {
-              amountMinor: Number(row.lowest_price_minor),
-              currency: (row.offer_currency || 'USD') as any,
-            },
-            highestPrice: {
-              amountMinor: Number(row.lowest_price_minor),
-              currency: (row.offer_currency || 'USD') as any,
-            },
-            buyBoxOfferId: row.buy_box_offer_id,
-            hasMultipleOffers: false,
-          };
-        }
-        return prod;
-      });
-
-      const totalPages = Math.ceil(total / limit) || 1;
-
-      // Facets
-      const categoryFacets: CatalogDiscoveryFacetItem[] = MOCK_CATEGORIES.filter((c) => c.level <= 1).map((c) => ({
-        id: c.id,
-        slug: c.slug,
-        label: c.name.en,
-        count: Math.round(total / 6),
-      }));
-
-      const brandFacets: CatalogDiscoveryFacetItem[] = MOCK_BRANDS.slice(0, 10).map((b) => ({
-        id: b.id,
-        slug: b.slug,
-        label: b.name,
-        count: Math.round(total / 10),
-      }));
-
-      return {
-        products,
-        total,
-        page,
-        limit,
-        totalPages,
-        facets: {
-          categories: categoryFacets,
-          brands: brandFacets,
-          inStockCount: total,
-        },
-      };
-    }
-  } catch (dbErr) {
-    appLogger.warn('Database query failed or not ready; falling back to resilient catalog cache', {}, dbErr);
+  if (query) {
+    conditions.push(
+      `(p.title_en ILIKE $${paramIndex} OR p.description_en ILIKE $${paramIndex} OR b.name ILIKE $${paramIndex} OR $${paramIndex + 1} = ANY(p.tags))`
+    );
+    values.push(`%${query}%`, query.toLowerCase());
+    paramIndex += 2;
   }
 
-  // Resilient in-memory fallback across 1,050 products
-  let filtered = CATALOG_PRODUCTS_1000.filter((product) => {
-    if (query) {
-      const q = query.toLowerCase();
-      const matchTitle = product.title.en.toLowerCase().includes(q);
-      const matchDesc = product.description.en.toLowerCase().includes(q);
-      const matchTags = product.tags.some((t) => t.toLowerCase().includes(q));
-      const matchBrand = product.brand.name.toLowerCase().includes(q);
-      if (!matchTitle && !matchDesc && !matchTags && !matchBrand) {
-        return false;
+  if (categorySlug) {
+    // Support parent category matching all descendant categories via recursive CTE
+    conditions.push(
+      `p.category_id IN (
+        WITH RECURSIVE cat_tree AS (
+          SELECT id FROM categories WHERE LOWER(slug) = $${paramIndex}
+          UNION ALL
+          SELECT c.id FROM categories c JOIN cat_tree ct ON c.parent_id = ct.id
+        )
+        SELECT id FROM cat_tree
+      )`
+    );
+    values.push(categorySlug);
+    paramIndex += 1;
+  }
+
+  if (brandSlugs && brandSlugs.length > 0) {
+    conditions.push(`LOWER(b.slug) = ANY($${paramIndex})`);
+    values.push(brandSlugs);
+    paramIndex += 1;
+  }
+
+  if (minRating !== undefined && Number.isFinite(minRating)) {
+    conditions.push(`p.rating_avg >= $${paramIndex}`);
+    values.push(minRating);
+    paramIndex += 1;
+  }
+
+  if (minPriceMinor !== undefined && Number.isFinite(minPriceMinor)) {
+    conditions.push(`o.price_minor >= $${paramIndex}`);
+    values.push(minPriceMinor);
+    paramIndex += 1;
+  }
+
+  if (maxPriceMinor !== undefined && Number.isFinite(maxPriceMinor)) {
+    conditions.push(`o.price_minor <= $${paramIndex}`);
+    values.push(maxPriceMinor);
+    paramIndex += 1;
+  }
+
+  if (inStockOnly) {
+    conditions.push(`(o.stock_quantity - COALESCE(o.reserved_quantity, 0)) > 0`);
+  }
+
+  let orderBy = 'p.rating_avg DESC, p.rating_count DESC, p.id ASC';
+  switch (sort) {
+    case 'price_asc':
+      orderBy = 'o.price_minor ASC NULLS LAST, p.id ASC';
+      break;
+    case 'price_desc':
+      orderBy = 'o.price_minor DESC NULLS LAST, p.id ASC';
+      break;
+    case 'rating_desc':
+      orderBy = 'p.rating_avg DESC, p.rating_count DESC, p.id ASC';
+      break;
+    case 'bestselling':
+      orderBy = 'p.rating_count DESC, p.id ASC';
+      break;
+    case 'discount_desc':
+      orderBy = 'COALESCE(o.compare_at_price_minor - o.price_minor, 0) DESC, p.rating_avg DESC';
+      break;
+    case 'newest':
+      orderBy = 'p.created_at DESC, p.id ASC';
+      break;
+    case 'relevance':
+    default:
+      orderBy = 'p.rating_avg DESC, p.rating_count DESC, p.id ASC';
+      break;
+  }
+
+  const whereClause = conditions.join(' AND ');
+  const lateralOfferJoin = `
+    LEFT JOIN LATERAL (
+      SELECT id, price_minor, compare_at_price_minor, currency, is_buy_box_winner, stock_quantity, reserved_quantity
+      FROM seller_offers
+      WHERE product_id = p.id
+      ORDER BY is_buy_box_winner DESC, price_minor ASC
+      LIMIT 1
+    ) o ON true
+  `;
+
+  try {
+    const countSql = `
+      SELECT COUNT(DISTINCT p.id) AS total
+      FROM products p
+      LEFT JOIN brands b ON p.brand_id = b.id
+      ${lateralOfferJoin}
+      WHERE ${whereClause};
+    `;
+    const countRes = await dbQuery<{ total: string }>(countSql, values, targetPool);
+    const total = parseInt(countRes.rows[0]?.total || '0', 10);
+
+    const offset = (page - 1) * limit;
+    const dataSql = `
+      SELECT
+        p.*,
+        b.name AS brand_name,
+        b.slug AS brand_slug,
+        o.price_minor AS lowest_price_minor,
+        o.compare_at_price_minor AS compare_at_price_minor,
+        o.currency AS offer_currency,
+        o.is_buy_box_winner,
+        o.id AS buy_box_offer_id
+      FROM products p
+      LEFT JOIN brands b ON p.brand_id = b.id
+      ${lateralOfferJoin}
+      WHERE ${whereClause}
+      ORDER BY ${orderBy}
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1};
+    `;
+    const dataRes = await dbQuery<any>(dataSql, [...values, limit, offset], targetPool);
+
+    const products: Product[] = dataRes.rows.map((row) => {
+      const prod = mapRowToProduct(row);
+      if (row.lowest_price_minor !== null && row.lowest_price_minor !== undefined) {
+        const currency = (row.offer_currency || 'USD') as any;
+        prod.offerSummary = {
+          offerCount: 1,
+          lowestPrice: createMoney(Number(row.lowest_price_minor), currency),
+          highestPrice: createMoney(Number(row.lowest_price_minor), currency),
+          buyBoxOfferId: row.buy_box_offer_id,
+          hasMultipleOffers: false,
+        };
       }
-    }
+      return prod;
+    });
 
-    if (categorySlug) {
-      const targetCat = MOCK_CATEGORIES.find((c) => c.slug.toLowerCase() === categorySlug);
-      if (targetCat && product.categoryId !== targetCat.id) return false;
-    }
+    // Real SQL Facet Counts from PostgreSQL
+    const [catFacetRes, brandFacetRes, inStockRes] = await Promise.all([
+      dbQuery<any>(
+        `SELECT c.id, c.slug, c.name_en, COUNT(p.id) AS cnt
+         FROM categories c
+         LEFT JOIN products p ON p.category_id = c.id AND p.is_active = true
+         WHERE c.is_active = true
+         GROUP BY c.id, c.slug, c.name_en
+         ORDER BY cnt DESC, c.name_en ASC
+         LIMIT 20;`,
+        [],
+        targetPool
+      ),
+      dbQuery<any>(
+        `SELECT b.id, b.slug, b.name, COUNT(p.id) AS cnt
+         FROM brands b
+         LEFT JOIN products p ON p.brand_id = b.id AND p.is_active = true
+         GROUP BY b.id, b.slug, b.name
+         ORDER BY cnt DESC, b.name ASC
+         LIMIT 20;`,
+        [],
+        targetPool
+      ),
+      dbQuery<{ cnt: string }>(
+        `SELECT COUNT(DISTINCT so.product_id) AS cnt
+         FROM seller_offers so
+         JOIN products p ON p.id = so.product_id
+         WHERE p.is_active = true AND (so.stock_quantity - COALESCE(so.reserved_quantity, 0)) > 0;`,
+        [],
+        targetPool
+      ),
+    ]);
 
-    if (brandSlugs && brandSlugs.length > 0) {
-      if (!brandSlugs.includes(product.brand.slug.toLowerCase())) return false;
-    }
+    const categoryFacets: CatalogDiscoveryFacetItem[] = catFacetRes.rows.map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      label: r.name_en,
+      count: parseInt(r.cnt || '0', 10),
+    }));
 
-    const priceMinor = product.offerSummary?.lowestPrice?.amountMinor ?? 0;
-    if (minPriceMinor !== undefined && priceMinor < minPriceMinor) return false;
-    if (maxPriceMinor !== undefined && priceMinor > maxPriceMinor) return false;
+    const brandFacets: CatalogDiscoveryFacetItem[] = brandFacetRes.rows.map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      label: r.name,
+      count: parseInt(r.cnt || '0', 10),
+    }));
 
-    const avgRating = product.ratingSummary?.average ?? 0;
-    if (minRating !== undefined && avgRating < minRating) return false;
-
-    return true;
-  });
-
-  filtered.sort((a, b) => {
-    const priceA = a.offerSummary?.lowestPrice?.amountMinor ?? 0;
-    const priceB = b.offerSummary?.lowestPrice?.amountMinor ?? 0;
-    const ratingA = a.ratingSummary?.average ?? 0;
-    const ratingB = b.ratingSummary?.average ?? 0;
-    const reviewsA = a.ratingSummary?.count ?? 0;
-    const reviewsB = b.ratingSummary?.count ?? 0;
-
-    switch (sort) {
-      case 'price_asc':
-        return priceA - priceB;
-      case 'price_desc':
-        return priceB - priceA;
-      case 'rating_desc':
-        return ratingB !== ratingA ? ratingB - ratingA : reviewsB - reviewsA;
-      case 'bestselling':
-        return reviewsB - reviewsA;
-      case 'newest':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case 'relevance':
-      default:
-        return reviewsB - reviewsA;
-    }
-  });
-
-  const total = filtered.length;
-  const totalPages = Math.ceil(total / limit) || 1;
-  const startIndex = (page - 1) * limit;
-  const paginatedProducts = filtered.slice(startIndex, startIndex + limit);
-
-  const categoryFacets: CatalogDiscoveryFacetItem[] = MOCK_CATEGORIES.filter((c) => c.level <= 1).map((c) => ({
-    id: c.id,
-    slug: c.slug,
-    label: c.name.en,
-    count: Math.round(total / 6),
-  }));
-
-  const brandFacets: CatalogDiscoveryFacetItem[] = MOCK_BRANDS.map((b) => ({
-    id: b.id,
-    slug: b.slug,
-    label: b.name,
-    count: Math.round(total / 10),
-  }));
-
-  return {
-    products: paginatedProducts,
-    total,
-    page,
-    limit,
-    totalPages,
-    facets: {
-      categories: categoryFacets,
-      brands: brandFacets,
-      inStockCount: total,
-    },
-  };
+    return {
+      products,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+      facets: {
+        categories: categoryFacets,
+        brands: brandFacets,
+        inStockCount: parseInt(inStockRes.rows[0]?.cnt || '0', 10),
+      },
+    };
+  } catch (err) {
+    throw new DatabaseUnavailableError(
+      err instanceof Error ? `Catalog query failed: ${err.message}` : 'Catalog database query failed'
+    );
+  }
 }
 
 /**
- * Retrieves a single product by ID or Slug with associated multi-vendor offers.
+ * Retrieves a single product by ID or Slug with verified seller offers, reviews, and related items from PostgreSQL.
  */
-export async function getRealProductDetail(identifier: string): Promise<{
+export async function getRealProductDetail(
+  identifier: string,
+  pool?: pg.Pool
+): Promise<{
   product: Product;
   offers: any[];
   relatedProducts: Product[];
+  reviews: any[];
+  qaList: any[];
 } | null> {
-  const clean = identifier.trim();
+  const targetPool = pool || getDbPool();
+  const clean = decodeURIComponent(identifier).trim();
 
-  try {
-    const prodRes = await queryDb<any>(
-      `SELECT p.*, b.name as brand_name, b.slug as brand_slug
+  const prodRes = await dbQuery<any>(
+    `SELECT p.*, b.name AS brand_name, b.slug AS brand_slug,
+            c.slug AS cat_slug, c.name_en AS cat_name
+     FROM products p
+     LEFT JOIN brands b ON p.brand_id = b.id
+     LEFT JOIN categories c ON p.category_id = c.id
+     WHERE LOWER(p.id) = LOWER($1) OR LOWER(p.slug) = LOWER($1)
+     LIMIT 1;`,
+    [clean],
+    targetPool
+  );
+
+  if (prodRes.rows.length === 0) return null;
+
+  const row = prodRes.rows[0];
+  const product = mapRowToProduct(row);
+
+  const [offersRes, relatedRes, reviewsRes] = await Promise.all([
+    dbQuery<any>(
+      `SELECT so.*, s.name AS seller_name, s.slug AS seller_slug, s.is_verified AS seller_verified,
+              s.rating_avg AS seller_rating_avg, s.rating_count AS seller_rating_count,
+              s.positive_feedback_pct AS seller_positive_pct
+       FROM seller_offers so
+       JOIN sellers s ON s.id = so.seller_id
+       WHERE so.product_id = $1
+       ORDER BY so.is_buy_box_winner DESC, so.price_minor ASC;`,
+      [product.id],
+      targetPool
+    ),
+    dbQuery<any>(
+      `SELECT p.*, b.name AS brand_name, b.slug AS brand_slug
        FROM products p
        LEFT JOIN brands b ON p.brand_id = b.id
-       WHERE p.id = $1 OR p.slug = $1
-       LIMIT 1;`,
-      [clean]
-    );
+       WHERE p.id != $1 AND p.is_active = true AND (p.category_id = $2 OR p.brand_id = $3)
+       LIMIT 4;`,
+      [product.id, product.categoryId, product.brand.id],
+      targetPool
+    ),
+    dbQuery<any>(
+      `SELECT * FROM reviews WHERE product_id = $1 AND status = 'approved' ORDER BY created_at DESC LIMIT 20;`,
+      [product.id],
+      targetPool
+    ),
+  ]);
 
-    if (prodRes.rows.length > 0) {
-      const product = mapRowToProduct(prodRes.rows[0]);
-      const offersRes = await queryDb<any>(
-        `SELECT * FROM seller_offers WHERE product_id = $1 ORDER BY price_minor ASC;`,
-        [product.id]
-      );
-      const offers = offersRes.rows.map(mapRowToOffer);
+  const offers = offersRes.rows.map((o) => {
+    const mapped = mapRowToOffer(o);
+    mapped.seller = {
+      id: o.seller_id,
+      name: o.seller_name || o.seller_id,
+      slug: o.seller_slug || o.seller_id,
+      isVerified: Boolean(o.seller_verified),
+      rating: {
+        average: Number(o.seller_rating_avg) || 4.8,
+        count: Number(o.seller_rating_count) || 0,
+        positiveFeedbackPercent: Number(o.seller_positive_pct) || 98,
+      },
+      badges: Boolean(o.seller_verified) ? ['authorized_dealer'] : [],
+    };
+    return mapped;
+  });
 
-      const relatedRes = await queryDb<any>(
-        `SELECT p.*, b.name as brand_name, b.slug as brand_slug
-         FROM products p
-         LEFT JOIN brands b ON p.brand_id = b.id
-         WHERE p.id != $1 AND (p.category_id = $2 OR p.brand_id = $3)
-         LIMIT 4;`,
-        [product.id, product.categoryId, product.brand.id]
-      );
-      const relatedProducts = relatedRes.rows.map(mapRowToProduct);
-
-      return {
-        product,
-        offers,
-        relatedProducts,
-      };
-    }
-  } catch {
-    // Fall back to memory
+  if (offers.length > 0) {
+    const prices = offers.map((o) => o.price.amountMinor);
+    const currency = offers[0]!.price.currency;
+    product.offerSummary = {
+      offerCount: offers.length,
+      lowestPrice: createMoney(Math.min(...prices), currency),
+      highestPrice: createMoney(Math.max(...prices), currency),
+      buyBoxOfferId: offers.find((o) => o.isBuyBoxWinner)?.offerId ?? offers[0]!.offerId,
+      hasMultipleOffers: offers.length > 1,
+    };
   }
-
-  const cleanLower = clean.toLowerCase();
-  const product =
-    CATALOG_PRODUCTS_1000.find((p) => p.slug.toLowerCase() === cleanLower || p.id.toLowerCase() === cleanLower) || null;
-
-  if (!product) return null;
-
-  const offers = CATALOG_OFFERS_1000.filter((o) => o.productId === product.id);
-  const relatedProducts = CATALOG_PRODUCTS_1000.filter(
-    (p) => p.id !== product.id && (p.categoryId === product.categoryId || p.brand.id === product.brand.id)
-  ).slice(0, 4);
 
   return {
     product,
     offers,
-    relatedProducts,
+    relatedProducts: relatedRes.rows.map(mapRowToProduct),
+    reviews: reviewsRes.rows.map((r) => ({
+      id: r.id,
+      productId: r.product_id,
+      authorName: r.customer_name,
+      rating: Number(r.rating),
+      title: r.title,
+      content: r.comment,
+      isVerifiedPurchase: Boolean(r.is_verified_purchase),
+      helpfulCount: Number(r.helpful_count),
+      createdAt: new Date(r.created_at).toISOString(),
+    })),
+    qaList: [],
+  };
+}
+
+/**
+ * Lists all brands directly from PostgreSQL with real active product counts.
+ */
+export async function listCatalogBrands(query?: string, pool?: pg.Pool): Promise<Array<Record<string, any>>> {
+  const targetPool = pool || getDbPool();
+  const clean = (query || '').trim().toLowerCase();
+  const res = await dbQuery<any>(
+    `SELECT b.*, COUNT(p.id) AS product_count
+     FROM brands b
+     LEFT JOIN products p ON p.brand_id = b.id AND p.is_active = true
+     ${clean ? 'WHERE LOWER(b.name) LIKE $1 OR LOWER(b.slug) LIKE $1' : ''}
+     GROUP BY b.id
+     ORDER BY product_count DESC, b.name ASC;`,
+    clean ? [`%${clean}%`] : [],
+    targetPool
+  );
+
+  return res.rows.map((r) => ({
+    ...mapRowToBrand(r),
+    isVerified: Boolean(r.is_verified),
+    productCount: parseInt(r.product_count || '0', 10),
+  }));
+}
+
+/**
+ * Lists hierarchical categories directly from PostgreSQL.
+ */
+export async function listCatalogCategories(
+  options: { asTree?: boolean; parentId?: string | null } = {},
+  pool?: pg.Pool
+): Promise<{ data: any[]; total: number }> {
+  const targetPool = pool || getDbPool();
+  const res = await dbQuery<any>(
+    `SELECT c.*, COUNT(p.id) AS product_count
+     FROM categories c
+     LEFT JOIN products p ON p.category_id = c.id AND p.is_active = true
+     WHERE c.is_active = true
+     GROUP BY c.id
+     ORDER BY c.level ASC, c.sort_order ASC, c.name_en ASC;`,
+    [],
+    targetPool
+  );
+
+  let categories = res.rows.map((r) => ({
+    ...mapRowToCategory(r),
+    productCount: parseInt(r.product_count || '0', 10),
+  }));
+
+  if (options.parentId !== undefined) {
+    categories = categories.filter((c) => c.parentId === options.parentId);
+    return { data: categories, total: categories.length };
+  }
+
+  return {
+    data: options.asTree !== false ? buildCategoryTree(categories) : categories,
+    total: categories.length,
+  };
+}
+
+/**
+ * Search suggestions backed directly by PostgreSQL.
+ */
+export async function searchCatalogSuggestions(
+  query: string,
+  pool?: pg.Pool
+): Promise<{
+  query?: string;
+  trendingSearches?: string[];
+  products: any[];
+  categories: any[];
+  brands: any[];
+}> {
+  const targetPool = pool || getDbPool();
+  const clean = query.trim();
+
+  if (!clean) {
+    return {
+      trendingSearches: [
+        'MacBook Pro',
+        'Wireless Headphones',
+        'Gaming Monitor',
+        'Mechanical Keyboard',
+        'Smart Watch',
+      ],
+      products: [],
+      categories: [],
+      brands: [],
+    };
+  }
+
+  const pattern = `%${clean}%`;
+  const [prodRes, catRes, brandRes] = await Promise.all([
+    dbQuery<any>(
+      `SELECT p.id, p.title_en, p.slug, p.primary_image_url, p.rating_avg, b.name AS brand_name,
+              o.price_minor, o.currency
+       FROM products p
+       LEFT JOIN brands b ON b.id = p.brand_id
+       LEFT JOIN LATERAL (
+         SELECT price_minor, currency FROM seller_offers WHERE product_id = p.id ORDER BY price_minor ASC LIMIT 1
+       ) o ON true
+       WHERE p.is_active = true AND (p.title_en ILIKE $1 OR p.description_en ILIKE $1 OR $2 = ANY(p.tags))
+       ORDER BY p.rating_avg DESC
+       LIMIT 6;`,
+      [pattern, clean.toLowerCase()],
+      targetPool
+    ),
+    dbQuery<any>(
+      `SELECT id, name_en, slug FROM categories WHERE is_active = true AND (name_en ILIKE $1 OR slug ILIKE $1) LIMIT 4;`,
+      [pattern],
+      targetPool
+    ),
+    dbQuery<any>(
+      `SELECT id, name, slug FROM brands WHERE name ILIKE $1 OR slug ILIKE $1 LIMIT 4;`,
+      [pattern],
+      targetPool
+    ),
+  ]);
+
+  return {
+    query: clean,
+    products: prodRes.rows.map((p) => ({
+      id: p.id,
+      title: p.title_en,
+      slug: p.slug,
+      thumbnail: p.primary_image_url || '',
+      price: createMoney(Number(p.price_minor || 0), (p.currency || 'USD') as any),
+      rating: Number(p.rating_avg || 0),
+      brand: p.brand_name || '',
+    })),
+    categories: catRes.rows.map((c) => ({ id: c.id, name: c.name_en, slug: c.slug })),
+    brands: brandRes.rows.map((b) => ({ id: b.id, name: b.name, slug: b.slug })),
   };
 }

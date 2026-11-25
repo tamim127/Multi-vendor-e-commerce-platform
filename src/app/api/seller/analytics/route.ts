@@ -1,26 +1,20 @@
 import { NextResponse } from 'next/server';
-import { DEMO_SELLER_METRICS } from '@/domains/seller/fixtures/analytics.fixture';
+import { requireSellerAccess } from '@/server/auth/auth-middleware';
+import { getSellerRealAnalytics } from '@/server/seller/seller-service';
+import { apiSuccess, handleApiError } from '@/server/security/http';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
+    const requestedSellerId = searchParams.get('sellerId');
+    const { membership } = await requireSellerAccess(request, requestedSellerId);
     const timeframe = searchParams.get('timeframe') || 'last_30_days';
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        ...DEMO_SELLER_METRICS,
-        timeframe,
-      },
-    });
+    const data = await getSellerRealAnalytics(membership.sellerId, timeframe);
+    return apiSuccess(data);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { success: false, error: 'Failed to retrieve seller analytics', details: message },
-      { status: 500 }
-    );
+    return handleApiError(request, error, 'GET /api/seller/analytics');
   }
 }
-

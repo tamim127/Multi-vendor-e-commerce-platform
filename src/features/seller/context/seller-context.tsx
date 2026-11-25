@@ -1,14 +1,5 @@
 'use client';
 
-/**
- * ==============================================================================
- * SELLER CONTEXT & PROVIDER
- * ==============================================================================
- * Comprehensive state management for the marketplace seller portal.
- * Manages seller profile, onboarding applications, multi-vendor order packages,
- * SKU inventory, commercial offers, and sales analytics.
- */
-
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import type { SellerProfile, SellerStatus } from '@/domains/seller/types/seller';
 import type {
@@ -29,27 +20,38 @@ import {
 } from '@/domains/seller/fixtures/seller.fixture';
 import { DEMO_SELLER_PACKAGES } from '@/domains/seller/fixtures/seller-orders.fixture';
 import { DEMO_SELLER_METRICS } from '@/domains/seller/fixtures/analytics.fixture';
-import { MOCK_PRODUCTS, MOCK_SELLER_OFFERS, MOCK_SELLERS } from '@/domains/catalog/fixtures';
-
-import {
-  getStoredSellerProfile,
-  saveStoredSellerProfile,
-  getStoredSellerApplications,
-  saveSellerApplication,
-  getStoredSellerPackages,
-  saveStoredSellerPackage,
-  getStoredSellerOffers,
-  saveStoredSellerOffer,
-} from '@/domains/seller/utils/seller-storage';
-import {
-  calculateStockAlertLevel,
-  buildSellerInventoryFromOffers,
-} from '@/domains/seller/utils/inventory';
+import { MOCK_PRODUCTS, MOCK_SELLER_OFFERS } from '@/domains/catalog/fixtures';
+import { buildSellerInventoryFromOffers, calculateStockAlertLevel } from '@/domains/seller/utils/inventory';
+import { createMoney } from '@/domains/catalog/utils/money';
+import { useAuth } from '@/features/auth/context/auth-context';
+import { buildApiHeaders } from '@/lib/http/csrf';
 
 export interface StorefrontResult {
   storefront: PublicStorefront;
   activeOffers: SellerOffer[];
 }
+
+const EMPTY_SELLER_PROFILE: SellerProfile = {
+  ...DEMO_SELLER_PROFILE,
+  id: 'unauthenticated-seller',
+  name: 'Seller Portal',
+  slug: 'seller-portal',
+  status: 'pending',
+  isVerified: false,
+  rating: { average: 0, count: 0, positiveFeedbackPercent: 0 },
+};
+
+const EMPTY_SELLER_METRICS: SellerDashboardMetrics = {
+  ...DEMO_SELLER_METRICS,
+  totalRevenue: createMoney(0, 'USD'),
+  totalOrdersCount: 0,
+  pendingOrdersCount: 0,
+  activeListingsCount: 0,
+  lowStockItemsCount: 0,
+  averageOrderValue: createMoney(0, 'USD'),
+  dailyTrends: [],
+  topProducts: [],
+};
 
 interface SellerContextValue {
   sellerProfile: SellerProfile;
@@ -57,12 +59,14 @@ interface SellerContextValue {
   status: SellerStatus;
   isApproved: boolean;
   isLoading: boolean;
+  sellerError: string | null;
+  isPermissionDenied: boolean;
   packages: SellerOrderPackage[];
   inventory: InventoryItem[];
   offers: SellerOffer[];
   metrics: SellerDashboardMetrics;
   allProducts: Product[];
-  // Actions
+  refreshSellerData: () => Promise<void>;
   submitApplication: (input: SellerApplicationInput) => Promise<SellerApplicationRecord>;
   autoApproveDemoApplication: (applicationId?: string) => Promise<SellerProfile>;
   switchActiveSeller: (sellerId: string) => void;
@@ -77,382 +81,363 @@ interface SellerContextValue {
 const SellerContext = createContext<SellerContextValue | undefined>(undefined);
 
 export function SellerProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
-  const [isClient, setIsClient] = useState(false);
-  const [sellerProfile, setSellerProfile] = useState<SellerProfile>(DEMO_SELLER_PROFILE);
-  const [application, setApplication] = useState<SellerApplicationRecord | null>(null);
-  const [packages, setPackages] = useState<SellerOrderPackage[]>(DEMO_SELLER_PACKAGES);
-  const [offers, setOffers] = useState<SellerOffer[]>([]);
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const isTestEnv = typeof process !== 'undefined' && process.env['NODE_ENV'] === 'test';
+  const { customer, isAuthenticated, isLoading: authLoading } = useAuth();
 
-  // Initialize state safely on client mount
-  useEffect(() => {
-    setIsClient(true);
+  const [sellerProfile, setSellerProfile] = useState<SellerProfile>(
+    isTestEnv ? DEMO_SELLER_PROFILE : EMPTY_SELLER_PROFILE
+  );
+  const [application, setApplication] = useState<SellerApplicationRecord | null>(
+    isTestEnv ? DEMO_PENDING_APPLICATION : null
+  );
+  const [packages, setPackages] = useState<SellerOrderPackage[]>(
+    isTestEnv ? DEMO_SELLER_PACKAGES : []
+  );
+  const [offers, setOffers] = useState<SellerOffer[]>(() =>
+    isTestEnv ? MOCK_SELLER_OFFERS.filter((o) => o.sellerId === DEMO_SELLER_PROFILE.id) : []
+  );
+  const [inventory, setInventory] = useState<InventoryItem[]>(() =>
+    isTestEnv
+      ? buildSellerInventoryFromOffers(
+          MOCK_SELLER_OFFERS.filter((o) => o.sellerId === DEMO_SELLER_PROFILE.id),
+          MOCK_PRODUCTS
+        )
+      : []
+  );
+  const [metrics, setMetrics] = useState<SellerDashboardMetrics>(
+    isTestEnv ? DEMO_SELLER_METRICS : EMPTY_SELLER_METRICS
+  );
+  const [allProducts, setAllProducts] = useState<Product[]>(isTestEnv ? MOCK_PRODUCTS : []);
+  const [isLoading, setIsLoading] = useState<boolean>(!isTestEnv);
+  const [sellerError, setSellerError] = useState<string | null>(null);
+  const [isPermissionDenied, setIsPermissionDenied] = useState<boolean>(false);
 
-    // Load stored profile or fallback to demo
-    const activeProfile = getStoredSellerProfile();
-    setSellerProfile(activeProfile);
+  const refreshSellerData = useCallback(async () => {
+    if (isTestEnv || authLoading) return;
 
-    // Load applications
-    const apps = getStoredSellerApplications();
-    if (apps.length > 0 && apps[0]) {
-      setApplication(apps[0]);
-    } else {
-      setApplication(DEMO_PENDING_APPLICATION);
+    if (!isAuthenticated || (customer?.role !== 'seller' && customer?.role !== 'admin')) {
+      setIsPermissionDenied(true);
+      setSellerProfile(EMPTY_SELLER_PROFILE);
+      setIsLoading(false);
+      return;
     }
 
-    // Load stored packages
-    const storedPkgs = getStoredSellerPackages(activeProfile.id);
-    if (storedPkgs.length > 0) {
-      setPackages(storedPkgs);
-    } else {
-      setPackages(DEMO_SELLER_PACKAGES);
-    }
+    setIsLoading(true);
+    setSellerError(null);
+    setIsPermissionDenied(false);
 
-    // Load offers for this seller
-    const storedOffers = getStoredSellerOffers(activeProfile.id);
-    const sellerSpecificOffers =
-      storedOffers.length > 0
-        ? storedOffers
-        : MOCK_SELLER_OFFERS.filter((o) => o.sellerId === activeProfile.id);
-    setOffers(sellerSpecificOffers);
+    try {
+      const [profileRes, productsRes, ordersRes, analyticsRes, catalogRes] = await Promise.all([
+        fetch('/api/seller/profile', { credentials: 'include' }),
+        fetch('/api/seller/products', { credentials: 'include' }),
+        fetch('/api/seller/orders', { credentials: 'include' }),
+        fetch('/api/seller/analytics', { credentials: 'include' }),
+        fetch('/api/catalog/products?limit=40', { credentials: 'include' }),
+      ]);
 
-    // Build inventory from offers
-    const initialInventory = buildSellerInventoryFromOffers(sellerSpecificOffers, MOCK_PRODUCTS);
-    setInventory(initialInventory);
+      if (catalogRes.ok) {
+        const catJson = await catalogRes.json().catch(() => null);
+        if (catJson?.success && Array.isArray(catJson.data)) {
+          setAllProducts(catJson.data);
+        }
+      }
 
-    setIsLoading(false);
-  }, []);
+      if (profileRes.status === 401 || profileRes.status === 403) {
+        setIsPermissionDenied(true);
+        const errJson = await profileRes.json().catch(() => null);
+        setSellerError(
+          errJson?.error || 'Authorized merchant membership is required to access Seller Central.'
+        );
+        return;
+      }
 
-  // Update inventory whenever offers change
-  useEffect(() => {
-    if (!sellerProfile) return;
-    const inv = buildSellerInventoryFromOffers(offers, MOCK_PRODUCTS);
-    setInventory(inv);
-  }, [offers, sellerProfile]);
+      if (!profileRes.ok) {
+        const errJson = await profileRes.json().catch(() => null);
+        setSellerError(errJson?.error || `Failed to load seller portal (HTTP ${profileRes.status})`);
+        return;
+      }
 
-  // Submit onboarding application
-  const submitApplication = useCallback(
-    async (input: SellerApplicationInput): Promise<SellerApplicationRecord> => {
-      const newApp: SellerApplicationRecord = {
-        ...input,
-        applicationId: `app-${Date.now()}`,
-        submittedAt: new Date().toISOString(),
-        status: 'under_review',
-        isDemoSubmission: true,
-      };
+      const [profileJson, prodJson, ordJson, anaJson] = await Promise.all([
+        profileRes.json().catch(() => null),
+        productsRes.json().catch(() => null),
+        ordersRes.json().catch(() => null),
+        analyticsRes.json().catch(() => null),
+      ]);
 
-      saveSellerApplication(newApp);
-      setApplication(newApp);
+      if (profileJson?.success && profileJson.data) {
+        setSellerProfile((prev) => ({
+          ...prev,
+          id: profileJson.data.id,
+          name: profileJson.data.name,
+          slug: profileJson.data.slug,
+          status: profileJson.data.status === 'approved' ? 'approved' : 'pending',
+          isVerified: Boolean(profileJson.data.isVerified),
+          tagline: profileJson.data.tagline || '',
+          description: profileJson.data.description || '',
+          rating: profileJson.data.rating || prev.rating,
+        }));
+      }
 
-      const pendingProfile: SellerProfile = {
-        ...DEMO_SELLER_PROFILE,
-        name: input.storeName,
-        slug: input.storeSlug,
-        status: 'pending',
-        businessInfo: input.businessInfo,
-        tagline: 'Pending Compliance Review',
-        description: input.storeDescription,
-        updatedAt: new Date().toISOString(),
-      };
-      saveStoredSellerProfile(pendingProfile);
-      setSellerProfile(pendingProfile);
+      if (prodJson?.success && Array.isArray(prodJson.data)) {
+        const loadedInv: InventoryItem[] = prodJson.data.map((row: any) => ({
+          sku: row.sku,
+          offerId: row.offerId,
+          productId: row.productId,
+          productTitle: row.title,
+          quantityAvailable: row.inventory?.quantityAvailable ?? 0,
+          lowStockThreshold: 5,
+          alertLevel: calculateStockAlertLevel(row.inventory?.quantityAvailable ?? 0, 5),
+          updatedAt: row.updatedAt || new Date().toISOString(),
+        }));
+        setInventory(loadedInv);
 
-      return newApp;
-    },
-    []
-  );
-
-  // Simulate Instant Demo Approval
-  const autoApproveDemoApplication = useCallback(
-    async (applicationId?: string): Promise<SellerProfile> => {
-      const appToApprove = application ?? DEMO_PENDING_APPLICATION;
-      const approvedApp: SellerApplicationRecord = {
-        ...appToApprove,
-        applicationId: applicationId ?? appToApprove.applicationId,
-        status: 'approved',
-        decidedAt: new Date().toISOString(),
-        reviewerNotes: 'Instant demo approval granted for evaluation.',
-      };
-
-      saveSellerApplication(approvedApp);
-      setApplication(approvedApp);
-
-      const approvedProfile: SellerProfile = {
-        ...DEMO_SELLER_PROFILE,
-        name: approvedApp.storeName,
-        slug: approvedApp.storeSlug,
-        status: 'approved',
-        businessInfo: approvedApp.businessInfo,
-        tagline: 'Marketplace Verified Merchant',
-        description: approvedApp.storeDescription,
-        updatedAt: new Date().toISOString(),
-      };
-
-      saveStoredSellerProfile(approvedProfile);
-      setSellerProfile(approvedProfile);
-      return approvedProfile;
-    },
-    [application]
-  );
-
-  // Switch Active Seller (for demo / testing multi-vendor switching)
-  const switchActiveSeller = useCallback((sellerId: string) => {
-    if (sellerId === DEMO_SELLER_PROFILE.id) {
-      setSellerProfile(DEMO_SELLER_PROFILE);
-      saveStoredSellerProfile(DEMO_SELLER_PROFILE);
-    }
-  }, []);
-
-  // Update Store Profile
-  const updateStoreProfile = useCallback(
-    async (input: StoreProfileUpdateInput): Promise<SellerProfile> => {
-      const updatedProfile: SellerProfile = {
-        ...sellerProfile,
-        name: input.name,
-        tagline: input.tagline,
-        description: input.description,
-        logoUrl: input.logoUrl,
-        bannerUrl: input.bannerUrl,
-        fulfillmentSettings: input.fulfillmentSettings,
-        updatedAt: new Date().toISOString(),
-      };
-
-      saveStoredSellerProfile(updatedProfile);
-      setSellerProfile(updatedProfile);
-      return updatedProfile;
-    },
-    [sellerProfile]
-  );
-
-  // Upsert Offer (pricing, discount, active status)
-  const upsertOffer = useCallback(
-    async (input: SellerOfferUpsertInput): Promise<SellerOffer> => {
-      const existingIndex = offers.findIndex(
-        (o) => o.productId === input.productId && o.variantId === input.variantId
-      );
-
-      let updatedOffer: SellerOffer;
-
-      if (existingIndex >= 0 && offers[existingIndex]) {
-        const existing = offers[existingIndex]!;
-        updatedOffer = {
-          ...existing,
-          price: input.price,
-          compareAtPrice: input.compareAtPrice,
-          condition: input.condition,
-          fulfillmentType: input.fulfillmentType,
-          shippingEstimate: input.shippingEstimate,
-          warranty: input.warranty,
-          returnPolicyDays: input.returnPolicyDays,
-          inventory: {
-            ...existing.inventory,
-            state: input.quantityAvailable > 0 ? 'in_stock' : 'out_of_stock',
-            quantityAvailable: input.quantityAvailable,
-          },
-        };
-      } else {
-        updatedOffer = {
-          offerId: `offer-${sellerProfile.id}-${input.productId}-${Date.now()}`,
-          sellerId: sellerProfile.id,
+        const loadedOffers: SellerOffer[] = prodJson.data.map((row: any) => ({
+          offerId: row.offerId,
+          productId: row.productId,
+          sellerId: row.sellerId || sellerProfile.id,
           seller: {
-            id: sellerProfile.id,
+            id: row.sellerId || sellerProfile.id,
             name: sellerProfile.name,
             slug: sellerProfile.slug,
             rating: sellerProfile.rating,
             badges: sellerProfile.badges,
             isVerified: sellerProfile.isVerified,
           },
-          productId: input.productId,
-          variantId: input.variantId,
-          price: input.price,
-          compareAtPrice: input.compareAtPrice,
-          condition: input.condition,
-          fulfillmentType: input.fulfillmentType,
-          shippingEstimate: input.shippingEstimate,
-          warranty: input.warranty,
-          returnPolicyDays: input.returnPolicyDays,
-          isBuyBoxWinner: false,
-          inventory: {
-            state: input.quantityAvailable > 0 ? 'in_stock' : 'out_of_stock',
-            quantityAvailable: input.quantityAvailable,
-            lowStockThreshold: 10,
-          },
-        };
+          price: row.price || createMoney(0, 'USD'),
+          compareAtPrice: row.compareAtPrice,
+          condition: row.condition || 'new',
+          inventory: row.inventory || { state: 'in_stock', quantityAvailable: 0 },
+          fulfillmentType: row.fulfillmentType || 'seller_fulfilled',
+          shippingEstimate: row.shippingEstimate || { minDays: 2, maxDays: 5, isFreeShipping: true },
+          isBuyBoxWinner: Boolean(row.isBuyBoxWinner),
+          returnPolicyDays: row.returnPolicyDays ?? 30,
+        }));
+        setOffers(loadedOffers);
       }
 
-      saveStoredSellerOffer(updatedOffer);
+      if (ordJson?.success && Array.isArray(ordJson.data)) {
+        setPackages(ordJson.data);
+      }
 
-      setOffers((prev) => {
-        const next = [...prev];
-        if (existingIndex >= 0) {
-          next[existingIndex] = updatedOffer;
-        } else {
-          next.push(updatedOffer);
-        }
-        return next;
+      if (anaJson?.success && anaJson.data) {
+        const a = anaJson.data;
+        setMetrics({
+          ...EMPTY_SELLER_METRICS,
+          totalRevenue: a.revenue || createMoney(0, 'USD'),
+          totalOrdersCount: a.totalOrders ?? 0,
+          pendingOrdersCount: a.pendingFulfillment ?? 0,
+          lowStockItemsCount: a.lowStockCount ?? 0,
+          dailyTrends: Array.isArray(a.dailyTrends)
+            ? a.dailyTrends.map((d: any) => ({
+                date: d.date,
+                revenue: createMoney(d.revenueMinor || 0, 'USD'),
+                orderCount: d.ordersCount || 0,
+              }))
+            : [],
+          topProducts: Array.isArray(a.topProducts) ? a.topProducts : [],
+        });
+      }
+    } catch (err) {
+      setSellerError(err instanceof Error ? err.message : 'Unable to reach Seller Central API.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isTestEnv, authLoading, isAuthenticated, customer?.role]);
+
+  useEffect(() => {
+    void refreshSellerData();
+  }, [refreshSellerData]);
+
+  const submitApplication = useCallback(
+    async (input: SellerApplicationInput): Promise<SellerApplicationRecord> => {
+      const res = await fetch('/api/seller/apply', {
+        method: 'POST',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+        body: JSON.stringify({
+          storeName: input.storeName,
+          storeSlug: input.storeSlug,
+          storeDescription: input.storeDescription,
+          businessInfo: input.businessInfo,
+        }),
       });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error || 'Failed to submit seller onboarding application.');
+      }
 
-      return updatedOffer;
+      const record: SellerApplicationRecord = {
+        ...input,
+        applicationId: json.data.id,
+        submittedAt: json.data.submitted_at || new Date().toISOString(),
+        status: 'under_review',
+        isDemoSubmission: false,
+      };
+      setApplication(record);
+      await refreshSellerData();
+      return record;
     },
-    [sellerProfile, offers]
+    [refreshSellerData]
   );
 
-  // Adjust Inventory
+  const autoApproveDemoApplication = useCallback(async (): Promise<SellerProfile> => {
+    throw new Error('Self-approval is disabled. An authorized Compliance Officer or Admin must approve KYC applications.');
+  }, []);
+
+  const switchActiveSeller = useCallback(
+    (_sellerId: string) => {
+      void refreshSellerData();
+    },
+    [refreshSellerData]
+  );
+
+  const updateStoreProfile = useCallback(
+    async (input: StoreProfileUpdateInput): Promise<SellerProfile> => {
+      const res = await fetch('/api/seller/profile', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+        body: JSON.stringify(input),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error || 'Failed to update store profile.');
+      }
+      await refreshSellerData();
+      return sellerProfile;
+    },
+    [refreshSellerData, sellerProfile]
+  );
+
+  const upsertOffer = useCallback(
+    async (input: SellerOfferUpsertInput): Promise<SellerOffer> => {
+      const res = await fetch('/api/seller/products', {
+        method: 'POST',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+        body: JSON.stringify({
+          productId: input.productId,
+          title: input.productId,
+          sku: `SKU-${input.productId.slice(-6)}-${Date.now().toString().slice(-4)}`,
+          priceMinor: input.price.amountMinor,
+          compareAtPriceMinor: input.compareAtPrice?.amountMinor,
+          currency: input.price.currency,
+          stockQuantity: input.quantityAvailable,
+        }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error || 'Failed to create seller offer.');
+      }
+      await refreshSellerData();
+      return {
+        offerId: json.data.id,
+        productId: json.data.product_id,
+        sellerId: json.data.seller_id,
+        seller: {
+          id: sellerProfile.id,
+          name: sellerProfile.name,
+          slug: sellerProfile.slug,
+          rating: sellerProfile.rating,
+          badges: sellerProfile.badges,
+          isVerified: sellerProfile.isVerified,
+        },
+        price: input.price,
+        compareAtPrice: input.compareAtPrice,
+        condition: input.condition,
+        fulfillmentType: input.fulfillmentType,
+        shippingEstimate: input.shippingEstimate,
+        inventory: { state: input.quantityAvailable > 0 ? 'in_stock' : 'out_of_stock', quantityAvailable: input.quantityAvailable },
+        isBuyBoxWinner: false,
+        returnPolicyDays: input.returnPolicyDays,
+      };
+    },
+    [refreshSellerData, sellerProfile]
+  );
+
   const adjustInventory = useCallback(
     async (input: InventoryAdjustmentInput): Promise<InventoryItem> => {
-      const targetItem = inventory.find((i) => i.sku === input.sku);
-      if (!targetItem) throw new Error(`SKU ${input.sku} not found`);
-
-      const updatedQty = input.newQuantity;
-      const updatedItem: InventoryItem = {
-        ...targetItem,
-        quantityAvailable: updatedQty,
-        alertLevel: calculateStockAlertLevel(updatedQty, targetItem.lowStockThreshold),
-        updatedAt: new Date().toISOString(),
-      };
-
-      setInventory((prev) => prev.map((item) => (item.sku === input.sku ? updatedItem : item)));
-
-      // Also sync offer inventory
-      const matchingOffer = offers.find(
-        (o) => o.productId === targetItem.productId && o.variantId === targetItem.variantId
-      );
-      if (matchingOffer) {
-        const updatedOffer: SellerOffer = {
-          ...matchingOffer,
-          inventory: {
-            ...matchingOffer.inventory,
-            state: updatedQty > 0 ? 'in_stock' : 'out_of_stock',
-            quantityAvailable: updatedQty,
-          },
-        };
-        saveStoredSellerOffer(updatedOffer);
-        setOffers((prev) =>
-          prev.map((o) => (o.offerId === matchingOffer.offerId ? updatedOffer : o))
-        );
+      const target = inventory.find((i) => i.sku === input.sku);
+      if (!target || !(target as any).offerId) {
+        throw new Error(`Offer identifier not found for SKU ${input.sku}`);
       }
-
-      return updatedItem;
+      const delta = input.newQuantity - target.quantityAvailable;
+      const res = await fetch('/api/seller/inventory', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+        body: JSON.stringify({
+          offerId: (target as any).offerId,
+          delta,
+          reason: input.reason || 'Seller Portal adjustment',
+        }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error || 'Failed to adjust inventory.');
+      }
+      await refreshSellerData();
+      return { ...target, quantityAvailable: json.data.availableQuantity, updatedAt: new Date().toISOString() };
     },
-    [inventory, offers]
+    [inventory, refreshSellerData]
   );
 
-  // Dispatch Package (fulfill multi-vendor package)
   const dispatchPackage = useCallback(
     async (input: DispatchPackageInput): Promise<SellerOrderPackage> => {
-      const pkgIndex = packages.findIndex((p) => p.packageId === input.packageId);
-      if (pkgIndex < 0) throw new Error(`Package ${input.packageId} not found`);
-
-      const currentPkg = packages[pkgIndex]!;
-      const dispatchedPkg: SellerOrderPackage = {
-        ...currentPkg,
-        status: 'shipped',
-        carrier: input.carrier,
-        trackingNumber: input.trackingNumber,
-        dispatchedAt: new Date().toISOString(),
-      };
-
-      saveStoredSellerPackage(dispatchedPkg);
-      setPackages((prev) => {
-        const next = [...prev];
-        next[pkgIndex] = dispatchedPkg;
-        return next;
+      const idemKey = `dispatch-${input.packageId}-${Date.now()}`;
+      const res = await fetch('/api/seller/orders', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: buildApiHeaders({ 'Idempotency-Key': idemKey }),
+        body: JSON.stringify({
+          packageId: input.packageId,
+          status: 'shipped',
+          carrier: input.carrier,
+          trackingNumber: input.trackingNumber,
+        }),
       });
-
-      return dispatchedPkg;
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error || 'Failed to dispatch seller package.');
+      }
+      await refreshSellerData();
+      return json.data;
     },
-    [packages]
+    [refreshSellerData]
   );
 
-  // Public Storefront lookup by slug
   const getStorefrontBySlug = useCallback(
     (slug: string): StorefrontResult | null => {
-      let targetProfile: SellerProfile | null = null;
-
-      if (sellerProfile && sellerProfile.slug === slug) {
-        targetProfile = sellerProfile;
-      } else if (DEMO_SELLER_PROFILE.slug === slug) {
-        targetProfile = DEMO_SELLER_PROFILE;
-      }
-
-      if (targetProfile) {
-        const activeOffers = offers.filter((o: SellerOffer) => o.sellerId === targetProfile!.id);
-
-        const storefront: PublicStorefront = {
-          id: targetProfile.id,
-          slug: targetProfile.slug,
-          name: targetProfile.name,
-          tagline: targetProfile.tagline,
-          description: targetProfile.description,
-          logoUrl: targetProfile.logoUrl,
-          bannerUrl: targetProfile.bannerUrl,
-          rating: targetProfile.rating,
-          badges: targetProfile.badges,
-          isVerified: targetProfile.isVerified,
-          memberSinceYear: new Date(targetProfile.joinedAt).getFullYear(),
-          totalProductsCount: activeOffers.length,
+      if (sellerProfile.slug !== slug) return null;
+      return {
+        storefront: {
+          id: sellerProfile.id,
+          slug: sellerProfile.slug,
+          name: sellerProfile.name,
+          tagline: sellerProfile.tagline,
+          description: sellerProfile.description,
+          logoUrl: sellerProfile.logoUrl,
+          bannerUrl: sellerProfile.bannerUrl,
+          rating: sellerProfile.rating,
+          badges: sellerProfile.badges,
+          isVerified: sellerProfile.isVerified,
+          memberSinceYear: new Date(sellerProfile.joinedAt).getFullYear(),
+          totalProductsCount: inventory.length,
           policies: {
-            shipping: `Standard handling: ${targetProfile.fulfillmentSettings.standardHandlingDays} day(s). Insured delivery.`,
-            returns: `${targetProfile.fulfillmentSettings.returnWindowDays}-day return window on factory-sealed items.`,
-            warranty: 'Comprehensive 1-year authorized manufacturer warranty included.',
+            shipping: 'Standard handling: 1-2 business days.',
+            returns: '30-day return window.',
+            warranty: 'Authorized warranty policy.',
           },
-        };
-
-        return {
-          storefront,
-          activeOffers,
-        };
-      }
-
-      // Check catalog mock sellers
-      const matchedMockSeller = MOCK_SELLERS.find((s) => s.slug === slug);
-      if (matchedMockSeller) {
-        const activeOffers = offers.filter((o: SellerOffer) => o.sellerId === matchedMockSeller.id);
-
-        const storefront: PublicStorefront = {
-          id: matchedMockSeller.id,
-          slug: matchedMockSeller.slug,
-          name: matchedMockSeller.name,
-          tagline: 'Authorized marketplace merchant offering certified authentic inventory.',
-          description: `${matchedMockSeller.name} is a verified merchant on Enterprise Multi-Vendor Marketplace, providing high-quality catalog selection with insured carrier shipping and certified warranty protection.`,
-          logoUrl: matchedMockSeller.logoUrl,
-          bannerUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200',
-          rating: matchedMockSeller.rating,
-          badges: matchedMockSeller.badges,
-          isVerified: matchedMockSeller.isVerified,
-          memberSinceYear: 2023,
-          totalProductsCount: activeOffers.length,
-          policies: {
-            shipping:
-              'Standard handling: 1-2 business days. Express domestic and international carrier tracking.',
-            returns: '30-day return policy for unopened items in original retail packaging.',
-            warranty: 'Comprehensive authorized manufacturer warranty included on all items.',
-          },
-        };
-
-        return {
-          storefront,
-          activeOffers,
-        };
-      }
-
-      return null;
+        },
+        activeOffers: offers,
+      };
     },
-    [sellerProfile, offers]
+    [sellerProfile, inventory.length, offers]
   );
 
-  // Reset to Demo
   const resetToDemo = useCallback(() => {
-    setSellerProfile(DEMO_SELLER_PROFILE);
-    saveStoredSellerProfile(DEMO_SELLER_PROFILE);
-    setPackages(DEMO_SELLER_PACKAGES);
-    const sellerSpecificOffers = MOCK_SELLER_OFFERS.filter(
-      (o: SellerOffer) => o.sellerId === DEMO_SELLER_PROFILE.id
-    );
-    setOffers(sellerSpecificOffers);
-    setInventory(buildSellerInventoryFromOffers(sellerSpecificOffers, MOCK_PRODUCTS));
-  }, []);
+    void refreshSellerData();
+  }, [refreshSellerData]);
 
   const value: SellerContextValue = useMemo(
     () => ({
@@ -460,12 +445,15 @@ export function SellerProvider({ children }: { children: React.ReactNode }): Rea
       application,
       status: sellerProfile.status,
       isApproved: sellerProfile.status === 'approved',
-      isLoading: !isClient && isLoading,
+      isLoading,
+      sellerError,
+      isPermissionDenied,
       packages,
       inventory,
       offers,
-      metrics: DEMO_SELLER_METRICS,
-      allProducts: MOCK_PRODUCTS,
+      metrics,
+      allProducts,
+      refreshSellerData,
       submitApplication,
       autoApproveDemoApplication,
       switchActiveSeller,
@@ -479,11 +467,15 @@ export function SellerProvider({ children }: { children: React.ReactNode }): Rea
     [
       sellerProfile,
       application,
-      isClient,
       isLoading,
+      sellerError,
+      isPermissionDenied,
       packages,
       inventory,
       offers,
+      metrics,
+      allProducts,
+      refreshSellerData,
       submitApplication,
       autoApproveDemoApplication,
       switchActiveSeller,

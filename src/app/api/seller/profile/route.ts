@@ -1,36 +1,45 @@
 import { NextResponse } from 'next/server';
-import { DEMO_SELLER_PROFILE } from '@/domains/seller/fixtures/seller.fixture';
+import { z } from 'zod';
+import { requireSellerAccess } from '@/server/auth/auth-middleware';
+import { getSellerProfile, updateSellerProfile } from '@/server/seller/seller-service';
+import { apiSuccess, handleApiError, readJsonBody, ValidationError } from '@/server/security/http';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(): Promise<NextResponse> {
-  return NextResponse.json({
-    success: true,
-    data: DEMO_SELLER_PROFILE,
-  });
+const UpdateProfileSchema = z.object({
+  name: z.string().min(2).max(255).optional(),
+  tagline: z.string().max(500).optional(),
+  description: z.string().max(4000).optional(),
+  contactPhone: z.string().max(64).optional(),
+  logoUrl: z.string().url().optional(),
+  bannerUrl: z.string().url().optional(),
+});
+
+export async function GET(request: Request): Promise<NextResponse> {
+  try {
+    const requestedSellerId = new URL(request.url).searchParams.get('sellerId');
+    const { membership } = await requireSellerAccess(request, requestedSellerId);
+    const profile = await getSellerProfile(membership.sellerId);
+    return apiSuccess(profile);
+  } catch (error) {
+    return handleApiError(request, error, 'GET /api/seller/profile');
+  }
 }
 
 export async function PUT(request: Request): Promise<NextResponse> {
   try {
-    const body = await request.json().catch(() => ({}));
+    const requestedSellerId = new URL(request.url).searchParams.get('sellerId');
+    const { auth, membership } = await requireSellerAccess(request, requestedSellerId);
+    const body = await readJsonBody(request, 32768);
+    const parsed = UpdateProfileSchema.safeParse(body);
 
-    const updatedProfile = {
-      ...DEMO_SELLER_PROFILE,
-      ...body,
-      updatedAt: new Date().toISOString(),
-    };
+    if (!parsed.success) {
+      throw new ValidationError('Invalid seller profile update payload', parsed.error.flatten().fieldErrors);
+    }
 
-    return NextResponse.json({
-      success: true,
-      data: updatedProfile,
-      message: 'Merchant store profile updated successfully',
-    });
+    const updated = await updateSellerProfile(membership.sellerId, auth.customer.id, parsed.data);
+    return apiSuccess(updated);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { success: false, error: 'Failed to update seller profile', details: message },
-      { status: 500 }
-    );
+    return handleApiError(request, error, 'PUT /api/seller/profile');
   }
 }
-

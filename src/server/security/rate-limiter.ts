@@ -5,10 +5,13 @@ interface RateLimitRecord {
   resetAt: number;
 }
 
-// In-memory sliding window store (can be backed by Redis in multi-instance clusters)
+/**
+ * Process-local sliding window store.
+ * NOTE: Distributed multi-instance rate limiting is NOT complete until backed by
+ * a shared external store such as Redis. Single-instance protection only.
+ */
 const rateLimitStore = new Map<string, RateLimitRecord>();
 
-// Garbage collect expired buckets every 60 seconds
 if (typeof setInterval !== 'undefined') {
   setInterval(() => {
     const now = Date.now();
@@ -35,23 +38,35 @@ export interface RateLimitResult {
 }
 
 /**
- * Extracts client IP from standard reverse proxy and CDN headers.
+ * Extracts client IP securely.
+ * Never trusts arbitrary client-spoofable X-Forwarded-For headers unless
+ * TRUSTED_PROXY=true is explicitly enabled behind a validated edge proxy.
  */
 export function extractClientIp(request: Request): string {
   const headers = request.headers;
-  const cfIp = headers.get('cf-connecting-ip');
-  if (cfIp) return cfIp.trim();
+  const trustProxy = process.env['TRUSTED_PROXY'] === 'true';
 
-  const forwarded = headers.get('x-forwarded-for');
-  if (forwarded) {
-    const first = forwarded.split(',')[0];
-    if (first) return first.trim();
+  if (trustProxy) {
+    const cfIp = headers.get('cf-connecting-ip');
+    if (cfIp) return cfIp.trim();
+
+    const forwarded = headers.get('x-forwarded-for');
+    if (forwarded) {
+      // Take the right-most untrusted hop added by our trusted reverse proxy if multi-hop, or first normalized entry
+      const parts = forwarded
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean);
+      if (parts.length > 0) {
+        return parts[parts.length - 1]!;
+      }
+    }
+
+    const realIp = headers.get('x-real-ip');
+    if (realIp) return realIp.trim();
   }
 
-  const realIp = headers.get('x-real-ip');
-  if (realIp) return realIp.trim();
-
-  return '127.0.0.1';
+  return 'direct-untrusted-client';
 }
 
 /**
@@ -98,6 +113,13 @@ export function checkRateLimit(
 }
 
 /**
+ * Clears rate limit buckets (primarily for test isolation).
+ */
+export function resetRateLimitsForTests(): void {
+  rateLimitStore.clear();
+}
+
+/**
  * Wraps an API route handler with automatic rate limit enforcement.
  */
 export function withRateLimit(
@@ -135,4 +157,3 @@ export function withRateLimit(
     return response;
   };
 }
-

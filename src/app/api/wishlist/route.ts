@@ -1,86 +1,63 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { MOCK_PRODUCTS } from '@/domains/catalog/fixtures';
-import type { WishlistItem } from '@/domains/customer/types/wishlist';
+import { requireAuth } from '@/server/auth/auth-middleware';
+import { getCustomerWishlist, mutateCustomerWishlist } from '@/server/customer/customer-service';
+import { handleApiError, readJsonBody, ValidationError } from '@/server/security/http';
+import { applySecurityHeaders } from '@/server/security/headers';
 
 export const dynamic = 'force-dynamic';
 
 const WishlistActionSchema = z.object({
   action: z.enum(['toggle', 'add', 'remove', 'get']),
   productId: z.string().optional(),
-  currentProductIds: z.array(z.string()).default([]),
 });
 
-export async function POST(request: Request): Promise<NextResponse> {
+export async function GET(request: Request): Promise<NextResponse> {
   try {
-    const body = await request.json().catch(() => ({}));
-    const parsed = WishlistActionSchema.safeParse(body);
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid wishlist action payload', details: parsed.error.issues },
-        { status: 400 }
-      );
-    }
-
-    const { action, productId, currentProductIds } = parsed.data;
-    const idSet = new Set(currentProductIds);
-
-    if (action === 'add' && productId) {
-      idSet.add(productId);
-    } else if (action === 'remove' && productId) {
-      idSet.delete(productId);
-    } else if (action === 'toggle' && productId) {
-      if (idSet.has(productId)) {
-        idSet.delete(productId);
-      } else {
-        idSet.add(productId);
-      }
-    }
-
-    const updatedIds = Array.from(idSet);
-    const items: WishlistItem[] = updatedIds.map((id) => {
-      const product = MOCK_PRODUCTS.find((p) => p.id === id);
-      return {
-        productId: id,
-        addedAt: new Date().toISOString(),
-        productSnapshot: product,
-      };
-    });
-
-    return NextResponse.json({
+    const auth = await requireAuth(request);
+    const items = await getCustomerWishlist(auth.customer.id);
+    const res = NextResponse.json({
       success: true,
       data: {
-        productIds: updatedIds,
+        productIds: items.map((i) => i.productId),
         items,
         total: items.length,
       },
     });
+    res.headers.set('Cache-Control', 'no-store');
+    return applySecurityHeaders(res);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { success: false, error: 'Wishlist operation failed', details: message },
-      { status: 500 }
-    );
+    return handleApiError(request, error, 'GET /api/wishlist');
   }
 }
 
-export async function GET(): Promise<NextResponse> {
-  // Returns demo wishlist with curated favorites
-  const sampleProductIds = [MOCK_PRODUCTS[0]?.id, MOCK_PRODUCTS[1]?.id].filter(Boolean) as string[];
-  const items: WishlistItem[] = sampleProductIds.map((id) => ({
-    productId: id,
-    addedAt: new Date().toISOString(),
-    productSnapshot: MOCK_PRODUCTS.find((p) => p.id === id),
-  }));
+export async function POST(request: Request): Promise<NextResponse> {
+  try {
+    const auth = await requireAuth(request);
+    const body = await readJsonBody(request, 16384);
+    const parsed = WishlistActionSchema.safeParse(body);
 
-  return NextResponse.json({
-    success: true,
-    data: {
-      productIds: sampleProductIds,
-      items,
-      total: items.length,
-    },
-  });
+    if (!parsed.success) {
+      throw new ValidationError('Invalid wishlist action payload', parsed.error.flatten().fieldErrors);
+    }
+
+    const { action, productId } = parsed.data;
+    if (action !== 'get' && !productId) {
+      throw new ValidationError('productId is required for wishlist mutations.');
+    }
+
+    const items = await mutateCustomerWishlist(auth.customer.id, action, productId);
+    const res = NextResponse.json({
+      success: true,
+      data: {
+        productIds: items.map((i) => i.productId),
+        items,
+        total: items.length,
+      },
+    });
+    res.headers.set('Cache-Control', 'no-store');
+    return applySecurityHeaders(res);
+  } catch (error) {
+    return handleApiError(request, error, 'POST /api/wishlist');
+  }
 }
-

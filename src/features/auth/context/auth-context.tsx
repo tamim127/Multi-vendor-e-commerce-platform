@@ -1,12 +1,3 @@
-/**
- * ==============================================================================
- * AUTHENTICATION FEATURE — CONTEXT & SESSION ENGINE
- * ==============================================================================
- * Manages customer authentication state, profile updates, and address book CRUD.
- * Security notice: Session tokens are never stored in localStorage.
- * Prepares HttpOnly, SameSite, and Secure cookie session architecture.
- */
-
 'use client';
 
 import * as React from 'react';
@@ -21,28 +12,27 @@ import type {
   RegisterCredentials,
   AuthSession,
 } from '@/domains/customer/types/auth';
-import {
-  DEMO_CUSTOMER,
-  DEMO_PASSWORD,
-  DEMO_ADDRESSES,
-} from '@/domains/customer/fixtures/customer.fixture';
+import { DEMO_ADDRESSES } from '@/domains/customer/fixtures/customer.fixture';
 import {
   LoginSchema,
   RegisterSchema,
   CustomerProfileUpdateSchema,
   AddressUpsertSchema,
 } from '@/domains/customer/schemas';
-import { SESSION_COOKIE_NAME } from '@/domains/customer/utils/auth-security';
+import { buildApiHeaders } from '@/lib/http/csrf';
 
 export interface AuthContextValue {
   customer: Customer | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  authError: string | null;
   addresses: CustomerAddress[];
   session: AuthSession | null;
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>;
   register: (credentials: RegisterCredentials) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  logoutAllDevices: () => Promise<void>;
+  refreshSession: () => Promise<void>;
   updateProfile: (
     input: CustomerProfileUpdateInput
   ) => Promise<{ success: boolean; error?: string }>;
@@ -70,186 +60,195 @@ export function AuthProvider({
     initialCustomer ? DEMO_ADDRESSES : []
   );
   const [session, setSession] = React.useState<AuthSession | null>(null);
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  const [isLoading, setIsLoading] = React.useState<boolean>(!initialCustomer);
+  const [authError, setAuthError] = React.useState<string | null>(null);
 
-  // 1. Initial Session Check: inspect non-sensitive session cookie on client mount
-  React.useEffect(() => {
+  const fetchAddresses = React.useCallback(async () => {
     try {
-      if (typeof document !== 'undefined') {
-        const cookies = document.cookie.split(';');
-        const hasSessionCookie = cookies.some((c) =>
-          c.trim().startsWith(`${SESSION_COOKIE_NAME}=`)
-        );
-
-        if (hasSessionCookie && !customer) {
-          // In demo environment, restore default demo customer session
-          setCustomer(DEMO_CUSTOMER);
-          setAddresses(DEMO_ADDRESSES);
-          setSession({
-            sessionId: 'sess-demo-active',
-            customer: DEMO_CUSTOMER,
-            expiresAt: new Date(Date.now() + 86400000).toISOString(),
-          });
+      const res = await fetch('/api/customer/addresses', { credentials: 'include' });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setAddresses(json.data);
         }
       }
     } catch {
-      // Graceful fallback
-    } finally {
-      setIsLoading(false);
+      // Leave current list
     }
   }, []);
 
-  // Helper to manage session cookie
-  const setSessionCookie = (sessionId: string, rememberMe = false): void => {
-    if (typeof document === 'undefined') return;
-    const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
-    document.cookie = `${SESSION_COOKIE_NAME}=${sessionId}; path=/; max-age=${maxAge}; SameSite=Lax`;
-  };
+  const refreshSession = React.useCallback(async () => {
+    try {
+      setAuthError(null);
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      const json = await res.json().catch(() => null);
 
-  const clearSessionCookie = (): void => {
-    if (typeof document === 'undefined') return;
-    document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
-  };
+      if (!res.ok) {
+        if (res.status === 503) {
+          setAuthError('Authentication database is temporarily unavailable.');
+        }
+        setCustomer(null);
+        setSession(null);
+        setAddresses([]);
+        return;
+      }
 
-  // 2. Login
+      if (json?.data?.isAuthenticated && json.data.customer) {
+        setCustomer(json.data.customer);
+        setSession({
+          sessionId: 'active-db-session',
+          customer: json.data.customer,
+          expiresAt: json.data.expiresAt || new Date(Date.now() + 86400000).toISOString(),
+        });
+        await fetchAddresses();
+      } else {
+        setCustomer(null);
+        setSession(null);
+        setAddresses([]);
+      }
+    } catch {
+      // Graceful offline/test check
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchAddresses]);
+
+  React.useEffect(() => {
+    if (initialCustomer) {
+      setIsLoading(false);
+      return;
+    }
+    void refreshSession();
+  }, [initialCustomer, refreshSession]);
+
   const login = React.useCallback(
     async (credentials: LoginCredentials): Promise<{ success: boolean; error?: string }> => {
-      setIsLoading(true);
-
       const validation = LoginSchema.safeParse(credentials);
       if (!validation.success) {
-        setIsLoading(false);
         return {
           success: false,
           error: validation.error.issues[0]?.message ?? 'Invalid credentials format',
         };
       }
 
-      // Check demo credentials or accepted registered demo accounts
-      const emailLower = credentials.email.toLowerCase();
-      if (
-        emailLower === DEMO_CUSTOMER.email.toLowerCase() &&
-        credentials.password === DEMO_PASSWORD
-      ) {
-        const newSession: AuthSession = {
-          sessionId: `sess-${Date.now()}`,
-          customer: DEMO_CUSTOMER,
-          expiresAt: new Date(Date.now() + 86400000).toISOString(),
-        };
+      setIsLoading(true);
+      setAuthError(null);
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          credentials: 'include',
+          headers: buildApiHeaders(),
+          body: JSON.stringify(credentials),
+        });
+        const json = await res.json().catch(() => null);
 
-        setCustomer(DEMO_CUSTOMER);
-        setAddresses(DEMO_ADDRESSES);
-        setSession(newSession);
-        setSessionCookie(newSession.sessionId, credentials.rememberMe);
-        setIsLoading(false);
+        if (!res.ok || !json?.success) {
+          const msg = json?.error || `Authentication failed (HTTP ${res.status})`;
+          setAuthError(msg);
+          return { success: false, error: msg };
+        }
+
+        const loggedCustomer = json.data.customer as Customer;
+        setCustomer(loggedCustomer);
+        setSession({
+          sessionId: 'active-db-session',
+          customer: loggedCustomer,
+          expiresAt: json.data.expiresAt,
+        });
+        await fetchAddresses();
         return { success: true };
-      }
-
-      // Generic demo fallback: if password matches demo format, allow demo login with dynamic customer
-      if (credentials.password.length >= 8) {
-        const dynamicCustomer: Customer = {
-          id: `cust-${Date.now()}`,
-          email: credentials.email,
-          firstName: credentials.email.split('@')[0] ?? 'Customer',
-          lastName: 'User',
-          status: 'active',
-          emailVerified: true,
-          preferences: {
-            language: 'en',
-            currency: 'USD',
-            newsletterSubscribed: false,
-            orderUpdatesEmail: true,
-            orderUpdatesSms: false,
-            twoFactorEnabled: false,
-          },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        const newSession: AuthSession = {
-          sessionId: `sess-${Date.now()}`,
-          customer: dynamicCustomer,
-          expiresAt: new Date(Date.now() + 86400000).toISOString(),
-        };
-
-        setCustomer(dynamicCustomer);
-        setAddresses(DEMO_ADDRESSES);
-        setSession(newSession);
-        setSessionCookie(newSession.sessionId, credentials.rememberMe);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unable to reach authentication server.';
+        setAuthError(msg);
+        return { success: false, error: msg };
+      } finally {
         setIsLoading(false);
-        return { success: true };
       }
-
-      setIsLoading(false);
-      return {
-        success: false,
-        error: 'Invalid email or password. Use demo credentials or register a new account.',
-      };
     },
-    []
+    [fetchAddresses]
   );
 
-  // 3. Register
   const register = React.useCallback(
     async (credentials: RegisterCredentials): Promise<{ success: boolean; error?: string }> => {
-      setIsLoading(true);
-
       const validation = RegisterSchema.safeParse(credentials);
       if (!validation.success) {
-        setIsLoading(false);
         return {
           success: false,
           error: validation.error.issues[0]?.message ?? 'Invalid registration data',
         };
       }
 
-      const newCustomer: Customer = {
-        id: `cust-${Date.now()}`,
-        email: credentials.email,
-        firstName: credentials.firstName,
-        lastName: credentials.lastName,
-        phoneNumber: credentials.phoneNumber,
-        status: 'active',
-        emailVerified: false,
-        preferences: {
-          language: 'en',
-          currency: 'USD',
-          newsletterSubscribed: false,
-          orderUpdatesEmail: true,
-          orderUpdatesSms: false,
-          twoFactorEnabled: false,
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      setIsLoading(true);
+      setAuthError(null);
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          credentials: 'include',
+          headers: buildApiHeaders(),
+          body: JSON.stringify(credentials),
+        });
+        const json = await res.json().catch(() => null);
 
-      const newSession: AuthSession = {
-        sessionId: `sess-${Date.now()}`,
-        customer: newCustomer,
-        expiresAt: new Date(Date.now() + 86400000).toISOString(),
-      };
+        if (!res.ok || !json?.success) {
+          const msg = json?.error || `Registration failed (HTTP ${res.status})`;
+          setAuthError(msg);
+          return { success: false, error: msg };
+        }
 
-      setCustomer(newCustomer);
-      setAddresses([]);
-      setSession(newSession);
-      setSessionCookie(newSession.sessionId, true);
-      setIsLoading(false);
-      return { success: true };
+        const newCustomer = json.data.customer as Customer;
+        setCustomer(newCustomer);
+        setAddresses([]);
+        setSession({
+          sessionId: 'active-db-session',
+          customer: newCustomer,
+          expiresAt: json.data.expiresAt,
+        });
+        return { success: true };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unable to reach registration server.';
+        setAuthError(msg);
+        return { success: false, error: msg };
+      } finally {
+        setIsLoading(false);
+      }
     },
     []
   );
 
-  // 4. Logout
   const logout = React.useCallback(async (): Promise<void> => {
     setIsLoading(true);
-    setCustomer(null);
-    setAddresses([]);
-    setSession(null);
-    clearSessionCookie();
-    setIsLoading(false);
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+      });
+    } catch {
+      // Clear local state regardless
+    } finally {
+      setCustomer(null);
+      setAddresses([]);
+      setSession(null);
+      setIsLoading(false);
+    }
   }, []);
 
-  // 5. Update Profile
+  const logoutAllDevices = React.useCallback(async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      await fetch('/api/auth/logout-all', {
+        method: 'POST',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+      });
+    } finally {
+      setCustomer(null);
+      setAddresses([]);
+      setSession(null);
+      setIsLoading(false);
+    }
+  }, []);
+
   const updateProfile = React.useCallback(
     async (input: CustomerProfileUpdateInput): Promise<{ success: boolean; error?: string }> => {
       const validation = CustomerProfileUpdateSchema.safeParse(input);
@@ -260,54 +259,47 @@ export function AuthProvider({
         };
       }
 
-      setCustomer((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          firstName: input.firstName,
-          lastName: input.lastName,
-          phoneNumber: input.phoneNumber,
-          avatarUrl: input.avatarUrl || prev.avatarUrl,
-          updatedAt: new Date().toISOString(),
-        };
-      });
+      try {
+        const res = await fetch('/api/customer/profile', {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: buildApiHeaders(),
+          body: JSON.stringify(input),
+        });
+        const json = await res.json().catch(() => null);
+        if (!res.ok || !json?.success) {
+          return { success: false, error: json?.error || 'Failed to update profile' };
+        }
 
-      return { success: true };
+        setCustomer((prev) => (prev ? { ...prev, ...json.data } : json.data));
+        return { success: true };
+      } catch (err) {
+        return { success: false, error: err instanceof Error ? err.message : 'Network error' };
+      }
     },
     []
   );
 
-  // 6. Address CRUD
-  const addAddress = React.useCallback(
-    async (input: AddressUpsertInput): Promise<CustomerAddress> => {
-      const validation = AddressUpsertSchema.safeParse(input);
-      if (!validation.success) {
-        throw new Error(validation.error.issues[0]?.message ?? 'Invalid address');
-      }
+  const addAddress = React.useCallback(async (input: AddressUpsertInput): Promise<CustomerAddress> => {
+    const validation = AddressUpsertSchema.safeParse(input);
+    if (!validation.success) {
+      throw new Error(validation.error.issues[0]?.message ?? 'Invalid address');
+    }
 
-      const newAddress: CustomerAddress = {
-        ...input,
-        id: `addr-${Date.now()}`,
-        customerId: customer?.id ?? 'cust-guest',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      setAddresses((prev) => {
-        let updated = [...prev];
-        if (newAddress.isDefaultShipping) {
-          updated = updated.map((a) => ({ ...a, isDefaultShipping: false }));
-        }
-        if (newAddress.isDefaultBilling) {
-          updated = updated.map((a) => ({ ...a, isDefaultBilling: false }));
-        }
-        return [newAddress, ...updated];
-      });
-
-      return newAddress;
-    },
-    [customer]
-  );
+    const res = await fetch('/api/customer/addresses', {
+      method: 'POST',
+      credentials: 'include',
+      headers: buildApiHeaders(),
+      body: JSON.stringify(input),
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.success) {
+      throw new Error(json?.error || 'Failed to save address');
+    }
+    const created = json.data as CustomerAddress;
+    await fetchAddresses();
+    return created;
+  }, [fetchAddresses]);
 
   const updateAddress = React.useCallback(
     async (addressId: string, input: AddressUpsertInput): Promise<CustomerAddress> => {
@@ -316,72 +308,80 @@ export function AuthProvider({
         throw new Error(validation.error.issues[0]?.message ?? 'Invalid address');
       }
 
-      let updatedAddr: CustomerAddress | null = null;
-
-      setAddresses((prev) => {
-        return prev.map((addr) => {
-          if (addr.id === addressId) {
-            updatedAddr = {
-              ...addr,
-              ...input,
-              updatedAt: new Date().toISOString(),
-            };
-            return updatedAddr;
-          }
-          if (input.isDefaultShipping && addr.id !== addressId) {
-            return { ...addr, isDefaultShipping: false };
-          }
-          if (input.isDefaultBilling && addr.id !== addressId) {
-            return { ...addr, isDefaultBilling: false };
-          }
-          return addr;
-        });
+      const res = await fetch(`/api/customer/addresses/${encodeURIComponent(addressId)}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+        body: JSON.stringify(input),
       });
-
-      if (!updatedAddr) {
-        throw new Error('Address not found');
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error || 'Failed to update address');
       }
-
-      return updatedAddr;
+      await fetchAddresses();
+      return json.data as CustomerAddress;
     },
-    []
+    [fetchAddresses]
   );
 
-  const deleteAddress = React.useCallback(async (addressId: string): Promise<void> => {
-    setAddresses((prev) => prev.filter((a) => a.id !== addressId));
-  }, []);
+  const deleteAddress = React.useCallback(
+    async (addressId: string): Promise<void> => {
+      const res = await fetch(`/api/customer/addresses/${encodeURIComponent(addressId)}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.error || 'Failed to delete address');
+      }
+      await fetchAddresses();
+    },
+    [fetchAddresses]
+  );
 
-  const setDefaultShippingAddress = React.useCallback(async (addressId: string): Promise<void> => {
-    setAddresses((prev) =>
-      prev.map((a) => ({
-        ...a,
-        isDefaultShipping: a.id === addressId,
-      }))
-    );
-  }, []);
+  const setDefaultShippingAddress = React.useCallback(
+    async (addressId: string): Promise<void> => {
+      const res = await fetch(`/api/customer/addresses/${encodeURIComponent(addressId)}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+        body: JSON.stringify({ isDefaultShipping: true }),
+      });
+      if (!res.ok) throw new Error('Failed to update default shipping address');
+      await fetchAddresses();
+    },
+    [fetchAddresses]
+  );
 
-  const setDefaultBillingAddress = React.useCallback(async (addressId: string): Promise<void> => {
-    setAddresses((prev) =>
-      prev.map((a) => ({
-        ...a,
-        isDefaultBilling: a.id === addressId,
-      }))
-    );
-  }, []);
+  const setDefaultBillingAddress = React.useCallback(
+    async (addressId: string): Promise<void> => {
+      const res = await fetch(`/api/customer/addresses/${encodeURIComponent(addressId)}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+        body: JSON.stringify({ isDefaultBilling: true }),
+      });
+      if (!res.ok) throw new Error('Failed to update default billing address');
+      await fetchAddresses();
+    },
+    [fetchAddresses]
+  );
 
   const updatePreferences = React.useCallback(
     async (prefs: Partial<CustomerPreferences>): Promise<void> => {
-      setCustomer((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          preferences: {
-            ...prev.preferences,
-            ...prefs,
-          },
-          updatedAt: new Date().toISOString(),
-        };
+      const res = await fetch('/api/customer/profile', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: buildApiHeaders(),
+        body: JSON.stringify({ preferences: prefs }),
       });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success) {
+        setCustomer((prev) =>
+          prev ? { ...prev, preferences: json.data.preferences || { ...prev.preferences, ...prefs } } : null
+        );
+      }
     },
     []
   );
@@ -389,13 +389,16 @@ export function AuthProvider({
   const value = React.useMemo<AuthContextValue>(() => {
     return {
       customer,
-      isAuthenticated: !!customer,
+      isAuthenticated: Boolean(customer),
       isLoading,
+      authError,
       addresses,
       session,
       login,
       register,
       logout,
+      logoutAllDevices,
+      refreshSession,
       updateProfile,
       addAddress,
       updateAddress,
@@ -407,11 +410,14 @@ export function AuthProvider({
   }, [
     customer,
     isLoading,
+    authError,
     addresses,
     session,
     login,
     register,
     logout,
+    logoutAllDevices,
+    refreshSession,
     updateProfile,
     addAddress,
     updateAddress,
@@ -431,11 +437,14 @@ export function useAuth(): AuthContextValue {
       customer: null,
       isAuthenticated: false,
       isLoading: false,
+      authError: null,
       addresses: [],
       session: null,
       login: async () => ({ success: false, error: 'Auth context not mounted' }),
       register: async () => ({ success: false, error: 'Auth context not mounted' }),
       logout: async () => {},
+      logoutAllDevices: async () => {},
+      refreshSession: async () => {},
       updateProfile: async () => ({ success: false, error: 'Auth context not mounted' }),
       addAddress: async () => {
         throw new Error('Auth context not mounted');

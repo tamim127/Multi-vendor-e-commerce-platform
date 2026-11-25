@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { DEMO_SELLER_PACKAGES } from '@/domains/seller/fixtures/seller-orders.fixture';
+import { requireSellerAccess } from '@/server/auth/auth-middleware';
+import { dispatchPackageForSeller, listSellerPackages } from '@/server/seller/seller-service';
+import {
+  acquireIdempotencyLock,
+  completeIdempotencyRecord,
+  failIdempotencyRecord,
+} from '@/server/db/idempotency-service';
+import { apiSuccess, handleApiError, readJsonBody, ValidationError } from '@/server/security/http';
+import { applySecurityHeaders } from '@/server/security/headers';
 
 export const dynamic = 'force-dynamic';
 
 const UpdateFulfillmentSchema = z.object({
-  packageId: z.string(),
+  packageId: z.string().min(3),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
   carrier: z.string().optional(),
   trackingNumber: z.string().optional(),
@@ -14,79 +22,70 @@ const UpdateFulfillmentSchema = z.object({
 export async function GET(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const query = searchParams.get('q')?.toLowerCase();
+    const requestedSellerId = searchParams.get('sellerId');
+    const { membership } = await requireSellerAccess(request, requestedSellerId);
 
-    let packages = [...DEMO_SELLER_PACKAGES];
+    const status = searchParams.get('status') || undefined;
+    const q = searchParams.get('q') || undefined;
 
-    if (status && status !== 'all') {
-      packages = packages.filter((p) => p.status === status);
-    }
-
-    if (query) {
-      packages = packages.filter(
-        (p) =>
-          p.orderId.toLowerCase().includes(query) ||
-          p.packageId.toLowerCase().includes(query) ||
-          p.customer.name.toLowerCase().includes(query)
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: packages,
-      total: packages.length,
-    });
+    const packages = await listSellerPackages(membership.sellerId, { status, q });
+    return apiSuccess(packages, { meta: { total: packages.length, sellerId: membership.sellerId } });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { success: false, error: 'Failed to retrieve seller orders', details: message },
-      { status: 500 }
-    );
+    return handleApiError(request, error, 'GET /api/seller/orders');
   }
 }
 
 export async function PATCH(request: Request): Promise<NextResponse> {
+  let idemRecordId: string | null = null;
   try {
-    const body = await request.json().catch(() => ({}));
+    const requestedSellerId = new URL(request.url).searchParams.get('sellerId');
+    const { auth, membership } = await requireSellerAccess(request, requestedSellerId);
+    const body = await readJsonBody(request, 16384);
     const parsed = UpdateFulfillmentSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid fulfillment update', errors: parsed.error.flatten().fieldErrors },
-        { status: 400 }
-      );
+      throw new ValidationError('Invalid fulfillment update', parsed.error.flatten().fieldErrors);
     }
 
-    const { packageId, status, carrier, trackingNumber } = parsed.data;
-    const existing = DEMO_SELLER_PACKAGES.find((p) => p.packageId === packageId);
-
-    if (!existing) {
-      return NextResponse.json(
-        { success: false, error: `Package not found: ${packageId}` },
-        { status: 404 }
-      );
+    const idemKey = request.headers.get('idempotency-key') || request.headers.get('x-idempotency-key');
+    if (idemKey) {
+      const idem = await acquireIdempotencyLock({
+        scope: `seller_fulfillment:${membership.sellerId}`,
+        key: idemKey.trim(),
+        payload: parsed.data,
+      });
+      if (idem.kind === 'replay') {
+        const res = NextResponse.json(idem.responseBody, { status: idem.statusCode });
+        res.headers.set('X-Idempotent-Replay', 'true');
+        return applySecurityHeaders(res);
+      }
+      idemRecordId = idem.recordId;
     }
 
-    const updatedPackage = {
-      ...existing,
-      status,
-      carrier: carrier || existing.carrier,
-      trackingNumber: trackingNumber || existing.trackingNumber,
-      dispatchedAt: status === 'shipped' ? new Date().toISOString() : existing.dispatchedAt,
+    const updated = await dispatchPackageForSeller({
+      packageId: parsed.data.packageId,
+      sellerId: membership.sellerId,
+      status: parsed.data.status,
+      carrier: parsed.data.carrier,
+      trackingNumber: parsed.data.trackingNumber,
+      actorId: auth.customer.id,
+    });
+
+    const responseBody = {
+      success: true,
+      data: updated,
+      message: `Package ${parsed.data.packageId} fulfillment status updated to ${parsed.data.status}.`,
     };
 
-    return NextResponse.json({
-      success: true,
-      data: updatedPackage,
-      message: `Package ${packageId} fulfillment status updated to ${status}.`,
-    });
+    if (idemRecordId) {
+      await completeIdempotencyRecord(idemRecordId, 200, responseBody);
+    }
+
+    return applySecurityHeaders(NextResponse.json(responseBody, { status: 200 }));
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { success: false, error: 'Failed to update order fulfillment', details: message },
-      { status: 500 }
-    );
+    if (idemRecordId) {
+      await failIdempotencyRecord(idemRecordId).catch(() => {});
+    }
+    return handleApiError(request, error, 'PATCH /api/seller/orders');
   }
 }
-

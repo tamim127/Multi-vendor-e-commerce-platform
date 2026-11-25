@@ -1,41 +1,17 @@
 import { NextResponse } from 'next/server';
-import {
-  DEMO_ADMIN_KPIS,
-  DEMO_ADMIN_REVENUE_CHART,
-  DEMO_ADMIN_TOP_SELLERS,
-  DEMO_ADMIN_TOP_PRODUCTS,
-} from '@/domains/admin/fixtures/analytics.fixture';
+import { requireAdminPermission } from '@/server/auth/auth-middleware';
+import { getAdminRealMetrics } from '@/server/admin/admin-service';
+import { apiSuccess, handleApiError } from '@/server/security/http';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
-    const { searchParams } = new URL(request.url);
-    const timeframe = searchParams.get('timeframe') || 'last_30_days';
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        kpis: DEMO_ADMIN_KPIS,
-        revenueTrend: DEMO_ADMIN_REVENUE_CHART,
-        topSellers: DEMO_ADMIN_TOP_SELLERS,
-        topProducts: DEMO_ADMIN_TOP_PRODUCTS,
-        timeframe,
-        systemHealth: {
-          uptimePercent: 99.98,
-          avgResponseTimeMs: 42,
-          databaseStatus: 'healthy',
-          searchEngineStatus: 'healthy',
-          escrowServiceStatus: 'active',
-        },
-      },
-    });
+    await requireAdminPermission(request, 'analytics:read');
+    const timeframe = new URL(request.url).searchParams.get('timeframe') || 'last_30_days';
+    const data = await getAdminRealMetrics(timeframe);
+    return apiSuccess(data);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { success: false, error: 'Failed to retrieve admin platform metrics', details: message },
-      { status: 500 }
-    );
+    return handleApiError(request, error, 'GET /api/admin/metrics');
   }
 }
-

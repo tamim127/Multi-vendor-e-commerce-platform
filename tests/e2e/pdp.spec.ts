@@ -108,7 +108,7 @@ test.describe('Phase 2D: Product Detail Page (PDP)', () => {
   test('handles 404 gracefully when navigating to nonexistent product slug', async ({ page }) => {
     const response = await page.goto('/products/this-product-does-not-exist');
     expect([200, 404]).toContain(response?.status());
-    await expect(page.getByText(/Product Not Found/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Product Not Found/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /Back to Products/i })).toBeVisible();
   });
 });

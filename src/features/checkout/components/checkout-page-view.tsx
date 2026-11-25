@@ -33,6 +33,7 @@ import type {
 } from '@/domains/checkout/types/checkout';
 
 import { savePlacedOrderToStorage } from '@/domains/customer/utils/orders';
+import { buildApiHeaders } from '@/lib/http/csrf';
 
 export function CheckoutPageView(): React.JSX.Element {
   const { cart, items, sellerGroups, itemCount, subtotal, shippingTotal, clearCart } = useCart();
@@ -57,8 +58,14 @@ export function CheckoutPageView(): React.JSX.Element {
   });
 
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
   const [confirmedOrder, setConfirmedOrder] = React.useState<CheckoutOrderResult | null>(null);
+  const idempotencyKeyRef = React.useRef<string>(
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? `chk-${crypto.randomUUID()}`
+      : `chk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  );
 
   // Delivery method fee calculation (Standard: base shipping; Express: +$15.00 per package)
   const isExpress = formData.deliveryMethod === 'express';
@@ -113,92 +120,75 @@ export function CheckoutPageView(): React.JSX.Element {
     }
 
     setFieldErrors({});
+    setSubmitError(null);
     setIsSubmitting(true);
 
-    // Simulate reliable idempotent order submission
-    const vendorPackages: CheckoutVendorPackage[] = sellerGroups.map((group) => {
-      const pkgShippingFee = isExpress
-        ? addMoney(
-            group.shippingCost || createMoney(0, cart.currency),
-            createMoney(1500, cart.currency)
-          )
-        : group.shippingCost || createMoney(0, cart.currency);
+    try {
+      const response = await fetch('/api/checkout/place-order', {
+        method: 'POST',
+        credentials: 'include',
+        headers: buildApiHeaders({
+          'Idempotency-Key': idempotencyKeyRef.current,
+        }),
+        body: JSON.stringify({
+          contact: formData.contact,
+          shipping: formData.shipping,
+          deliveryMethod: formData.deliveryMethod,
+          paymentMethod: 'credit_card',
+          idempotencyKey: idempotencyKeyRef.current,
+        }),
+      });
 
-      return {
-        sellerId: group.sellerId,
-        sellerName: group.sellerName,
-        items: group.items,
-        subtotal: group.subtotal,
-        shippingFee: pkgShippingFee,
-        deliveryMethod: formData.deliveryMethod,
-        estimatedDays: isExpress ? '1-2 business days' : '3-5 business days',
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) {
+        const errMsg =
+          response.status === 401
+            ? 'Please sign in to your account before placing an order.'
+            : payload?.error || `Failed to place order (HTTP ${response.status}).`;
+        setSubmitError(errMsg);
+        setIsSubmitting(false);
+        return;
+      }
+
+      const apiOrder = payload.data?.order;
+      const vendorPackages: CheckoutVendorPackage[] =
+        apiOrder?.vendorPackages ||
+        sellerGroups.map((group) => ({
+          sellerId: group.sellerId,
+          sellerName: group.sellerName,
+          items: group.items,
+          subtotal: group.subtotal,
+          shippingFee: createMoney(isExpress ? 1500 : 0, cart.currency),
+          deliveryMethod: formData.deliveryMethod,
+          estimatedDays: isExpress ? '1-2 business days' : '3-5 business days',
+        }));
+
+      const orderResult: CheckoutOrderResult = {
+        orderId: payload.data.orderId,
+        currency: payload.data.currency || cart.currency,
+        itemsSubtotal: apiOrder?.itemsSubtotal || subtotal,
+        shippingTotal: apiOrder?.shippingTotal || effectiveShipping,
+        grandTotal: apiOrder?.grandTotal || createMoney(payload.data.grandTotalMinor, cart.currency),
+        itemCount: apiOrder?.itemCount ?? itemCount,
+        contact: formData.contact,
+        shippingAddress: formData.shipping,
+        vendorPackages,
+        createdAt: apiOrder?.createdAt || new Date().toISOString(),
+        isDemo: false,
+        status: payload.data.status || 'pending_payment',
       };
-    });
 
-    const randomSuffix = Math.floor(100000 + Math.random() * 900000);
-    const orderResult: CheckoutOrderResult = {
-      orderId: `ORD-2026-${randomSuffix}`,
-      currency: cart.currency,
-      itemsSubtotal: subtotal,
-      shippingTotal: effectiveShipping,
-      grandTotal: effectiveGrandTotal,
-      itemCount,
-      contact: formData.contact,
-      shippingAddress: formData.shipping,
-      vendorPackages,
-      createdAt: new Date().toISOString(),
-      isDemo: true,
-      status: 'confirmed',
-    };
+      if (apiOrder) {
+        savePlacedOrderToStorage(apiOrder);
+      }
 
-    // Small delay to simulate network turn and prevent duplicate submission
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
-    // Save placed order into customer order history
-    savePlacedOrderToStorage({
-      orderId: orderResult.orderId,
-      currency: orderResult.currency,
-      itemsSubtotal: orderResult.itemsSubtotal,
-      shippingTotal: orderResult.shippingTotal,
-      grandTotal: orderResult.grandTotal,
-      itemCount: orderResult.itemCount,
-      status: 'processing',
-      createdAt: orderResult.createdAt,
-      updatedAt: orderResult.createdAt,
-      shippingAddress: {
-        id: `addr-${randomSuffix}`,
-        label: 'home',
-        fullName: formData.contact.fullName,
-        streetAddress: formData.shipping.address,
-        streetAddress2: undefined,
-        city: formData.shipping.city,
-        stateOrProvince: formData.shipping.state,
-        postalCode: formData.shipping.postalCode,
-        countryCode: formData.shipping.country,
-        phoneNumber: formData.contact.phone,
-        isDefaultShipping: true,
-        isDefaultBilling: true,
-        createdAt: orderResult.createdAt,
-        updatedAt: orderResult.createdAt,
-      },
-      vendorPackages: orderResult.vendorPackages,
-      isDemo: true,
-      carrier: 'Marketplace Logistics',
-      trackingNumber: `MP-${randomSuffix}`,
-      estimatedDelivery: '3-5 business days',
-      trackingEvents: [
-        {
-          status: 'Order Confirmed',
-          location: 'Marketplace Logistics Hub',
-          timestamp: orderResult.createdAt,
-          description: 'Payment authorized and vendor packaging notification initiated.',
-        },
-      ],
-    });
-
-    setConfirmedOrder(orderResult);
-    clearCart();
-    setIsSubmitting(false);
+      setConfirmedOrder(orderResult);
+      clearCart();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Unable to submit order to backend.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // 1. Order Confirmation View
@@ -717,6 +707,16 @@ export function CheckoutPageView(): React.JSX.Element {
             </div>
 
             {/* Place Order CTA */}
+            {submitError && (
+              <div
+                role="alert"
+                className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive flex items-start gap-2"
+              >
+                <AlertCircle className="size-4 shrink-0 mt-0.5" />
+                <span>{submitError}</span>
+              </div>
+            )}
+
             <div className="pt-2">
               <Button
                 type="submit"

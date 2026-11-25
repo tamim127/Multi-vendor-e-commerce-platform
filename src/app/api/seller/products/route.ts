@@ -1,101 +1,49 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { MOCK_PRODUCTS, MOCK_SELLER_OFFERS } from '@/domains/catalog/fixtures';
-import { createMoney } from '@/domains/catalog/utils/money';
+import { requireSellerAccess } from '@/server/auth/auth-middleware';
+import { createSellerOfferListing, listSellerOffers } from '@/server/seller/seller-service';
+import { apiSuccess, handleApiError, readJsonBody, ValidationError } from '@/server/security/http';
 
 export const dynamic = 'force-dynamic';
 
 const CreateProductOfferSchema = z.object({
+  productId: z.string().optional(),
   title: z.string().min(3),
   sku: z.string().min(3),
   priceMinor: z.number().int().positive(),
   compareAtPriceMinor: z.number().int().positive().optional(),
-  currency: z.string().default('USD'),
+  currency: z.string().length(3).default('USD'),
   stockQuantity: z.number().int().min(0).default(10),
   categoryId: z.string().optional(),
   description: z.string().optional(),
+  imageUrl: z.string().url().optional(),
 });
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
-    const { searchParams } = new URL(request.url);
-    const sellerId = searchParams.get('sellerId') || 'seller-tech-direct';
-
-    // Get seller offers and join with product metadata
-    const offers = MOCK_SELLER_OFFERS.filter((o) => o.sellerId === sellerId);
-    const sellerProducts = offers.map((offer) => {
-      const product = MOCK_PRODUCTS.find((p) => p.id === offer.productId);
-      return {
-        offerId: offer.offerId,
-        productId: offer.productId,
-        title: product?.title.en || 'Marketplace Item',
-        slug: product?.slug || '',
-        price: offer.price,
-        compareAtPrice: offer.compareAtPrice,
-        inventory: offer.inventory,
-        isBuyBoxWinner: offer.isBuyBoxWinner,
-        thumbnail: product?.media[0]?.url || '',
-      };
-    });
-
-    return NextResponse.json({
-      success: true,
-      data: sellerProducts,
-      total: sellerProducts.length,
-    });
+    const requestedSellerId = new URL(request.url).searchParams.get('sellerId');
+    const { membership } = await requireSellerAccess(request, requestedSellerId);
+    const items = await listSellerOffers(membership.sellerId);
+    return apiSuccess(items, { meta: { total: items.length, sellerId: membership.sellerId } });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { success: false, error: 'Failed to retrieve seller products', details: message },
-      { status: 500 }
-    );
+    return handleApiError(request, error, 'GET /api/seller/products');
   }
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const body = await request.json().catch(() => ({}));
+    const requestedSellerId = new URL(request.url).searchParams.get('sellerId');
+    const { auth, membership } = await requireSellerAccess(request, requestedSellerId);
+    const body = await readJsonBody(request, 32768);
     const parsed = CreateProductOfferSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid product listing data', errors: parsed.error.flatten().fieldErrors },
-        { status: 400 }
-      );
+      throw new ValidationError('Invalid product listing data', parsed.error.flatten().fieldErrors);
     }
 
-    const { title, sku, priceMinor, compareAtPriceMinor, currency, stockQuantity } = parsed.data;
-    const now = new Date().toISOString();
-
-    const newOffer = {
-      offerId: `ofr-${Date.now()}`,
-      sellerId: 'seller-tech-direct',
-      productId: `prod-custom-${Date.now()}`,
-      title,
-      sku,
-      price: createMoney(priceMinor, currency as any),
-      compareAtPrice: compareAtPriceMinor ? createMoney(compareAtPriceMinor, currency as any) : undefined,
-      inventory: {
-        state: stockQuantity > 0 ? 'in_stock' : 'out_of_stock',
-        quantityAvailable: stockQuantity,
-        allowsBackorder: false,
-      },
-      isBuyBoxWinner: true,
-      complianceStatus: 'pending_review',
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    return NextResponse.json({
-      success: true,
-      data: newOffer,
-      message: 'Product offer created and queued for marketplace catalog approval',
-    }, { status: 201 });
+    const offer = await createSellerOfferListing(membership.sellerId, auth.customer.id, parsed.data);
+    return apiSuccess(offer, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { success: false, error: 'Failed to create product listing', details: message },
-      { status: 500 }
-    );
+    return handleApiError(request, error, 'POST /api/seller/products');
   }
 }

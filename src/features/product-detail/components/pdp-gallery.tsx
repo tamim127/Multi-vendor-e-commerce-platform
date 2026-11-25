@@ -60,7 +60,7 @@ export function PdpGallery({
   };
 
   const activeAlt =
-    activeMedia?.alt[locale as keyof typeof activeMedia.alt] ??
+    activeMedia?.alt?.[locale as keyof typeof activeMedia.alt] ??
     activeMedia?.alt?.en ??
     productTitle;
 
@@ -131,7 +131,7 @@ export function PdpGallery({
           {mediaList.map((media, idx) => {
             const isSelected = idx === activeIndex;
             const thumbAlt =
-              media.alt[locale as keyof typeof media.alt] ??
+              media.alt?.[locale as keyof typeof media.alt] ??
               media.alt?.en ??
               `${productTitle} thumbnail ${idx + 1}`;
 

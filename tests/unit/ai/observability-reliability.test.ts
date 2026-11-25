@@ -31,13 +31,22 @@ describe('Observability & Reliability Primitives', () => {
     expect(nested['normalField']).toBe('visible-data');
   });
 
-  it('reports operational health status and readiness', () => {
+  it('reports operational health status and readiness', async () => {
     const health = checkSystemHealth();
     expect(health.status).toBe('ok');
     expect(health.services.length).toBeGreaterThanOrEqual(2);
 
-    const readiness = checkSystemReadiness();
+    const healthyPool = {
+      query: vi.fn().mockResolvedValue({ rows: [{ ok: 1 }] }),
+    } as unknown as Parameters<typeof checkSystemReadiness>[0];
+    const readiness = await checkSystemReadiness(healthyPool);
     expect(readiness.ready).toBe(true);
+
+    const failingPool = {
+      query: vi.fn().mockRejectedValue(new Error('ECONNREFUSED')),
+    } as unknown as Parameters<typeof checkSystemReadiness>[0];
+    const notReady = await checkSystemReadiness(failingPool);
+    expect(notReady.ready).toBe(false);
   });
 
   it('withTimeout rejects when operation exceeds time threshold', async () => {

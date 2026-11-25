@@ -52,7 +52,11 @@ test.describe('Phase 3: Shopping Cart & Checkout Flow', () => {
 
     const addToCartBtn = page.getByRole('button', { name: /Add to Cart/i }).first();
     await expect(addToCartBtn).toBeVisible();
+    const addCartSync = page.waitForResponse(
+      (res) => res.url().includes('/api/cart') && res.request().method() === 'POST'
+    );
     await addToCartBtn.click();
+    await addCartSync;
 
     const intentClose = page.getByRole('button', { name: /Got it/i });
     if (await intentClose.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -80,7 +84,11 @@ test.describe('Phase 3: Shopping Cart & Checkout Flow', () => {
 
     const addToCartBtn = page.getByRole('button', { name: /Add to Cart/i }).first();
     await expect(addToCartBtn).toBeVisible();
+    const addCartSync = page.waitForResponse(
+      (res) => res.url().includes('/api/cart') && res.request().method() === 'POST'
+    );
     await addToCartBtn.click();
+    await addCartSync;
 
     const intentClose = page.getByRole('button', { name: /Got it/i });
     if (await intentClose.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -103,7 +111,11 @@ test.describe('Phase 3: Shopping Cart & Checkout Flow', () => {
 
     const addToCartBtn = page.getByRole('button', { name: /Add to Cart/i }).first();
     await expect(addToCartBtn).toBeVisible();
+    const addCartSync = page.waitForResponse(
+      (res) => res.url().includes('/api/cart') && res.request().method() === 'POST'
+    );
     await addToCartBtn.click();
+    await addCartSync;
 
     const intentClose = page.getByRole('button', { name: /Got it/i });
     if (await intentClose.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -127,7 +139,11 @@ test.describe('Phase 3: Shopping Cart & Checkout Flow', () => {
     await page.goto('/products/apple-macbook-pro-16-m3-max');
     const addMacBook = page.getByRole('button', { name: /Add to Cart/i }).first();
     await expect(addMacBook).toBeVisible();
+    const firstSync = page.waitForResponse(
+      (res) => res.url().includes('/api/cart') && res.request().method() === 'POST'
+    );
     await addMacBook.click();
+    await firstSync;
 
     const intentClose1 = page.getByRole('button', { name: /Got it/i });
     if (await intentClose1.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -138,7 +154,11 @@ test.describe('Phase 3: Shopping Cart & Checkout Flow', () => {
     await page.goto('/products/sony-wh-1000xm5-wireless-noise-cancelling-headphones');
     const addSony = page.getByRole('button', { name: /Add to Cart/i }).first();
     await expect(addSony).toBeVisible();
+    const secondSync = page.waitForResponse(
+      (res) => res.url().includes('/api/cart') && res.request().method() === 'POST'
+    );
     await addSony.click();
+    await secondSync;
 
     const intentClose2 = page.getByRole('button', { name: /Got it/i });
     if (await intentClose2.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -157,7 +177,11 @@ test.describe('Phase 3: Shopping Cart & Checkout Flow', () => {
 
     const addToCartBtn = page.getByRole('button', { name: /Add to Cart/i }).first();
     await expect(addToCartBtn).toBeVisible();
+    const addCartSync = page.waitForResponse(
+      (res) => res.url().includes('/api/cart') && res.request().method() === 'POST'
+    );
     await addToCartBtn.click();
+    await addCartSync;
 
     const intentClose = page.getByRole('button', { name: /Got it/i });
     if (await intentClose.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -176,14 +200,31 @@ test.describe('Phase 3: Shopping Cart & Checkout Flow', () => {
     await expect(page.getByText(/3\. Delivery Method/i)).toBeVisible();
   });
 
-  test('8. handles checkout validation and simulates successful order placement', async ({
+  test('8. handles checkout validation and completes authenticated order placement', async ({
     page,
   }) => {
+    // Authenticate a customer in PostgreSQL before placing persistent order
+    await page.context().clearCookies();
+    await page.goto('/register');
+    const uniqueEmail = `checkout.buyer.${Date.now()}@example.com`;
+    await page.locator('#reg-firstName').fill('Alice');
+    await page.locator('#reg-lastName').fill('Customer');
+    await page.locator('#reg-email').fill(uniqueEmail);
+    await page.locator('#reg-password').fill('Valid@Password123');
+    await page.locator('#reg-confirmPassword').fill('Valid@Password123');
+    await page.locator('input[type="checkbox"]').check();
+    await page.getByRole('button', { name: /Sign Up/i }).click();
+    await expect(page).toHaveURL(/\/account/);
+
     await page.goto('/products/apple-macbook-pro-16-m3-max');
 
     const addToCartBtn = page.getByRole('button', { name: /Add to Cart/i }).first();
     await expect(addToCartBtn).toBeVisible();
+    const addCartSync = page.waitForResponse(
+      (res) => res.url().includes('/api/cart') && res.request().method() === 'POST'
+    );
     await addToCartBtn.click();
+    await addCartSync;
 
     const intentClose = page.getByRole('button', { name: /Got it/i });
     if (await intentClose.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -198,7 +239,7 @@ test.describe('Phase 3: Shopping Cart & Checkout Flow', () => {
 
     // 2. Fill required form fields
     await page.fill('#contact-fullName', 'Alice Customer');
-    await page.fill('#contact-email', 'alice@example.com');
+    await page.fill('#contact-email', uniqueEmail);
     await page.fill('#contact-phone', '+1 555-987-6543');
     await page.fill('#shipping-address', '789 Enterprise Way');
     await page.fill('#shipping-city', 'Austin');
@@ -213,7 +254,7 @@ test.describe('Phase 3: Shopping Cart & Checkout Flow', () => {
     await placeOrderBtn.click();
 
     // 5. Confirmation appears
-    await expect(page.getByText(/Order Placed Successfully!/i)).toBeVisible();
+    await expect(page.getByText(/Order Placed Successfully!/i)).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/Order Reference/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /Return to Store/i })).toBeVisible();
   });

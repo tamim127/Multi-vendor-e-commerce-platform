@@ -92,7 +92,10 @@ export function PdpTabs({
               <table className="w-full text-left text-sm">
                 <tbody>
                   {visibleAttributes.map((attr, idx) => {
-                    const label = attr.label[locale as keyof typeof attr.label] ?? attr.label.en;
+                    const label =
+                      attr.label?.[locale as keyof typeof attr.label] ??
+                      attr.label?.en ??
+                      attr.key;
                     const displayVal = attr.displayValue
                       ? (attr.displayValue[locale as keyof typeof attr.displayValue] ??
                         attr.displayValue.en)

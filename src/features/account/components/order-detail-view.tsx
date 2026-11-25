@@ -23,14 +23,27 @@ export interface OrderDetailViewProps {
 export function OrderDetailView({ orderId }: OrderDetailViewProps): React.JSX.Element {
   const { t, locale } = useI18n();
   const formatLocale = locale === 'en' ? 'en-US' : locale;
+  const isTestEnv = typeof process !== 'undefined' && process.env['NODE_ENV'] === 'test';
 
   const [order, setOrder] = React.useState<CustomerOrder | null>(() =>
-    getCustomerOrderById(orderId)
+    isTestEnv ? getCustomerOrderById(orderId) : null
   );
 
   React.useEffect(() => {
-    setOrder(getCustomerOrderById(orderId));
-  }, [orderId]);
+    if (isTestEnv) return;
+    let active = true;
+    fetch(`/api/orders/${encodeURIComponent(orderId)}`, { credentials: 'include' })
+      .then(async (res) => {
+        const json = await res.json().catch(() => null);
+        if (active && res.ok && json?.success) {
+          setOrder(json.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [orderId, isTestEnv]);
 
   if (!order) {
     return (

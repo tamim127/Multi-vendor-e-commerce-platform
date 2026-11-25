@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createMoney } from '@/domains/catalog/utils/money';
-import { groupCartBySeller } from '@/domains/cart/utils/calculations';
-import type { CustomerOrder } from '@/domains/customer/types/order';
+import { requireAuth } from '@/server/auth/auth-middleware';
+import { placeOrderFromCustomerCart, InsufficientStockError } from '@/server/commerce/order-service';
+import { getCustomerOrderById } from '@/server/customer/customer-service';
+import {
+  acquireIdempotencyLock,
+  completeIdempotencyRecord,
+  failIdempotencyRecord,
+} from '@/server/db/idempotency-service';
 import { checkRateLimit } from '@/server/security/rate-limiter';
 import { applySecurityHeaders } from '@/server/security/headers';
+import { ConflictError, handleApiError, readJsonBody, ValidationError } from '@/server/security/http';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,125 +27,114 @@ const PlaceOrderSchema = z.object({
     postalCode: z.string().min(3),
     country: z.string().min(2),
   }),
+  addressId: z.string().optional(),
   deliveryMethod: z.enum(['standard', 'express']).default('standard'),
-  items: z.array(z.any()).min(1, 'Order must contain at least one item'),
-  paymentMethod: z.enum(['credit_card', 'escrow_wallet', 'bank_transfer']).default('credit_card'),
+  paymentMethod: z.enum(['credit_card', 'bank_transfer']).default('credit_card'),
+  idempotencyKey: z.string().min(8).max(128).optional(),
 });
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const rate = checkRateLimit(request, { maxRequests: 30, windowSeconds: 60, prefix: 'checkout_place' });
+  const rate = checkRateLimit(request, { maxRequests: 20, windowSeconds: 60, prefix: 'checkout_place' });
   if (!rate.isAllowed) {
-    const errorRes = NextResponse.json(
-      { success: false, error: 'Too Many Requests', retryAfter: rate.resetSeconds },
-      { status: 429 }
+    return applySecurityHeaders(
+      NextResponse.json(
+        { success: false, error: 'Too Many Requests', retryAfter: rate.resetSeconds },
+        { status: 429 }
+      )
     );
-    return applySecurityHeaders(errorRes);
   }
 
+  let idemRecordId: string | null = null;
+
   try {
-    const body = await request.json().catch(() => ({}));
+    const auth = await requireAuth(request);
+    const body = await readJsonBody(request, 65536);
     const parsed = PlaceOrderSchema.safeParse(body);
 
     if (!parsed.success) {
-      const errRes = NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid order placement request',
-          details: parsed.error.flatten().fieldErrors,
-        },
-        { status: 400 }
-      );
-      return applySecurityHeaders(errRes);
+      throw new ValidationError('Invalid order placement request', parsed.error.flatten().fieldErrors);
     }
 
-    const { contact, shipping, deliveryMethod, items, paymentMethod } = parsed.data;
+    const rawIdemKey =
+      request.headers.get('idempotency-key') ||
+      request.headers.get('x-idempotency-key') ||
+      parsed.data.idempotencyKey;
 
-    // Split items into vendor packages
-    const sellerGroups = groupCartBySeller(items);
-    const orderId = `ORD-2026-${Math.floor(100000 + Math.random() * 900000)}`;
-    const now = new Date().toISOString();
-    const currency = items[0]?.unitPrice?.currency || 'USD';
-
-    let totalAmountMinor = 0;
-    for (const item of items) {
-      const lineTotal = item.lineTotal?.amountMinor ?? (item.unitPrice?.amountMinor * item.quantity);
-      totalAmountMinor += lineTotal;
+    if (!rawIdemKey || rawIdemKey.trim().length < 8) {
+      throw new ValidationError('Idempotency-Key header (min 8 chars) is required for order placement.');
     }
 
-    const shippingMinor = deliveryMethod === 'express' ? 1500 : 0;
-    const grandTotalMinor = totalAmountMinor + shippingMinor;
-
-    const vendorPackages = sellerGroups.map((group) => ({
-      sellerId: group.sellerId,
-      sellerName: group.sellerName,
-      deliveryMethod,
-      shippingFee: createMoney(0, currency),
-      subtotal: group.subtotal,
-      estimatedDays: deliveryMethod === 'express' ? '1-2 business days' : '3-5 business days',
-      items: group.items,
-    }));
-
-    const orderRecord: CustomerOrder = {
-      orderId,
-      customerId: contact.email,
-      currency: currency as any,
-      itemsSubtotal: createMoney(totalAmountMinor, currency as any),
-      shippingTotal: createMoney(shippingMinor, currency as any),
-      grandTotal: createMoney(grandTotalMinor, currency as any),
-      itemCount: items.reduce((acc: number, item: any) => acc + (item.quantity || 1), 0),
-      status: 'pending',
-      createdAt: now,
-      updatedAt: now,
-      shippingAddress: {
-        id: `addr-${Date.now()}`,
-        label: 'home',
-        fullName: contact.fullName,
-        phoneNumber: contact.phone,
-        streetAddress: shipping.address,
-        city: shipping.city,
-        stateOrProvince: shipping.state,
-        postalCode: shipping.postalCode,
-        countryCode: shipping.country,
-        isDefaultShipping: true,
-        isDefaultBilling: true,
-        createdAt: now,
-        updatedAt: now,
+    const idem = await acquireIdempotencyLock({
+      scope: `checkout:${auth.customer.id}`,
+      key: rawIdemKey.trim(),
+      payload: {
+        customerId: auth.customer.id,
+        contact: parsed.data.contact,
+        shipping: parsed.data.shipping,
+        addressId: parsed.data.addressId || null,
+        deliveryMethod: parsed.data.deliveryMethod,
+        paymentMethod: parsed.data.paymentMethod,
       },
-      carrier: deliveryMethod === 'express' ? 'FedEx Priority' : 'Standard Ground Carrier',
-      trackingNumber: `TRK-${Math.floor(100000000 + Math.random() * 900000000)}`,
-      estimatedDelivery: deliveryMethod === 'express' ? 'In 2 days' : 'In 4-5 days',
-      trackingEvents: [
-        {
-          status: 'Order Confirmed',
-          location: 'Aureon Global Clearinghouse',
-          timestamp: now,
-          description: `Order successfully placed and escrow funds secured via ${paymentMethod}.`,
-        },
-      ],
-      vendorPackages,
-    };
+      ttlSeconds: 86400,
+    });
 
-    const response = NextResponse.json({
+    if (idem.kind === 'replay') {
+      const replayRes = NextResponse.json(idem.responseBody, { status: idem.statusCode });
+      replayRes.headers.set('X-Idempotent-Replay', 'true');
+      replayRes.headers.set('Cache-Control', 'no-store');
+      return applySecurityHeaders(replayRes);
+    }
+
+    idemRecordId = idem.recordId;
+
+    const placed = await placeOrderFromCustomerCart({
+      customerId: auth.customer.id,
+      addressId: parsed.data.addressId,
+      shippingAddress: {
+        name: parsed.data.contact.fullName,
+        street: parsed.data.shipping.address,
+        city: parsed.data.shipping.city,
+        state: parsed.data.shipping.state,
+        postalCode: parsed.data.shipping.postalCode,
+        country: parsed.data.shipping.country,
+        phone: parsed.data.contact.phone,
+      },
+      deliveryMethod: parsed.data.deliveryMethod,
+      paymentMethod: parsed.data.paymentMethod,
+      idempotencyKey: rawIdemKey.trim(),
+    });
+
+    const fullOrder = await getCustomerOrderById(auth.customer.id, placed.orderId);
+
+    const responseBody = {
       success: true,
       data: {
-        order: orderRecord,
-        escrowReference: `ESCROW-${Date.now()}`,
-        status: 'confirmed',
-        message: 'Order created successfully and routed to respective multi-vendor merchants.',
+        orderId: placed.orderId,
+        order: fullOrder,
+        status: placed.status,
+        paymentStatus: placed.paymentStatus,
+        paymentGatewayVerified: false,
+        fulfillmentStatus: placed.fulfillmentStatus,
+        grandTotalMinor: placed.grandTotalMinor,
+        currency: placed.currency,
+        packages: placed.packages,
+        message:
+          'Order persisted in pending_payment state with inventory reserved. Payment processor confirmation is required before capture.',
       },
-    }, { status: 201 });
+    };
 
-    response.headers.set('X-RateLimit-Limit', String(rate.limit));
-    response.headers.set('X-RateLimit-Remaining', String(rate.remaining));
-    response.headers.set('X-RateLimit-Reset', String(rate.resetSeconds));
+    await completeIdempotencyRecord(idemRecordId, 201, responseBody);
 
+    const response = NextResponse.json(responseBody, { status: 201 });
+    response.headers.set('Cache-Control', 'no-store');
     return applySecurityHeaders(response);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    const errRes = NextResponse.json(
-      { success: false, error: 'Order processing failed', details: message },
-      { status: 500 }
-    );
-    return applySecurityHeaders(errRes);
+    if (idemRecordId) {
+      await failIdempotencyRecord(idemRecordId).catch(() => {});
+    }
+    if (error instanceof InsufficientStockError) {
+      return handleApiError(request, new ConflictError(error.message), 'POST /api/checkout/place-order');
+    }
+    return handleApiError(request, error, 'POST /api/checkout/place-order');
   }
 }

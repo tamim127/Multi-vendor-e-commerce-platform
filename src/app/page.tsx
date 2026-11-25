@@ -28,7 +28,6 @@ import { AppShell } from '@/components/layout/shell/app-shell';
 import { useCart } from '@/features/cart';
 import { useWishlist } from '@/features/wishlist';
 import { useAIAssistant } from '@/features/ai';
-import { MOCK_PRODUCTS } from '@/domains/catalog/fixtures';
 import type { Product } from '@/domains/catalog/types/product';
 import type { AddToCartInput } from '@/domains/cart/types/cart';
 
@@ -140,39 +139,52 @@ interface CuratedTrendingProduct {
   price: number;
   originalPrice: number;
   image: string;
+  offerId?: string;
+  rawProduct: Product;
 }
 
-function getTrendingProductsForTab(tab: 'popular' | 'best' | 'rated' | 'new'): CuratedTrendingProduct[] {
-  let pool = [...MOCK_PRODUCTS];
+function getTrendingProductsForTab(
+  sourceProducts: Product[],
+  tab: 'popular' | 'best' | 'rated' | 'new'
+): CuratedTrendingProduct[] {
+  let pool = [...sourceProducts];
   if (tab === 'best') {
-    pool = pool.filter((p) => p.badges.some((b) => b.type === 'best_seller'));
+    pool = pool.filter((p) => (p.badges || []).some((b) => b.type === 'best_seller'));
+    if (pool.length === 0) pool = [...sourceProducts];
   } else if (tab === 'rated') {
-    pool = pool.filter((p) => p.ratingSummary.average >= 4.7);
+    pool = pool.filter((p) => (p.ratingSummary?.average ?? 0) >= 4.7);
+    if (pool.length === 0) pool = [...sourceProducts];
   } else if (tab === 'new') {
     pool = pool.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } else {
-    // popular
-    pool = pool.sort((a, b) => b.ratingSummary.count - a.ratingSummary.count);
+    pool = pool.sort((a, b) => (b.ratingSummary?.count ?? 0) - (a.ratingSummary?.count ?? 0));
   }
 
   return pool.slice(0, 5).map((p) => {
     const price = (p.offerSummary?.lowestPrice?.amountMinor || 19900) / 100;
-    const highestPriceMinor = p.offerSummary?.highestPrice?.amountMinor || (p.offerSummary?.lowestPrice?.amountMinor || 19900) * 1.25;
+    const highestPriceMinor =
+      p.offerSummary?.highestPrice?.amountMinor || (p.offerSummary?.lowestPrice?.amountMinor || 19900) * 1.25;
     const originalPrice = Math.round(highestPriceMinor / 100);
-    const discountPercent = originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 20;
-    const reviewCount = p.ratingSummary.count >= 1000 ? `${(p.ratingSummary.count / 1000).toFixed(1)}k` : `${p.ratingSummary.count}`;
-    const img = p.media[0]?.url || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=500&q=80';
+    const discountPercent =
+      originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 15;
+    const cnt = p.ratingSummary?.count ?? 0;
+    const reviewCount = cnt >= 1000 ? `${(cnt / 1000).toFixed(1)}k` : `${cnt}`;
+    const img =
+      p.media?.[0]?.url ||
+      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=500&q=80';
     return {
       id: p.id,
       slug: p.slug,
       title: p.title.en,
-      category: p.categoryBreadcrumbs[p.categoryBreadcrumbs.length - 1]?.name.en || p.brand.name,
+      category: p.categoryBreadcrumbs?.[p.categoryBreadcrumbs.length - 1]?.name.en || p.brand.name,
       badge: `-${discountPercent}%`,
-      rating: p.ratingSummary.average,
+      rating: p.ratingSummary?.average ?? 4.5,
       reviews: reviewCount,
       price,
       originalPrice,
       image: img,
+      offerId: p.offerSummary?.buyBoxOfferId,
+      rawProduct: p,
     };
   });
 }
@@ -227,9 +239,28 @@ export default function HomePage(): React.JSX.Element {
   const [slideIndex, setSlideIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Trending filter tabs
+  // Trending filter tabs backed by PostgreSQL API
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
   const [trendingTab, setTrendingTab] = useState<'popular' | 'best' | 'rated' | 'new'>('popular');
-  const visibleTrendingProducts = useMemo(() => getTrendingProductsForTab(trendingTab), [trendingTab]);
+  const visibleTrendingProducts = useMemo(
+    () => getTrendingProductsForTab(catalogProducts, trendingTab),
+    [catalogProducts, trendingTab]
+  );
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/catalog/products?limit=24&sort=rating_desc')
+      .then((r) => r.json())
+      .then((json) => {
+        if (active && json?.success && Array.isArray(json.data)) {
+          setCatalogProducts(json.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Live Flash Deal countdown
   const [countdown, setCountdown] = useState({
@@ -277,9 +308,9 @@ export default function HomePage(): React.JSX.Element {
       slug: product.slug,
       title: { en: product.title },
       imageUrl: product.image,
-      offerId: `offer-${product.id}`,
+      offerId: product.offerId || `offer-${product.id}`,
       sellerId: 'seller-tech-direct',
-      sellerName: 'Aureon Official Flagship',
+      sellerName: product.rawProduct.brand.name || 'Aureon Verified Merchant',
       unitPrice: {
         amountMinor: Math.round(product.price * 100),
         currency: 'USD',
@@ -292,16 +323,7 @@ export default function HomePage(): React.JSX.Element {
 
   // Toggle wishlist from trending cards
   const handleToggleWishlist = (prod: CuratedTrendingProduct) => {
-    const existing =
-      MOCK_PRODUCTS.find((p) => p.id === prod.id || p.slug === prod.slug) ||
-      ({
-        ...MOCK_PRODUCTS[0]!,
-        id: prod.id,
-        slug: prod.slug,
-        title: { en: prod.title },
-      } as Product);
-
-    const added = toggleWishlist(existing);
+    const added = toggleWishlist(prod.rawProduct);
     triggerToast(added ? `Added ${prod.title} to wishlist` : `Removed from wishlist`);
   };
 
@@ -654,11 +676,13 @@ export default function HomePage(): React.JSX.Element {
               <div>
                 <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider">
                   <span className="h-0.5 w-5 bg-amber-500 inline-block" />
-                  <span>Trending Marketplace Selections</span>
+                  <h2 className="text-xs font-bold uppercase tracking-wider">
+                    Trending Marketplace Selections
+                  </h2>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-fg-primary tracking-tight mt-1">
+                <p className="text-xl sm:text-2xl font-bold text-fg-primary tracking-tight mt-1">
                   Most popular items this week
-                </h2>
+                </p>
               </div>
 
               {/* Filter Tabs & Arrows */}

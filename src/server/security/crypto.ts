@@ -1,42 +1,44 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
+import argon2 from 'argon2';
 
 /**
  * Enterprise Cryptographic Utilities
- * Uses Web Crypto / Node.js crypto for zero-dependency high performance security.
+ * Uses Argon2id for password hashing and SHA-256 for high-entropy token storage at rest.
  */
 
-const PBKDF2_ITERATIONS = 10000;
-const PBKDF2_KEYLEN = 64;
-const PBKDF2_DIGEST = 'sha512';
+const ARGON2_OPTIONS = {
+  type: argon2.argon2id,
+  memoryCost: 65536, // 64 MiB
+  timeCost: 3,
+  parallelism: 4,
+} as const;
 
 /**
- * Hashes a plaintext password with a unique cryptographic 16-byte salt using PBKDF2.
- * Returns format: $pbkdf2$<iterations>$<saltHex>$<hashHex>
+ * Hashes a plaintext password using Argon2id.
  */
 export async function hashPassword(password: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const salt = crypto.randomBytes(16).toString('hex');
-    crypto.pbkdf2(
-      password,
-      salt,
-      PBKDF2_ITERATIONS,
-      PBKDF2_KEYLEN,
-      PBKDF2_DIGEST,
-      (err, derivedKey) => {
-        if (err) return reject(err);
-        resolve(`$pbkdf2$${PBKDF2_ITERATIONS}$${salt}$${derivedKey.toString('hex')}`);
-      }
-    );
-  });
+  return argon2.hash(password, ARGON2_OPTIONS);
 }
 
 /**
- * Verifies a plaintext password against a stored PBKDF2 hash using timing-safe comparison.
+ * Verifies a plaintext password against a stored Argon2id hash (or legacy PBKDF2 hash during transition).
  */
 export async function verifyPassword(
   password: string,
   storedHash: string
 ): Promise<boolean> {
+  if (!password || !storedHash) return false;
+
+  // Argon2id verification
+  if (storedHash.startsWith('$argon2')) {
+    try {
+      return await argon2.verify(storedHash, password);
+    } catch {
+      return false;
+    }
+  }
+
+  // Legacy PBKDF2 support if an older seeded hash exists
   return new Promise((resolve) => {
     try {
       const parts = storedHash.split('$');
@@ -48,23 +50,14 @@ export async function verifyPassword(
       const salt = parts[3]!;
       const hash = parts[4]!;
 
-      crypto.pbkdf2(
-        password,
-        salt,
-        iterations,
-        PBKDF2_KEYLEN,
-        PBKDF2_DIGEST,
-        (err, derivedKey) => {
-          if (err) return resolve(false);
-
-          const hashBuffer = Buffer.from(hash, 'hex');
-          if (hashBuffer.length !== derivedKey.length) {
-            return resolve(false);
-          }
-
-          resolve(crypto.timingSafeEqual(hashBuffer, derivedKey));
+      crypto.pbkdf2(password, salt, iterations, 64, 'sha512', (err, derivedKey) => {
+        if (err) return resolve(false);
+        const hashBuffer = Buffer.from(hash, 'hex');
+        if (hashBuffer.length !== derivedKey.length) {
+          return resolve(false);
         }
-      );
+        resolve(crypto.timingSafeEqual(hashBuffer, derivedKey));
+      });
     } catch {
       resolve(false);
     }
@@ -72,9 +65,49 @@ export async function verifyPassword(
 }
 
 /**
- * Generates a cryptographically strong random token (e.g. for CSRF, session, or API keys).
+ * Generates a cryptographically strong random token (hex encoded).
  */
 export function generateSecureToken(bytes = 32): string {
   return crypto.randomBytes(bytes).toString('hex');
 }
 
+/**
+ * Computes a SHA-256 hex digest for storing session, CSRF, reset, or verification tokens at rest.
+ */
+export function hashToken(rawToken: string): string {
+  return crypto.createHash('sha256').update(rawToken, 'utf8').digest('hex');
+}
+
+/**
+ * Constant-time comparison of two SHA-256 hex strings.
+ */
+export function timingSafeEqualHex(aHex: string, bHex: string): boolean {
+  try {
+    const aBuf = Buffer.from(aHex, 'hex');
+    const bBuf = Buffer.from(bHex, 'hex');
+    if (aBuf.length === 0 || aBuf.length !== bBuf.length) {
+      return false;
+    }
+    return crypto.timingSafeEqual(aBuf, bBuf);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Deterministic canonical JSON payload fingerprint for durable idempotency checks.
+ */
+export function computePayloadHash(payload: unknown): string {
+  const stableStringify = (val: unknown): string => {
+    if (val === null || typeof val !== 'object') {
+      return JSON.stringify(val);
+    }
+    if (Array.isArray(val)) {
+      return `[${val.map(stableStringify).join(',')}]`;
+    }
+    const keys = Object.keys(val as Record<string, unknown>).sort();
+    return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify((val as Record<string, unknown>)[k])}`).join(',')}}`;
+  };
+
+  return crypto.createHash('sha256').update(stableStringify(payload), 'utf8').digest('hex');
+}

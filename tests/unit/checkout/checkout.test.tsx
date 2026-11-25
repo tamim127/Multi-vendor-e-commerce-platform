@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { CartProvider } from '@/features/cart';
 import { CheckoutPageView } from '@/features/checkout/components/checkout-page-view';
 import { CheckoutFormSchema } from '@/domains/checkout/schemas/checkout.schema';
@@ -67,6 +67,10 @@ describe('Checkout Domain & UI Suite', () => {
     if (typeof window !== 'undefined' && window.localStorage) {
       window.localStorage.clear();
     }
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('CheckoutFormSchema', () => {
@@ -150,6 +154,44 @@ describe('Checkout Domain & UI Suite', () => {
     });
 
     it('submits order successfully and renders order confirmation when fields are valid', async () => {
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              orderId: 'ord-unit-123456',
+              currency: 'USD',
+              status: 'pending_payment',
+              paymentStatus: 'pending_payment',
+              grandTotalMinor: 291300,
+              order: {
+                orderId: 'ord-unit-123456',
+                currency: 'USD',
+                itemsSubtotal: createMoney(289800, 'USD'),
+                shippingTotal: createMoney(1500, 'USD'),
+                grandTotal: createMoney(291300, 'USD'),
+                itemCount: 2,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                vendorPackages: [
+                  {
+                    sellerId: 'seller-official',
+                    sellerName: 'Apple Flagship Store',
+                    deliveryMethod: 'standard',
+                    shippingFee: createMoney(0, 'USD'),
+                    subtotal: createMoney(249900, 'USD'),
+                    estimatedDays: '3-5 business days',
+                    items: [mockItems[0]!],
+                  },
+                ],
+              },
+            },
+          }),
+          { status: 201, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
       renderCheckoutWithProviders(<CheckoutPageView />, { initialItems: mockItems });
 
       // Fill in required fields
@@ -172,6 +214,10 @@ describe('Checkout Domain & UI Suite', () => {
 
       await waitFor(
         () => {
+          expect(fetchSpy).toHaveBeenCalledWith(
+            '/api/checkout/place-order',
+            expect.objectContaining({ method: 'POST' })
+          );
           expect(screen.getByText(/Order Placed Successfully!/i)).toBeDefined();
           expect(screen.getByText(/Order Reference/i)).toBeDefined();
           expect(screen.getByText(/Return to Store/i)).toBeDefined();

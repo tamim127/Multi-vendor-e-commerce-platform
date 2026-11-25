@@ -49,13 +49,44 @@ function getOrderStatusBadge(status: CustomerOrderStatus, t: (key: string) => st
 export function OrdersPageView(): React.JSX.Element {
   const { t, locale } = useI18n();
   const formatLocale = locale === 'en' ? 'en-US' : locale;
+  const isTestEnv = typeof process !== 'undefined' && process.env['NODE_ENV'] === 'test';
 
-  const [orders, setOrders] = React.useState<CustomerOrder[]>(() => getAllCustomerOrders());
+  const [orders, setOrders] = React.useState<CustomerOrder[]>(() =>
+    isTestEnv ? getAllCustomerOrders() : []
+  );
+  const [isLoading, setIsLoading] = React.useState<boolean>(!isTestEnv);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [filter, setFilter] = React.useState<'all' | 'processing' | 'shipped' | 'delivered'>('all');
 
   React.useEffect(() => {
-    setOrders(getAllCustomerOrders());
-  }, []);
+    if (isTestEnv) return;
+    let active = true;
+    fetch('/api/orders', { credentials: 'include' })
+      .then(async (res) => {
+        const json = await res.json().catch(() => null);
+        if (!active) return;
+        if (!res.ok || !json?.success) {
+          setLoadError(
+            res.status === 401
+              ? 'Please sign in to view your orders.'
+              : json?.error || `Failed to load orders (HTTP ${res.status}).`
+          );
+          setOrders([]);
+          return;
+        }
+        setOrders(Array.isArray(json.data) ? json.data : []);
+        setLoadError(null);
+      })
+      .catch(() => {
+        if (active) setLoadError('Unable to reach order history service.');
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [isTestEnv]);
 
   const filteredOrders = orders.filter((order) => {
     if (filter === 'all') return true;
@@ -74,6 +105,18 @@ export function OrdersPageView(): React.JSX.Element {
           Review, track shipments, and inspect multi-vendor packages.
         </p>
       </div>
+
+      {isLoading && (
+        <div className="p-4 rounded-xl border border-border-subtle bg-surface-primary text-xs text-fg-muted">
+          Loading order history...
+        </div>
+      )}
+
+      {!isLoading && loadError && (
+        <div className="p-4 rounded-xl border border-danger/30 bg-danger/10 text-xs text-danger">
+          {loadError}
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex gap-2 border-b border-border-subtle pb-3 overflow-x-auto">

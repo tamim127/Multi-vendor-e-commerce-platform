@@ -1,11 +1,3 @@
-/**
- * ==============================================================================
- * SHOPPING CART FEATURE — REACT CONTEXT & STATE PROVIDER
- * ==============================================================================
- * Central reactive cart state with hydration-safe localStorage persistence,
- * multi-vendor grouping, and currency safety.
- */
-
 'use client';
 
 import * as React from 'react';
@@ -14,7 +6,6 @@ import type {
   Cart,
   CartItem,
   CartSellerGroup,
-  CartStorageState,
 } from '@/domains/cart/types/cart';
 import type { CurrencyCode, Money } from '@/domains/catalog/types/pricing';
 import {
@@ -23,10 +14,8 @@ import {
   removeItemFromCart,
   updateItemQuantity,
 } from '@/domains/cart/utils/calculations';
-import { CartStorageStateSchema } from '@/domains/cart/schemas/cart.schema';
-
-const CART_STORAGE_KEY = 'marketplace_cart_v1';
-const CART_STORAGE_VERSION = 1;
+import { buildApiHeaders } from '@/lib/http/csrf';
+import { useAuth } from '@/features/auth/context/auth-context';
 
 export interface CartContextValue {
   cart: Cart;
@@ -41,6 +30,7 @@ export interface CartContextValue {
   isHydrated: boolean;
   isDrawerOpen: boolean;
   currencyMismatchError: string | null;
+  cartError: string | null;
   openDrawer: () => void;
   closeDrawer: () => void;
   toggleDrawer: () => void;
@@ -51,10 +41,10 @@ export interface CartContextValue {
   decreaseQuantity: (itemId: string) => void;
   clearCart: () => void;
   clearCurrencyMismatch: () => void;
+  refreshCart: () => Promise<void>;
 }
 
 const CartContext = React.createContext<CartContextValue | null>(null);
-
 const EMPTY_INITIAL_ITEMS: CartItem[] = [];
 
 export interface CartProviderProps {
@@ -68,68 +58,75 @@ export function CartProvider({
   initialItems = EMPTY_INITIAL_ITEMS,
   defaultCurrency = 'USD',
 }: CartProviderProps): React.JSX.Element {
+  const hasInjectedItems = initialItems.length > 0;
+  const { customer, isLoading: authLoading } = useAuth();
   const [items, setItems] = React.useState<CartItem[]>(initialItems);
   const [currency, setCurrency] = React.useState<CurrencyCode>(defaultCurrency);
-  const [isHydrated, setIsHydrated] = React.useState<boolean>(false);
+  const [isHydrated, setIsHydrated] = React.useState<boolean>(hasInjectedItems);
   const [isDrawerOpen, setIsDrawerOpen] = React.useState<boolean>(false);
   const [currencyMismatchError, setCurrencyMismatchError] = React.useState<string | null>(null);
+  const [cartError, setCartError] = React.useState<string | null>(null);
 
-  // 1. Initial hydration read from localStorage (client only, once on mount)
-  React.useEffect(() => {
+  const refreshCart = React.useCallback(async () => {
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const raw = window.localStorage.getItem(CART_STORAGE_KEY);
-        if (raw && raw.trim().startsWith('{') && (!initialItems || initialItems.length === 0)) {
-          const parsed = JSON.parse(raw);
-          const validation = CartStorageStateSchema.safeParse(parsed);
-          if (validation.success && Array.isArray(validation.data.items)) {
-            setItems(validation.data.items);
-            setCurrency(validation.data.currency);
-          }
-        }
+      const res = await fetch('/api/cart', { credentials: 'include' });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success && json.data) {
+        setItems(json.data.items || []);
+        setCurrency((json.data.currency || 'USD') as CurrencyCode);
+        setCartError(null);
+      } else if (!res.ok && json?.error) {
+        setCartError(json.error);
       }
     } catch {
-      // Graceful fallback for private mode or corrupt storage: retain defaults
+      // Offline / isolated test render
     } finally {
       setIsHydrated(true);
     }
   }, []);
 
-  // 2. Persist to localStorage whenever items or currency change (only after hydration)
   React.useEffect(() => {
-    if (!isHydrated) return;
-
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const storagePayload: CartStorageState = {
-          version: CART_STORAGE_VERSION,
-          currency,
-          items,
-          updatedAt: new Date().toISOString(),
-        };
-        window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(storagePayload));
-      }
-    } catch {
-      // Graceful fallback if localStorage writes fail
+    if (hasInjectedItems) {
+      setIsHydrated(true);
+      return;
     }
-  }, [items, currency, isHydrated]);
+    if (authLoading) return;
+    void refreshCart();
+  }, [hasInjectedItems, authLoading, customer?.id, refreshCart]);
 
-  // 3. Derived authoritative Cart projections
-  const cart = React.useMemo(() => {
-    return buildCartState(items, currency);
-  }, [items, currency]);
+  const cart = React.useMemo(() => buildCartState(items, currency), [items, currency]);
 
-  // Operations
   const openDrawer = React.useCallback(() => setIsDrawerOpen(true), []);
   const closeDrawer = React.useCallback(() => setIsDrawerOpen(false), []);
   const toggleDrawer = React.useCallback(() => setIsDrawerOpen((prev) => !prev), []);
   const clearCurrencyMismatch = React.useCallback(() => setCurrencyMismatchError(null), []);
 
+  const syncCartMutation = React.useCallback(async (payload: Record<string, unknown>) => {
+    try {
+      const res = await fetch('/api/cart', {
+        method: 'POST',
+        credentials: 'include',
+        keepalive: true,
+        headers: buildApiHeaders(),
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success && json.data) {
+        setItems(json.data.items || []);
+        setCurrency((json.data.currency || 'USD') as CurrencyCode);
+        setCartError(null);
+      } else if (json?.error) {
+        setCartError(json.error);
+        setCurrencyMismatchError(json.error);
+      }
+    } catch (err) {
+      setCartError(err instanceof Error ? err.message : 'Cart synchronization failed');
+    }
+  }, []);
+
   const addItem = React.useCallback(
     (input: AddToCartInput): boolean => {
-      // If cart is empty, adopt the added item's currency
       const activeCurrency = items.length === 0 ? input.unitPrice.currency : currency;
-
       const result = mergeOrAddItem(items, input, activeCurrency);
 
       if (result.error) {
@@ -143,39 +140,71 @@ export function CartProvider({
       }
       setItems(result.items);
       setIsDrawerOpen(true);
+
+      if (!hasInjectedItems) {
+        void syncCartMutation({
+          action: 'add',
+          productId: input.productId,
+          offerId: input.offerId,
+          variantId: input.variantId,
+          variantLabel: input.selectedOptions
+            ? Object.entries(input.selectedOptions)
+                .map(([k, v]) => `${k}: ${v}`)
+                .join(' / ')
+            : undefined,
+          quantity: input.quantity,
+        });
+      }
       return true;
     },
-    [items, currency]
+    [items, currency, hasInjectedItems, syncCartMutation]
   );
 
-  const removeItem = React.useCallback((itemId: string) => {
-    setItems((prev) => removeItemFromCart(prev, itemId));
-  }, []);
+  const removeItem = React.useCallback(
+    (itemId: string) => {
+      setItems((prev) => removeItemFromCart(prev, itemId));
+      if (!hasInjectedItems) {
+        void syncCartMutation({ action: 'remove', itemId });
+      }
+    },
+    [hasInjectedItems, syncCartMutation]
+  );
 
-  const updateQuantity = React.useCallback((itemId: string, quantity: number) => {
-    setItems((prev) => updateItemQuantity(prev, itemId, quantity));
-  }, []);
+  const updateQuantity = React.useCallback(
+    (itemId: string, quantity: number) => {
+      setItems((prev) => updateItemQuantity(prev, itemId, quantity));
+      if (!hasInjectedItems) {
+        void syncCartMutation({ action: 'update', itemId, quantity });
+      }
+    },
+    [hasInjectedItems, syncCartMutation]
+  );
 
-  const increaseQuantity = React.useCallback((itemId: string) => {
-    setItems((prev) => {
-      const item = prev.find((i) => i.id === itemId);
-      if (!item) return prev;
-      return updateItemQuantity(prev, itemId, item.quantity + 1);
-    });
-  }, []);
+  const increaseQuantity = React.useCallback(
+    (itemId: string) => {
+      const found = items.find((i) => i.id === itemId);
+      if (!found) return;
+      updateQuantity(itemId, found.quantity + 1);
+    },
+    [items, updateQuantity]
+  );
 
-  const decreaseQuantity = React.useCallback((itemId: string) => {
-    setItems((prev) => {
-      const item = prev.find((i) => i.id === itemId);
-      if (!item) return prev;
-      return updateItemQuantity(prev, itemId, item.quantity - 1);
-    });
-  }, []);
+  const decreaseQuantity = React.useCallback(
+    (itemId: string) => {
+      const found = items.find((i) => i.id === itemId);
+      if (!found) return;
+      updateQuantity(itemId, found.quantity - 1);
+    },
+    [items, updateQuantity]
+  );
 
   const clearCart = React.useCallback(() => {
     setItems([]);
     setCurrencyMismatchError(null);
-  }, []);
+    if (!hasInjectedItems) {
+      void syncCartMutation({ action: 'clear' });
+    }
+  }, [hasInjectedItems, syncCartMutation]);
 
   const contextValue: CartContextValue = React.useMemo(
     () => ({
@@ -191,6 +220,7 @@ export function CartProvider({
       isHydrated,
       isDrawerOpen,
       currencyMismatchError,
+      cartError,
       openDrawer,
       closeDrawer,
       toggleDrawer,
@@ -201,6 +231,7 @@ export function CartProvider({
       decreaseQuantity,
       clearCart,
       clearCurrencyMismatch,
+      refreshCart,
     }),
     [
       cart,
@@ -208,6 +239,7 @@ export function CartProvider({
       isHydrated,
       isDrawerOpen,
       currencyMismatchError,
+      cartError,
       openDrawer,
       closeDrawer,
       toggleDrawer,
@@ -218,6 +250,7 @@ export function CartProvider({
       decreaseQuantity,
       clearCart,
       clearCurrencyMismatch,
+      refreshCart,
     ]
   );
 
@@ -239,6 +272,7 @@ const defaultCartContextValue: CartContextValue = {
   isHydrated: true,
   isDrawerOpen: false,
   currencyMismatchError: null,
+  cartError: null,
   openDrawer: () => {},
   closeDrawer: () => {},
   toggleDrawer: () => {},
@@ -249,6 +283,7 @@ const defaultCartContextValue: CartContextValue = {
   decreaseQuantity: () => {},
   clearCart: () => {},
   clearCurrencyMismatch: () => {},
+  refreshCart: async () => {},
 };
 
 export function useCart(): CartContextValue {

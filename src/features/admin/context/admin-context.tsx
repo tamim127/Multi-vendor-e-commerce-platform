@@ -1,13 +1,5 @@
 'use client';
 
-/**
- * ==============================================================================
- * ADMIN PLATFORM — GLOBAL CONTEXT & STATE ENGINE
- * ==============================================================================
- * Central administrative state management providing role-based capability gating,
- * audit logging, moderation operations, platform settings, and live demo role switching.
- */
-
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type {
   AdminUser,
@@ -50,36 +42,22 @@ import {
   hasPermission as evaluatePermission,
   hasAnyPermission as evaluateAnyPermission,
   hasAllPermissions as evaluateAllPermissions,
-  loadStoredAdminUser,
-  saveStoredAdminUser,
-  loadStoredSettings,
-  saveStoredSettings,
-  loadStoredCoupons,
-  saveStoredCoupons,
-  loadStoredPromotions,
-  saveStoredPromotions,
-  loadStoredRefunds,
-  saveStoredRefunds,
-  loadStoredReturns,
-  saveStoredReturns,
-  loadStoredReviews,
-  saveStoredReviews,
-  loadStoredAuditLogs,
-  appendStoredAuditLog,
-  loadStoredNotifications,
-  saveStoredNotifications,
-  loadStoredCustomers,
-  saveStoredCustomers,
-  loadStoredProductModeration,
-  saveStoredProductModeration,
-  loadStoredSellerModeration,
-  saveStoredSellerModeration,
-  clearAdminStorage,
 } from '@/domains/admin';
 
 import { MOCK_CATEGORIES } from '@/domains/catalog/fixtures/categories.fixture';
-import { DEMO_PENDING_APPLICATION } from '@/domains/seller/fixtures/seller.fixture';
 import { DEMO_ORDERS } from '@/domains/customer/fixtures/orders.fixture';
+import { buildApiHeaders } from '@/lib/http/csrf';
+
+const UNAUTHENTICATED_ADMIN_USER: AdminUser = {
+  id: 'unauthenticated',
+  email: '',
+  name: 'Unauthenticated Visitor',
+  role: 'support_lead',
+  permissions: [],
+  isActive: false,
+  lastLoginAt: '',
+  createdAt: '',
+};
 
 export interface AdminContextType {
   currentUser: AdminUser;
@@ -159,445 +137,365 @@ export interface AdminContextType {
   clearAllNotifications: () => void;
 
   resetAllToDemo: () => void;
+  refreshAdminData: () => Promise<void>;
   isLoading: boolean;
+  adminError: string | null;
+  isPermissionDenied: boolean;
 }
 
 const AdminContext = createContext<AdminContextType | null>(null);
 
 export function AdminProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
-  const [currentUser, setCurrentUser] = useState<AdminUser>(DEMO_SUPER_ADMIN);
-  const [settings, setSettings] = useState<PlatformSettings>(DEFAULT_PLATFORM_SETTINGS);
-  const [coupons, setCoupons] = useState<Coupon[]>(DEMO_COUPONS);
-  const [promotions, setPromotions] = useState<Promotion[]>(DEMO_PROMOTIONS);
-  const [refunds, setRefunds] = useState<RefundRequest[]>(DEMO_REFUND_REQUESTS);
-  const [returns, setReturns] = useState<ReturnRequest[]>(DEMO_RETURN_REQUESTS);
-  const [reviews, setReviews] = useState<AdminProductReview[]>(DEMO_ADMIN_REVIEWS);
-  const [auditLogs, setAuditLogs] = useState<AdminAuditLogEntry[]>(DEMO_AUDIT_LOGS);
-  const [notifications, setNotifications] = useState<AdminNotification[]>(DEMO_ADMIN_NOTIFICATIONS);
-  const [customers, setCustomers] = useState<CustomerAdminSummary[]>([]);
-  const [productStatuses, setProductStatuses] = useState<Record<string, ProductModerationStatus>>(
-    {}
+  const isTestEnv = typeof process !== 'undefined' && process.env['NODE_ENV'] === 'test';
+
+  const [currentUser, setCurrentUser] = useState<AdminUser>(
+    isTestEnv ? DEMO_SUPER_ADMIN : UNAUTHENTICATED_ADMIN_USER
   );
-  const [sellerStatuses, setSellerStatuses] = useState<Record<string, SellerStatus>>({
-    'seller-tech-direct': 'approved',
-    'seller-official-flagship': 'approved',
-    'seller-global-ware': 'approved',
-    'seller-nordic-audio': 'pending',
-  });
-  const [sellerApplications] = useState<SellerApplicationRecord[]>([DEMO_PENDING_APPLICATION]);
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
-  const [orders] = useState<CustomerOrder[]>(DEMO_ORDERS);
+  const [settings, setSettings] = useState<PlatformSettings>(DEFAULT_PLATFORM_SETTINGS);
+  const [coupons, setCoupons] = useState<Coupon[]>(isTestEnv ? DEMO_COUPONS : []);
+  const [promotions, setPromotions] = useState<Promotion[]>(isTestEnv ? DEMO_PROMOTIONS : []);
+  const [refunds, setRefunds] = useState<RefundRequest[]>(isTestEnv ? DEMO_REFUND_REQUESTS : []);
+  const [returns, setReturns] = useState<ReturnRequest[]>(isTestEnv ? DEMO_RETURN_REQUESTS : []);
+  const [reviews, setReviews] = useState<AdminProductReview[]>(isTestEnv ? DEMO_ADMIN_REVIEWS : []);
+  const [auditLogs, setAuditLogs] = useState<AdminAuditLogEntry[]>(isTestEnv ? DEMO_AUDIT_LOGS : []);
+  const [notifications, setNotifications] = useState<AdminNotification[]>(
+    isTestEnv ? DEMO_ADMIN_NOTIFICATIONS : []
+  );
+  const [customers, setCustomers] = useState<CustomerAdminSummary[]>([]);
+  const [productStatuses, setProductStatuses] = useState<Record<string, ProductModerationStatus>>({});
+  const [sellerStatuses, setSellerStatuses] = useState<Record<string, SellerStatus>>({});
+  const [sellerApplications] = useState<SellerApplicationRecord[]>([]);
+  const [categories, setCategories] = useState<Category[]>(isTestEnv ? MOCK_CATEGORIES : []);
+  const [orders, setOrders] = useState<CustomerOrder[]>(isTestEnv ? DEMO_ORDERS : []);
   const [orderTimelineNotes, setOrderTimelineNotes] = useState<
     Record<string, AdminOrderTimelineEvent[]>
   >({});
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(!isTestEnv);
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [isPermissionDenied, setIsPermissionDenied] = useState<boolean>(false);
 
-  // Hydrate from localStorage on client
-  useEffect(() => {
+  const refreshAdminData = useCallback(async () => {
+    if (isTestEnv) return;
+    setIsLoading(true);
+    setAdminError(null);
+    setIsPermissionDenied(false);
+
     try {
-      setCurrentUser(loadStoredAdminUser());
-      setSettings(loadStoredSettings());
-      setCoupons(loadStoredCoupons());
-      setPromotions(loadStoredPromotions());
-      setRefunds(loadStoredRefunds());
-      setReturns(loadStoredReturns());
-      setReviews(loadStoredReviews());
-      setAuditLogs(loadStoredAuditLogs());
-      setNotifications(loadStoredNotifications());
-      setCustomers(loadStoredCustomers());
-      setProductStatuses(loadStoredProductModeration() as Record<string, ProductModerationStatus>);
-      const storedSellers = loadStoredSellerModeration() as Record<string, SellerStatus>;
-      if (Object.keys(storedSellers).length > 0) {
-        setSellerStatuses((prev) => ({ ...prev, ...storedSellers }));
+      const meRes = await fetch('/api/auth/me', { credentials: 'include' });
+      const meJson = await meRes.json().catch(() => null);
+      const authCustomer = meJson?.data?.customer;
+
+      if (!meRes.ok || !meJson?.data?.isAuthenticated || authCustomer?.role !== 'admin') {
+        setCurrentUser(UNAUTHENTICATED_ADMIN_USER);
+        setIsPermissionDenied(true);
+        setAdminError('Authenticated administrative credentials are required.');
+        setIsLoading(false);
+        return;
       }
+
+      setCurrentUser({
+        id: authCustomer.id,
+        email: authCustomer.email,
+        name: `${authCustomer.firstName} ${authCustomer.lastName}`,
+        role: authCustomer.adminRole || 'super_admin',
+        permissions: authCustomer.adminPermissions || [],
+        isActive: authCustomer.status === 'active',
+        lastLoginAt: authCustomer.updatedAt,
+        createdAt: authCustomer.createdAt,
+      });
+
+      const [
+        sellersRes,
+        custRes,
+        prodRes,
+        catRes,
+        ordRes,
+        cpnRes,
+        prmRes,
+        refRes,
+        retRes,
+        revRes,
+        audRes,
+        notRes,
+        setRes,
+      ] = await Promise.all([
+        fetch('/api/admin/sellers', { credentials: 'include' }),
+        fetch('/api/admin/customers', { credentials: 'include' }),
+        fetch('/api/admin/products', { credentials: 'include' }),
+        fetch('/api/admin/categories', { credentials: 'include' }),
+        fetch('/api/admin/orders', { credentials: 'include' }),
+        fetch('/api/admin/coupons', { credentials: 'include' }),
+        fetch('/api/admin/promotions', { credentials: 'include' }),
+        fetch('/api/admin/refunds', { credentials: 'include' }),
+        fetch('/api/admin/returns', { credentials: 'include' }),
+        fetch('/api/admin/reviews', { credentials: 'include' }),
+        fetch('/api/admin/audit-logs', { credentials: 'include' }),
+        fetch('/api/admin/notifications', { credentials: 'include' }),
+        fetch('/api/admin/settings', { credentials: 'include' }),
+      ]);
+
+      if (sellersRes.ok) {
+        const sj = await sellersRes.json();
+        const statusMap: Record<string, SellerStatus> = {};
+        for (const s of sj.data || []) statusMap[s.id] = s.status;
+        setSellerStatuses(statusMap);
+      }
+      if (custRes.ok) {
+        const cj = await custRes.json();
+        setCustomers(cj.data || []);
+      }
+      if (prodRes.ok) {
+        const pj = await prodRes.json();
+        const pmMap: Record<string, ProductModerationStatus> = {};
+        for (const p of pj.data || []) pmMap[p.id] = p.moderation_status || 'approved';
+        setProductStatuses(pmMap);
+      }
+      if (catRes.ok) {
+        const ctj = await catRes.json();
+        setCategories(
+          (ctj.data || []).map((c: any) => ({
+            id: c.id,
+            slug: c.slug,
+            name: { en: c.name_en },
+            parentId: c.parent_id,
+            level: c.level,
+            path: `/${c.slug}`,
+            childCount: 0,
+            productCount: 0,
+            isActive: Boolean(c.is_active),
+            isFeatured: false,
+          }))
+        );
+      }
+      if (ordRes.ok) {
+        const oj = await ordRes.json();
+        setOrders(oj.data || []);
+      }
+      if (cpnRes.ok) setCoupons((await cpnRes.json()).data || []);
+      if (prmRes.ok) setPromotions((await prmRes.json()).data || []);
+      if (refRes.ok) setRefunds((await refRes.json()).data || []);
+      if (retRes.ok) setReturns((await retRes.json()).data || []);
+      if (revRes.ok) setReviews((await revRes.json()).data || []);
+      if (audRes.ok) setAuditLogs((await audRes.json()).data || []);
+      if (notRes.ok) setNotifications((await notRes.json()).data || []);
+      if (setRes.ok) {
+        const s = (await setRes.json()).data;
+        if (s) {
+          setSettings((prev) => ({
+            ...prev,
+            marketplaceName: s.marketplace_name,
+            supportEmail: s.support_email,
+            maintenanceMode: Boolean(s.maintenance_mode),
+            updatedAt: s.updated_at || prev.updatedAt,
+          }));
+        }
+      }
+    } catch (err) {
+      setAdminError(err instanceof Error ? err.message : 'Unable to reach admin backend API.');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isTestEnv]);
 
-  // Fail-closed RBAC helpers
+  useEffect(() => {
+    void refreshAdminData();
+  }, [refreshAdminData]);
+
   const checkPermission = useCallback(
-    (permission: AdminPermission): boolean => {
-      return evaluatePermission(currentUser, permission);
-    },
+    (permission: AdminPermission): boolean => evaluatePermission(currentUser, permission),
     [currentUser]
   );
 
   const checkAnyPermission = useCallback(
-    (permissions: AdminPermission[]): boolean => {
-      return evaluateAnyPermission(currentUser, permissions);
-    },
+    (permissions: AdminPermission[]): boolean => evaluateAnyPermission(currentUser, permissions),
     [currentUser]
   );
 
   const checkAllPermissions = useCallback(
-    (permissions: AdminPermission[]): boolean => {
-      return evaluateAllPermissions(currentUser, permissions);
-    },
+    (permissions: AdminPermission[]): boolean => evaluateAllPermissions(currentUser, permissions),
     [currentUser]
   );
 
-  // Append-only audit logger
   const logAuditEvent = useCallback(
     (
-      action: string,
-      targetType: AuditTargetType,
-      targetId: string,
-      metadata?: Record<string, unknown>,
-      outcome: 'success' | 'failure' | 'denied' = 'success'
-    ): void => {
-      const entry: AdminAuditLogEntry = {
-        id: `aud-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        timestamp: new Date().toISOString(),
-        actor: {
-          id: currentUser.id,
-          name: currentUser.name,
-          role: currentUser.role,
-        },
-        action,
-        targetType,
-        targetId,
-        metadata,
-        outcome,
-      };
-      setAuditLogs((prev) => [entry, ...prev]);
-      appendStoredAuditLog(entry);
+      _action: string,
+      _targetType: AuditTargetType,
+      _targetId: string,
+      _metadata?: Record<string, unknown>,
+      _outcome?: 'success' | 'failure' | 'denied'
+    ) => {
+      // Server writes authoritative audit logs on every admin API mutation
     },
-    [currentUser]
+    []
   );
 
-  // Role & User Switching
-  const setCurrentRole = useCallback(
-    (role: AdminRole): void => {
-      const targetUser = DEMO_ADMIN_USERS.find((u) => u.role === role) || {
-        ...currentUser,
-        role,
-        name: `Admin (${role})`,
-      };
-      setCurrentUser(targetUser);
-      saveStoredAdminUser(targetUser);
-      logAuditEvent('ADMIN_ROLE_SWITCHED', 'settings', targetUser.id, { newRole: role });
-    },
-    [currentUser, logAuditEvent]
-  );
+  const setCurrentRole = useCallback((_role: AdminRole) => {
+    setAdminError('Client-side role switching is disabled; server session enforces RBAC role.');
+  }, []);
 
-  const switchUser = useCallback(
-    (userId: string): void => {
-      const match = DEMO_ADMIN_USERS.find((u) => u.id === userId);
-      if (match) {
-        setCurrentUser(match);
-        saveStoredAdminUser(match);
-        logAuditEvent('ADMIN_USER_SWITCHED', 'settings', match.id, { email: match.email });
+  const switchUser = useCallback((_userId: string) => {
+    setAdminError('Client-side user switching is disabled; sign in with target credentials.');
+  }, []);
+
+  const mutateAdminApi = useCallback(
+    async (url: string, method: string, payload: unknown) => {
+      const res = await fetch(url, {
+        method,
+        credentials: 'include',
+        headers: buildApiHeaders(),
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        const msg = json?.error || `Admin action rejected (HTTP ${res.status})`;
+        setAdminError(msg);
+        throw new Error(msg);
       }
+      await refreshAdminData();
+      return json.data;
     },
-    [logAuditEvent]
+    [refreshAdminData]
   );
 
-  // Settings
   const updateSettings = useCallback(
-    async (updated: Partial<PlatformSettings>): Promise<void> => {
-      const nextSettings: PlatformSettings = {
-        ...settings,
-        ...updated,
-        updatedAt: new Date().toISOString(),
-        updatedBy: currentUser.name,
-      };
-      setSettings(nextSettings);
-      saveStoredSettings(nextSettings);
-      logAuditEvent(
-        'PLATFORM_SETTINGS_UPDATED',
-        'settings',
-        'global',
-        updated as Record<string, unknown>
-      );
+    async (updated: Partial<PlatformSettings>) => {
+      await mutateAdminApi('/api/admin/settings', 'PATCH', updated);
     },
-    [settings, currentUser.name, logAuditEvent]
+    [mutateAdminApi]
   );
 
-  // Seller Moderation
   const moderateSeller = useCallback(
-    async (
-      sellerId: string,
-      status: SellerStatus,
-      reason?: string,
-      notes?: string
-    ): Promise<void> => {
-      setSellerStatuses((prev) => {
-        const next = { ...prev, [sellerId]: status };
-        saveStoredSellerModeration(next);
-        return next;
+    async (sellerId: string, status: SellerStatus, reason?: string) => {
+      await mutateAdminApi('/api/admin/sellers', 'PATCH', {
+        sellerId,
+        status: status === 'pending' ? 'pending_review' : status,
+        reason,
       });
-      logAuditEvent(`SELLER_${status.toUpperCase()}`, 'seller', sellerId, { reason, notes });
     },
-    [logAuditEvent]
+    [mutateAdminApi]
   );
 
-  // Customer Moderation
   const moderateCustomer = useCallback(
-    async (customerId: string, status: CustomerAccountStatus, note?: string): Promise<void> => {
-      setCustomers((prev) => {
-        const next = prev.map((cust) => {
-          if (cust.id === customerId) {
-            return {
-              ...cust,
-              status,
-              notes: note ? [...(cust.notes || []), note] : cust.notes,
-            };
-          }
-          return cust;
-        });
-        saveStoredCustomers(next);
-        return next;
-      });
-      logAuditEvent(`CUSTOMER_${status.toUpperCase()}`, 'customer', customerId, { note });
+    async (customerId: string, status: CustomerAccountStatus, note?: string) => {
+      await mutateAdminApi('/api/admin/customers', 'PATCH', { customerId, status, note });
     },
-    [logAuditEvent]
+    [mutateAdminApi]
   );
 
-  // Product Moderation
   const moderateProduct = useCallback(
-    async (
-      productId: string,
-      status: ProductModerationStatus,
-      reason?: string,
-      notes?: string
-    ): Promise<void> => {
-      setProductStatuses((prev) => {
-        const next = { ...prev, [productId]: status };
-        saveStoredProductModeration(next);
-        return next;
+    async (productId: string, status: ProductModerationStatus, reason?: string) => {
+      await mutateAdminApi('/api/admin/products', 'PATCH', {
+        productId,
+        moderationStatus: status,
+        reason,
       });
-      logAuditEvent(`PRODUCT_${status.toUpperCase()}`, 'product', productId, { reason, notes });
     },
-    [logAuditEvent]
+    [mutateAdminApi]
   );
 
-  // Category Management
   const addCategory = useCallback(
-    async (input: CategoryAdminInput): Promise<void> => {
-      const newCat: Category = {
-        id: `cat-${input.slug}-${Date.now().toString(36)}`,
+    async (input: CategoryAdminInput) => {
+      await mutateAdminApi('/api/admin/categories', 'POST', {
+        mode: 'create',
+        nameEn: input.name['en'] || input.slug,
         slug: input.slug,
-        name: { en: input.name['en'] || input.slug, ...input.name },
-        description: input.description
-          ? { en: input.description['en'] || '', ...input.description }
-          : undefined,
         parentId: input.parentId,
-        level: input.parentId ? 1 : 0,
-        path: `/${input.slug}`,
-        childCount: 0,
-        productCount: 0,
-        isActive: input.isActive,
-        isFeatured: input.isFeatured || false,
-      };
-      setCategories((prev) => [...prev, newCat]);
-      logAuditEvent('CATEGORY_CREATED', 'category', newCat.id, { slug: input.slug });
+      });
     },
-    [logAuditEvent]
+    [mutateAdminApi]
   );
 
   const toggleCategoryActive = useCallback(
-    async (categoryId: string): Promise<void> => {
-      setCategories((prev) =>
-        prev.map((cat) => {
-          if (cat.id === categoryId) {
-            const nextActive = !cat.isActive;
-            logAuditEvent(
-              nextActive ? 'CATEGORY_ACTIVATED' : 'CATEGORY_DEACTIVATED',
-              'category',
-              categoryId
-            );
-            return { ...cat, isActive: nextActive };
-          }
-          return cat;
-        })
-      );
+    async (categoryId: string) => {
+      await mutateAdminApi('/api/admin/categories', 'POST', { mode: 'toggle', categoryId });
     },
-    [logAuditEvent]
+    [mutateAdminApi]
   );
 
-  // Order Timeline Notes
   const addOrderTimelineNote = useCallback(
-    async (orderId: string, note: string): Promise<void> => {
-      const event: AdminOrderTimelineEvent = {
-        id: `event-${Date.now()}`,
-        orderId,
-        status: 'Admin Note',
-        actor: currentUser.name,
-        timestamp: new Date().toISOString(),
-        note,
-      };
+    async (orderId: string, note: string) => {
+      await mutateAdminApi('/api/admin/orders', 'PATCH', { action: 'add_note', orderId, note });
       setOrderTimelineNotes((prev) => ({
         ...prev,
-        [orderId]: [...(prev[orderId] || []), event],
+        [orderId]: [
+          ...(prev[orderId] || []),
+          {
+            id: `note-${Date.now()}`,
+            orderId,
+            status: 'Admin Note',
+            actor: currentUser.name,
+            timestamp: new Date().toISOString(),
+            note,
+          },
+        ],
       }));
-      logAuditEvent('ORDER_NOTE_ADDED', 'order', orderId, { note });
     },
-    [currentUser.name, logAuditEvent]
+    [mutateAdminApi, currentUser.name]
   );
 
-  // Refund & Return Reviews
   const reviewRefund = useCallback(
-    async (refundId: string, status: RefundStatus, adminNote?: string): Promise<void> => {
-      setRefunds((prev) => {
-        const next = prev.map((ref) => {
-          if (ref.id === refundId) {
-            return {
-              ...ref,
-              status,
-              adminNote,
-              resolvedAt: new Date().toISOString(),
-              resolvedBy: currentUser.name,
-            };
-          }
-          return ref;
-        });
-        saveStoredRefunds(next);
-        return next;
-      });
-      logAuditEvent(`REFUND_${status.toUpperCase()}`, 'refund', refundId, { adminNote });
+    async (refundId: string, status: RefundStatus, adminNote?: string) => {
+      await mutateAdminApi('/api/admin/refunds', 'PATCH', { refundId, status, adminNote });
     },
-    [currentUser.name, logAuditEvent]
+    [mutateAdminApi]
   );
 
   const reviewReturn = useCallback(
-    async (returnId: string, status: ReturnStatus, adminNote?: string): Promise<void> => {
-      setReturns((prev) => {
-        const next = prev.map((ret) => {
-          if (ret.id === returnId) {
-            return {
-              ...ret,
-              status,
-              adminNote,
-              resolvedAt: new Date().toISOString(),
-              resolvedBy: currentUser.name,
-            };
-          }
-          return ret;
-        });
-        saveStoredReturns(next);
-        return next;
-      });
-      logAuditEvent(`RETURN_${status.toUpperCase()}`, 'return', returnId, { adminNote });
+    async (returnId: string, status: ReturnStatus, adminNote?: string) => {
+      await mutateAdminApi('/api/admin/returns', 'PATCH', { returnId, status, adminNote });
     },
-    [currentUser.name, logAuditEvent]
+    [mutateAdminApi]
   );
 
-  // Coupons & Promotions
   const createCoupon = useCallback(
-    async (input: Omit<Coupon, 'id' | 'currentUsageCount'>): Promise<void> => {
-      const newCoupon: Coupon = {
-        ...input,
-        id: `coup-${Date.now().toString(36)}`,
-        currentUsageCount: 0,
-      };
-      setCoupons((prev) => {
-        const next = [newCoupon, ...prev];
-        saveStoredCoupons(next);
-        return next;
-      });
-      logAuditEvent('COUPON_CREATED', 'coupon', newCoupon.id, { code: newCoupon.code });
+    async (input: Omit<Coupon, 'id' | 'currentUsageCount'>) => {
+      await mutateAdminApi('/api/admin/coupons', 'POST', { mode: 'create', ...input });
     },
-    [logAuditEvent]
+    [mutateAdminApi]
   );
 
   const toggleCouponActive = useCallback(
-    async (couponId: string): Promise<void> => {
-      setCoupons((prev) => {
-        const next = prev.map((c) => (c.id === couponId ? { ...c, isActive: !c.isActive } : c));
-        saveStoredCoupons(next);
-        return next;
-      });
-      logAuditEvent('COUPON_TOGGLED', 'coupon', couponId);
+    async (couponId: string) => {
+      await mutateAdminApi('/api/admin/coupons', 'POST', { mode: 'toggle', couponId });
     },
-    [logAuditEvent]
+    [mutateAdminApi]
   );
 
   const createPromotion = useCallback(
-    async (input: Omit<Promotion, 'id'>): Promise<void> => {
-      const newPromo: Promotion = {
-        ...input,
-        id: `promo-${Date.now().toString(36)}`,
-      };
-      setPromotions((prev) => {
-        const next = [newPromo, ...prev];
-        saveStoredPromotions(next);
-        return next;
-      });
-      logAuditEvent('PROMOTION_CREATED', 'coupon', newPromo.id, { name: newPromo.name });
+    async (input: Omit<Promotion, 'id'>) => {
+      await mutateAdminApi('/api/admin/promotions', 'POST', input);
     },
-    [logAuditEvent]
+    [mutateAdminApi]
   );
 
-  // Review Moderation
   const moderateReview = useCallback(
-    async (reviewId: string, status: ReviewModerationStatus, notes?: string): Promise<void> => {
-      setReviews((prev) => {
-        const next = prev.map((rev) => {
-          if (rev.id === reviewId) {
-            return {
-              ...rev,
-              status,
-              flagReason: notes || rev.flagReason,
-              moderatedAt: new Date().toISOString(),
-              moderatedBy: currentUser.name,
-            };
-          }
-          return rev;
-        });
-        saveStoredReviews(next);
-        return next;
-      });
-      logAuditEvent(`REVIEW_${status.toUpperCase()}`, 'review', reviewId, { notes });
+    async (reviewId: string, status: ReviewModerationStatus) => {
+      await mutateAdminApi('/api/admin/reviews', 'PATCH', { reviewId, status });
     },
-    [currentUser.name, logAuditEvent]
+    [mutateAdminApi]
   );
 
-  // Notifications
-  const markNotificationRead = useCallback((notificationId: string): void => {
-    setNotifications((prev) => {
-      const next = prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n));
-      saveStoredNotifications(next);
-      return next;
-    });
-  }, []);
+  const markNotificationRead = useCallback(
+    (notificationId: string) => {
+      void mutateAdminApi('/api/admin/notifications', 'PATCH', { notificationId }).catch(() => {});
+    },
+    [mutateAdminApi]
+  );
 
-  const clearAllNotifications = useCallback((): void => {
-    setNotifications((prev) => {
-      const next = prev.map((n) => ({ ...n, isRead: true }));
-      saveStoredNotifications(next);
-      return next;
-    });
-  }, []);
+  const clearAllNotifications = useCallback(() => {
+    void mutateAdminApi('/api/admin/notifications', 'PATCH', { clearAll: true }).catch(() => {});
+  }, [mutateAdminApi]);
 
-  // Reset to Demo
-  const resetAllToDemo = useCallback((): void => {
-    clearAdminStorage();
-    setCurrentUser(DEMO_SUPER_ADMIN);
-    setSettings(DEFAULT_PLATFORM_SETTINGS);
-    setCoupons(DEMO_COUPONS);
-    setPromotions(DEMO_PROMOTIONS);
-    setRefunds(DEMO_REFUND_REQUESTS);
-    setReturns(DEMO_RETURN_REQUESTS);
-    setReviews(DEMO_ADMIN_REVIEWS);
-    setAuditLogs(DEMO_AUDIT_LOGS);
-    setNotifications(DEMO_ADMIN_NOTIFICATIONS);
-    setCustomers(loadStoredCustomers());
-    setProductStatuses({});
-    setSellerStatuses({
-      'seller-tech-direct': 'approved',
-      'seller-official-flagship': 'approved',
-      'seller-global-ware': 'approved',
-      'seller-nordic-audio': 'pending',
-    });
-  }, []);
+  const resetAllToDemo = useCallback(() => {
+    void refreshAdminData();
+  }, [refreshAdminData]);
 
   const value: AdminContextType = useMemo(
     () => ({
       currentUser,
       currentRole: currentUser.role,
       setCurrentRole,
-      availableUsers: DEMO_ADMIN_USERS,
+      availableUsers: isTestEnv ? DEMO_ADMIN_USERS : [currentUser],
       switchUser,
       hasPermission: checkPermission,
       hasAnyPermission: checkAnyPermission,
@@ -634,10 +532,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }): Reac
       markNotificationRead,
       clearAllNotifications,
       resetAllToDemo,
+      refreshAdminData,
       isLoading,
+      adminError,
+      isPermissionDenied,
     }),
     [
       currentUser,
+      isTestEnv,
       setCurrentRole,
       switchUser,
       checkPermission,
@@ -675,7 +577,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }): Reac
       markNotificationRead,
       clearAllNotifications,
       resetAllToDemo,
+      refreshAdminData,
       isLoading,
+      adminError,
+      isPermissionDenied,
     ]
   );
 

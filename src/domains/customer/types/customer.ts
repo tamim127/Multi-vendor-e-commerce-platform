@@ -27,6 +27,15 @@ export interface Customer {
   avatarUrl?: string;
   status: CustomerAccountStatus;
   emailVerified: boolean;
+  role?: 'customer' | 'seller' | 'admin';
+  adminRole?: string;
+  sellerMemberships?: Array<{
+    sellerId: string;
+    sellerSlug: string;
+    sellerName: string;
+    sellerStatus: string;
+    membershipRole: string;
+  }>;
   preferences: CustomerPreferences;
   createdAt: string;
   updatedAt: string;

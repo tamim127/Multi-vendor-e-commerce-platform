@@ -74,8 +74,19 @@ export function createDbPool(options?: PoolConfigOptions): pg.Pool {
     'postgresql://postgres@localhost:5433/aureon_marketplace';
 
   const isProduction = process.env['NODE_ENV'] === 'production';
-  const ssl =
-    isProduction || connectionString.includes('sslmode=require') || connectionString.includes('neon.tech')
+  const isLocalHost =
+    connectionString.includes('localhost') ||
+    connectionString.includes('127.0.0.1') ||
+    connectionString.includes('::1');
+  const explicitSslDisable =
+    process.env['DB_SSL'] === 'false' || connectionString.includes('sslmode=disable');
+  const explicitSslEnable =
+    process.env['DB_SSL'] === 'true' ||
+    connectionString.includes('sslmode=require') ||
+    connectionString.includes('neon.tech');
+  const ssl = explicitSslDisable
+    ? false
+    : explicitSslEnable || (isProduction && !isLocalHost)
       ? { rejectUnauthorized: false }
       : false;
 

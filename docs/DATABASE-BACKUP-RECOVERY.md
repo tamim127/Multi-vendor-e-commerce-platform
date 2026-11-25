@@ -45,3 +45,4 @@ pg_restore -h localhost -p 5433 -U postgres -d aureon_marketplace -v "aureon_mar
 # 4. Verify post-restoration record counts
 psql -h localhost -p 5433 -U postgres -d aureon_marketplace -c "SELECT COUNT(*) FROM products; SELECT COUNT(*) FROM seller_offers;"
 ```
+

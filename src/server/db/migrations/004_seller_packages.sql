@@ -19,3 +19,4 @@ CREATE TABLE IF NOT EXISTS seller_packages (
 
 CREATE INDEX IF NOT EXISTS idx_seller_packages_order ON seller_packages(order_id);
 CREATE INDEX IF NOT EXISTS idx_seller_packages_seller ON seller_packages(seller_id);
+

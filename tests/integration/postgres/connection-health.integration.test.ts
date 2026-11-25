@@ -83,3 +83,4 @@ describe('PostgreSQL Connection Infrastructure & Health Integration Tests', () =
     expect(sanitizedTimeout.message).toContain('statement timeout limit');
   });
 });
+

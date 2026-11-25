@@ -73,3 +73,4 @@ Aureon Multi-Vendor Marketplace utilizes a relational, high-throughput PostgreSQ
 - **Pessimistic Concurrency Control**: During checkout, inventory rows are locked using `SELECT ... FOR UPDATE` within a database transaction.
 - **Stock Depletion Prevention**: If requested quantity exceeds `stock_quantity`, an explicit `InsufficientStockError` is thrown, triggering a complete transaction `ROLLBACK`.
 - **Zero Partial Orders**: No orders or seller packages can ever be created without successful inventory decrement.
+

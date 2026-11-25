@@ -55,3 +55,4 @@ node scripts/migrate.mjs down 2
 4. **Zero-Downtime Principles**:
    - Never add non-nullable columns without defaults to high-traffic tables.
    - Always create indexes concurrently or during scheduled maintenance windows if table sizes exceed 1,000,000 rows.
+

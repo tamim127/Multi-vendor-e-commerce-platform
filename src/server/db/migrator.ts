@@ -277,3 +277,4 @@ export async function migrateDown(options?: {
     return { rolledBackCount: rolledBackVersions.length, rolledBackVersions };
   });
 }
+
